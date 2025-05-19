@@ -49,6 +49,11 @@ class Club extends Model
         return $this->belongsTo(ClubPlayer::class, 'club_id', 'id');
     }
 
+    public function players()
+    {
+        return $this->belongsToMany(Player::class, 'club_players', 'club_id', 'player_id');
+    }
+
     public function scheduleMatch()
     {
         return $this->hasMany(ScheduleMatch::class);

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Club;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -12,6 +13,22 @@ class ClubSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        $data = [
+            [
+                'name' => 'Persib',
+            ],
+            [
+                'name' => 'Persija',
+            ],
+            [
+                'name' => 'Arema FC',
+            ],
+        ];
+
+        foreach ($data as $item) {
+            Club::create([
+                'name' => $item['name'],
+            ]);
+        }
     }
 }

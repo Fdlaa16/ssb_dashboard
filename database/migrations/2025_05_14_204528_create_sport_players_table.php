@@ -13,7 +13,10 @@ return new class extends Migration
     {
         Schema::create('sport_players', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('player_id')->nullable();
+            $table->unsignedBigInteger('sport_id')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

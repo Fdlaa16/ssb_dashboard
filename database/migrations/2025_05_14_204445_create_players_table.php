@@ -13,7 +13,14 @@ return new class extends Migration
     {
         Schema::create('players', function (Blueprint $table) {
             $table->id();
+            $table->string('code')->nullable();
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->string('name')->nullable();
+            $table->string('nisn')->nullable();
+            $table->integer('height')->nullable();
+            $table->integer('weight')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

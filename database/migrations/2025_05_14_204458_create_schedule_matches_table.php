@@ -13,7 +13,16 @@ return new class extends Migration
     {
         Schema::create('schedule_matches', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('first_club_id')->nullable();
+            $table->unsignedBigInteger('secound_club_id')->nullable();
+            $table->unsignedBigInteger('stadium_id')->nullable();
+            $table->date('schedule_date')->nullable();
+            $table->time('schedule_start_at')->nullable();
+            $table->time('schedule_end_at')->nullable();
+            $table->string('score')->nullable();
+            $table->boolean('status')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

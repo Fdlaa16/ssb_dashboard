@@ -45,9 +45,14 @@ class Player extends Model
         return (string) self::$code_prefix . '-' . str_pad($next_number, 5, 0, STR_PAD_LEFT);
     }
 
-    public function clubPlayer()
+    public function clubPlayers()
     {
-        return $this->belongsTo(ClubPlayer::class, 'player_id', 'id');
+        return $this->hasMany(ClubPlayer::class, 'player_id', 'id');
+    }
+
+    public function clubs()
+    {
+        return $this->belongsToMany(Club::class, 'club_players', 'player_id', 'club_id');
     }
 
     public function user()
@@ -58,5 +63,10 @@ class Player extends Model
     public function sportPlayer()
     {
         return $this->hasMany(SportPlayer::class, 'player_id', 'id');
+    }
+
+    public function sports()
+    {
+        return $this->belongsToMany(Sport::class, 'sport_players', 'player_id', 'sport_id');
     }
 }

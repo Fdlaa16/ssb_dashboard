@@ -13,7 +13,17 @@ return new class extends Migration
     {
         Schema::create('media', function (Blueprint $table) {
             $table->id();
+            $table->string('code')->nullable();
+            $table->string('name')->nullable();
+            $table->string('title')->nullable();
+            $table->string('hashtag')->nullable();
+            $table->text('description')->nullable();
+            $table->string('link')->nullable();
+            $table->string('thumbnail')->nullable();
+            $table->string('digital_platform')->nullable();
+            $table->boolean('status')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

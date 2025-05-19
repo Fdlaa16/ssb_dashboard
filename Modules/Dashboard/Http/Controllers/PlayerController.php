@@ -7,6 +7,7 @@ use App\Models\Player;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Inertia\Inertia;
 
 class PlayerController extends Controller
 {
@@ -26,28 +27,44 @@ class PlayerController extends Controller
         $players = Player::query()
             ->with([
                 'user',
-                'club'
+                'clubs',
+                'sports',
             ])
             ->when(!empty($request->search), function ($q) use ($request) {
-                $q->where('created_at', 'like', '%' . $request->search . '%')
-                    ->orWhere('code', 'like', '%' . $request->search . '%')
+                $q->where('code', 'like', '%' . $request->search . '%')
                     ->orWhere('name', 'like', '%' . $request->search . '%')
                     ->orWhere('nisn', 'like', '%' . $request->search . '%')
                     ->orWhere('height', 'like', '%' . $request->search . '%')
                     ->orWhere('weight', 'like', '%' . $request->search . '%')
                     ->orWhereHas('user', function ($user) use ($request) {
                         $user->where('email', 'like', '%' . $request->search . '%');
+                    })
+                    ->orWhereHas('clubs', function ($club) use ($request) {
+                        $club->where('name', 'like', '%' . $request->search . '%');
+                    })
+                    ->orWhereHas('sports', function ($sport) use ($request) {
+                        $sport->where('name', 'like', '%' . $request->search . '%');
                     });
             })
             ->when($request->status ?? null, function ($query, $status) {
                 if ($status == 0) {
-                    $query->whereNotNull('deleted_at');
+                    $query->onlyTrashed();
                 } else {
                     $query->whereNull('deleted_at');
                 }
             })
+            ->when($request->club_id, function ($query) use ($request) {
+                $query->whereHas('clubs', function ($q) use ($request) {
+                    $q->where('id', $request->club_id);
+                });
+            })
+            ->when($request->sport_id, function ($query) use ($request) {
+                $query->whereHas('sports', function ($q) use ($request) {
+                    $q->where('id', $request->sport_id);
+                });
+            })
             ->orderBy($orderByColumn, $orderByDirection)
-            ->latest();
+            ->withTrashed();
 
         if ($request->has('from_date') && !empty($request->from_date)) {
             $players->where('created_at', '>=', Helper::formatDate($request->from_date, 'Y-m-d') . ' 00:00:00');
@@ -56,9 +73,11 @@ class PlayerController extends Controller
             $players->where('created_at', '<=', Helper::formatDate($request->to_date, 'Y-m-d') . ' 23:59:59');
         }
 
-        $players = $players->paginate(10);
+        $players = $players->get();
 
-        return $players;
+        return response()->json([
+            'data' => $players,
+        ]);
     }
 
     /**
