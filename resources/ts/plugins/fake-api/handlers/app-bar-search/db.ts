@@ -69,6 +69,32 @@ export const db: DB = {
       ],
     },
     {
+      title: 'Player & Club',
+      category: 'appsPages',
+      children: [
+        {
+          url: { name: 'dashboards-player-list' },
+          icon: 'tabler-user',
+          title: 'Player',
+        },
+        {
+          url: { name: 'dashboards-player-edit-id' },
+          icon: 'tabler-user',
+          title: 'Player',
+        },
+        {
+          url: { name: 'dashboards-club-list' },
+          icon: 'tabler-user',
+          title: 'Club',
+        },
+        {
+          url: { name: 'dashboards-sport-list' },
+          icon: 'tabler-user',
+          title: 'Sport',
+        }
+      ]
+    },
+    {
       title: 'Apps & Pages',
       category: 'appsPages',
       children: [

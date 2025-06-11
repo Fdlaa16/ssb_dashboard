@@ -73,19 +73,4 @@ export const routes: RouteRecordRaw[] = [
     name: 'apps-ecommerce-dashboard',
     component: () => import('@/pages/dashboards/ecommerce.vue'),
   },
-  {
-    path: '/dashboards/player/list',
-    name: 'dashboards-player-list',
-    component: () => import('@/pages/dashboards/player/list/index.vue'),
-  },
-  // {
-  //   path: '/dashboards/club/list',
-  //   name: 'dashboards-club-list',
-  //   component: () => import('@/pages/dashboards/club/list/index.vue'),
-  // },
-  // {
-  //   path: '/dashboards/sport/list',
-  //   name: 'dashboards-sport-list',
-  //   component: () => import('@/pages/dashboards/sport/list/index.vue'),
-  // },
 ]

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const searchQuery = ref('')
 const selectedStatus = ref<invoiceStatus>(null)
 const selectedRows = ref([])
@@ -15,13 +17,33 @@ const page = ref(1)
 const sortBy = ref()
 const orderBy = ref()
 
+const route = useRoute()
+const isSnackbarVisible = ref(false)
+const snackbarMessage = ref('')
+const snackbarColor = ref<'success' | 'error'>('success')
+
+// Cek query saat mounted
+onMounted(() => {
+  if (route.query.success) {
+    snackbarMessage.value = String(route.query.success)
+    snackbarColor.value = 'success'
+    isSnackbarVisible.value = true
+
+    // Bersihkan query param setelah ditampilkan
+    router.replace({ query: {} })
+  }
+})
+
+
 const totalPages = computed(() => {
   return Math.ceil(players.value.length / itemsPerPage)
 })
 
 const widgetData = ref([
-  { title: 'Active Player', value: 24, icon: 'tabler-user' },
-  { title: 'Inactive Player', value: 24, icon: 'tabler-user' },
+  { title: 'All', value: 24, icon: 'tabler-user' },
+  { title: 'Active', value: 24, icon: 'tabler-user' },
+  { title: 'In Confirm', value: 24, icon: 'tabler-user' },
+  { title: 'Non Active', value: 24, icon: 'tabler-user' },
 ])
 
 const headers = [
@@ -31,7 +53,7 @@ const headers = [
   { title: 'Height (cm)', key: 'height' },
   { title: 'Weight (kg)', key: 'weight' },
   { title: 'Sport', key: 'sports' },
-  { title: 'Club', key: 'clubs' },
+  // { title: 'Club', key: 'clubs' },
   { title: 'Action', key: 'action', sortable: false },
 ]
 
@@ -61,7 +83,6 @@ async function fetchPlayer() {
     const response = await $api('/api/player')
     players.value = response.data
 
-    console.log('players', response.data)
   } catch (err: any) {
     error.value = err.message || 'Gagal memuat data'
   } finally {
@@ -69,9 +90,9 @@ async function fetchPlayer() {
   }
 }
 
-function editPlayer(player: any) {
-  console.log('Edit', player)
-}
+// function editPlayer(player: any) {
+//   console.log('Edit', player)
+// }
 
 function deletePlayer(player: any) {
   console.log('Delete', player)
@@ -79,6 +100,10 @@ function deletePlayer(player: any) {
 
 function activatePlayer(player: any) {
   console.log('Activate', player)
+}
+
+function editPlayer(player: any) {
+  router.push({ name: 'dashboards-player-edit-id', params: { id: player.id } })
 }
 
 onMounted(() => {
@@ -99,7 +124,7 @@ onMounted(() => {
               <VCol
                 cols="12"
                 sm="6"
-                md="6"
+                md="3"
                 class="px-6"
               >
                 <div
@@ -165,9 +190,15 @@ onMounted(() => {
             <!-- 👉 Create invoice -->
             <VBtn
               prepend-icon="tabler-plus"
-              :to="{ name: 'apps-invoice-add' }"
+              :to="{ name: 'dashboards-player-add' }"
             >
-              Create invoice
+              Create
+            </VBtn>
+            <VBtn
+              value="download"
+              prepend-icon="tabler-download"
+            >
+              Convert Data
             </VBtn>
           </div>
 
@@ -183,7 +214,7 @@ onMounted(() => {
             <div class="invoice-list-filter">
               <AppSelect
                 v-model="selectedStatus"
-                placeholder="Club Player"
+                placeholder="Club"
                 clearable
                 clear-icon="tabler-x"
                 single-line
@@ -195,7 +226,7 @@ onMounted(() => {
             <div class="invoice-list-filter">
               <AppSelect
                 v-model="selectedStatus"
-                placeholder="Sport Player"
+                placeholder="Sport"
                 clearable
                 clear-icon="tabler-x"
                 single-line
@@ -203,116 +234,137 @@ onMounted(() => {
                 :items="['Downloaded', 'Draft', 'Sent', 'Paid', 'Partial Payment', 'Past Due']"
               />
             </div>
+
+            <div class="invoice-list-filter">
+              <AppSelect
+                v-model="selectedStatus"
+                placeholder="Status"
+                clearable
+                clear-icon="tabler-x"
+                single-line
+                style="inline-size: 10rem;"
+                :items="['All', 'Active', 'Pending', 'Inactive']"
+              />
+            </div>
           </div>
         </VCardText>
-        <VDivider />
-          
-        <VCardText>
-          <VDataTable
-            :headers="headers"
-            :items="paginatedPlayers"
-            :loading="loading"
-            class="text-no-wrap"
-            :items-per-page="itemsPerPage"
-            hide-default-footer
-          >
-            <template #item.name="{ item }">
-              <div class="d-flex gap-x-3 align-center">
-                <!-- <VAvatar
-                  size="34"
-                  :image="item.productImage"
-                  :rounded="0"
-                /> -->
 
-                <div class="text-body-1">
-                  {{ item.name }}
-                </div>
-              </div>
-            </template>
+        <VDivider />  
+        <VDataTable
+          :headers="headers"
+          :items="paginatedPlayers"
+          :loading="loading"
+          class="text-no-wrap"
+          :items-per-page="itemsPerPage"
+          hide-default-footer
+        >
+          <template #item.name="{ item }">
+            <div class="d-flex gap-x-3 align-center">
+              <!-- <VAvatar
+                size="34"
+                :image="item.productImage"
+                :rounded="0"
+              /> -->
 
-            <template #item.nisn="{ item }">
-              <div class="text-body-1">{{ item.nisn }}</div>
-            </template>
-
-            <template #item.height="{ item }">
-              <div class="text-body-1">{{ item.height }}</div>
-            </template>
-
-            <template #item.weight="{ item }">
-              <div class="text-body-1">{{ item.weight }}</div>
-            </template>
-
-            <template #item.sports="{ item }">
               <div class="text-body-1">
-                <span
-                  v-for="(sport, index) in item.sports"
-                  :key="sport.id"
-                >
-                  {{ sport.name }}<span v-if="index < item.sports.length - 1">, </span>
-                </span>
+                {{ item.name }}
               </div>
-            </template>
+            </div>
+          </template>
 
-            <template #item.clubs="{ item }">
-              <div class="text-body-1">
-                <span
-                  v-for="(club, index) in item.clubs"
-                  :key="club.id"
-                >
-                  {{ club.name }}<span v-if="index < item.clubs.length - 1">, </span>
-                </span>
-              </div>
-            </template>
+          <template #item.nisn="{ item }">
+            <div class="text-body-1">{{ item.nisn }}</div>
+          </template>
 
-            <template #item.action="{ item }">
-              <div class="d-flex gap-x-2">
-                <VBtn
-                  v-if="!item.deleted_at"
-                  icon
-                  size="small"
-                  color="primary"
-                  @click="editPlayer(item)"
-                  title="Edit"
-                >
-                  <VIcon icon="tabler-pencil" />
-                </VBtn>
+          <template #item.height="{ item }">
+            <div class="text-body-1">{{ item.height }}</div>
+          </template>
 
-                <VBtn  
-                  v-if="!item.deleted_at"
-                  icon
-                  size="small"
-                  color="error"
-                  @click="deletePlayer(item)"
-                  title="Delete"
-                >
-                  <VIcon icon="tabler-trash" />
-                </VBtn>
+          <template #item.weight="{ item }">
+            <div class="text-body-1">{{ item.weight }}</div>
+          </template>
 
-                <VBtn
-                  v-if="item.deleted_at"
-                  icon
-                  size="small"
-                  color="success"
-                  @click="activatePlayer(item)"
-                  title="Activate"
-                >
-                  <VIcon icon="tabler-check" />
-                </VBtn>
-              </div>
-            </template>
-          </VDataTable>
+          <template #item.sports="{ item }">
+            <div class="text-body-1">
+              <span
+                v-for="(sport, index) in item.sports"
+                :key="sport.id"
+              >
+                {{ sport.name }}<span v-if="index < item.sports.length - 1">, </span>
+              </span>
+            </div>
+          </template>
 
-          <!-- Pagination -->
-          <div class="d-flex justify-end mt-4">
-            <VPagination
-              v-model="currentPage"
-              :length="totalPages"
-              total-visible="5"
-              color="primary"
-            />
-          </div>
-        </VCardText>
+          <!-- <template #item.clubs="{ item }">
+            <div class="text-body-1">
+              <span
+                v-for="(club, index) in item.clubs"
+                :key="club.id"
+              >
+                {{ club.name }}<span v-if="index < item.clubs.length - 1">, </span>
+              </span>
+            </div>
+          </template> -->
+
+          <template #item.action="{ item }">
+            <div class="d-flex gap-x-2">
+              <VBtn
+                v-if="!item.deleted_at"
+                icon
+                size="small"
+                color="primary"
+                @click="editPlayer(item)"
+                title="Edit"
+              >
+                <VIcon icon="tabler-pencil" />
+              </VBtn>
+
+              <VBtn  
+                v-if="!item.deleted_at"
+                icon
+                size="small"
+                color="error"
+                @click="deletePlayer(item)"
+                title="Delete"
+              >
+                <VIcon icon="tabler-trash" />
+              </VBtn>
+
+              <VBtn
+                v-if="item.deleted_at"
+                icon
+                size="small"
+                color="success"
+                @click="activatePlayer(item)"
+                title="Activate"
+              >
+                <VIcon icon="tabler-check" />
+              </VBtn>
+            </div>
+          </template>
+        </VDataTable>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-end mt-4 mb-3 mr-2">
+          <VPagination
+            v-model="currentPage"
+            :length="totalPages"
+            total-visible="5"
+            color="primary"
+          />
+        </div>
       </VCard>
     </VCol>
   </VRow>
+
+  <VSnackbar
+    v-model="isSnackbarVisible"
+    :color="snackbarColor"
+    location="bottom start"
+    variant="flat"
+    timeout="3000"
+  >
+    {{ snackbarMessage }}
+  </VSnackbar>
+
 </template>

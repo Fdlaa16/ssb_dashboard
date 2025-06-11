@@ -6,6 +6,7 @@ use Modules\Dashboard\Http\Controllers\ClubController;
 use Modules\Dashboard\Http\Controllers\PlayerController;
 use Modules\Dashboard\Http\Controllers\ScheduleMatchController;
 use Modules\Dashboard\Http\Controllers\ScheduleTrainingController;
+use Modules\Dashboard\Http\Controllers\SportController;
 use Modules\Dashboard\Http\Controllers\StadiumController;
 use Modules\Dashboard\Http\Controllers\StandingController;
 
@@ -29,6 +30,14 @@ Route::get('club/{id}', [ClubController::class, 'show'])->name('club.show');
 Route::get('club/{id}/edit', [ClubController::class, 'edit'])->name('club.edit');
 Route::put('club/{id}', [ClubController::class, 'update'])->name('club.update');
 Route::delete('club/{id}', [ClubController::class, 'destroy'])->name('club.destroy');
+
+Route::get('sport', [SportController::class, 'index'])->name('sport.index');
+Route::get('sport/create', [SportController::class, 'create'])->name('sport.create');
+Route::post('sport/store', [SportController::class, 'store'])->name('sport.store');
+Route::get('sport/{id}', [SportController::class, 'show'])->name('sport.show');
+Route::get('sport/{id}/edit', [SportController::class, 'edit'])->name('sport.edit');
+Route::put('sport/{id}', [SportController::class, 'update'])->name('sport.update');
+Route::delete('sport/{id}', [SportController::class, 'destroy'])->name('sport.destroy');
 
 Route::get('stadium', [StadiumController::class, 'index'])->name('stadium.index');
 Route::get('stadium/create', [StadiumController::class, 'create'])->name('stadium.create');

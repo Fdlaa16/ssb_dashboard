@@ -1,188 +1,107 @@
 <script lang="ts" setup>
-import InvoiceAddPaymentDrawer from '@/views/apps/invoice/InvoiceAddPaymentDrawer.vue'
-import InvoiceEditable from '@/views/apps/invoice/InvoiceEditable.vue'
-import InvoiceSendInvoiceDrawer from '@/views/apps/invoice/InvoiceSendInvoiceDrawer.vue'
+import PlayerEditable from '@/views/dashboards/player/PlayerEditable.vue';
+import type { PlayerData, Sport } from '@/views/dashboards/player/types';
+import { onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
-// Type: Invoice data
-import type { InvoiceData, PurchasedProduct } from '@/views/apps/invoice/types'
+const route = useRoute();
+const router = useRouter();
 
-const invoiceData = ref<InvoiceData>()
-const route = useRoute('apps-invoice-edit-id')
+const playerId = route.params.id as string;
 
-// 👉 fetchInvoice
+const playerData = ref<PlayerData>({
+  id: 0,
+  name: '',
+  email: '',
+  password: '',
+  nisn: '',
+  height: '',
+  weight: '',
+  sport_players: [],
+  avatar: null,
+  family_card: null,
+  report_grades: null,
+  birth_certificate: null,
+});
 
-const { data: invoiceDetails } = await useApi<any>(`/apps/invoice/${route.params.id}`)
+const sports = ref<Sport[]>([]);
 
-if (invoiceDetails.value) {
-  invoiceData.value = {
-    invoice: invoiceDetails.value.invoice,
-    paymentDetails: invoiceDetails.value.paymentDetails,
+const loading = ref(false);
+const error = ref<string | null>(null);
 
-    /*
-      We are adding some extra data in response for data purpose
-      Your response will contain this extra data
-      Purpose is to make it more API friendly and less static as possible
-    */
-
-    purchasedProducts: [
-      {
-        title: 'App Design',
-        cost: 24,
-        hours: 2,
-        description: 'Designed UI kit & app pages.',
-      },
-    ],
-    note: 'It was a pleasure working with you and your team. We hope you will keep us in mind for future freelance projects. Thank You!',
-    paymentMethod: 'Bank Account',
-    salesperson: 'Tom Cook',
-    thanksNote: 'Thanks for your business',
+// Ambil data player berdasarkan ID dari API
+const fetchPlayer = async () => {
+  loading.value = true;
+  try {
+    const res = await $api(`player/${playerId}/edit`); // contoh endpoint get player by id
+    playerData.value = res.data;
+  } catch (err: any) {
+    error.value = err.message || 'Gagal mengambil data player';
+  } finally {
+    loading.value = false;
   }
-}
+};
 
-const addProduct = (value: PurchasedProduct) => {
-  invoiceData.value?.purchasedProducts.push(value)
-}
+const fetchSports = async () => {
+  try {
+    const res = await $api('sport');
+    sports.value = res.data;
+  } catch {
+    // tangani error fetch sports
+  }
+};
 
-const removeProduct = (id: number) => {
-  invoiceData.value?.purchasedProducts.splice(id, 1)
-}
+onMounted(async () => {
+  await fetchSports();
+  await fetchPlayer();
+});
 
-const isSendSidebarActive = ref(false)
-const isAddPaymentSidebarActive = ref(false)
-const paymentTerms = ref(true)
-const clientNotes = ref(false)
-const paymentStub = ref(false)
-const selectedPaymentMethod = ref('Bank Account')
-const paymentMethods = ['Bank Account', 'PayPal', 'UPI Transfer']
+// Submit handler (edit update)
+const handleSubmit = async () => {
+  try {
+    const formData = new FormData();
+    formData.append('email', playerData.value.email);
+    // password kosong berarti tidak update password
+    if (playerData.value.password) {
+      formData.append('password', playerData.value.password);
+    }
+    formData.append('nisn', playerData.value.nisn);
+    formData.append('name', playerData.value.name);
+    formData.append('height', playerData.value.height);
+    formData.append('weight', playerData.value.weight);
+    formData.append('sport_players', JSON.stringify(playerData.value.sport_players));
+    // file uploads
+    formData.append('avatar', playerData.value.avatar || '');
+    formData.append('family_card', playerData.value.family_card || '');
+    formData.append('report_grades', playerData.value.report_grades || '');
+    formData.append('birth_certificate', playerData.value.birth_certificate || '');
+
+    const res = await $api(`player/${playerId}`, {
+      method: 'POST', // atau PUT tergantung API
+      body: formData,
+    });
+
+    alert('Data berhasil diperbarui!');
+    router.push({ name: 'dashboards-player-list' });
+  } catch (err: any) {
+    alert('Gagal update data: ' + (err.message || 'Unknown error'));
+  }
+};
 </script>
 
 <template>
-  <VRow v-if="invoiceData && invoiceData?.invoice">
-    <!-- 👉 InvoiceEditable -->
-    <VCol
-      cols="12"
-      md="9"
-    >
-      <InvoiceEditable
-        v-if="invoiceData?.invoice"
-        :data="invoiceData"
-        @push="addProduct"
-        @remove="removeProduct"
+  <VRow>
+    <VCol cols="12" md="12">
+      <PlayerEditable
+        :data="playerData"
+        :sports="sports"
+        @submit="handleSubmit"
+        @update:selectedSports="(val) => playerData.sport_players = val.map(id => {
+          const s = sports.find(x => x.id === id);
+          return s ? { id: 0, sport: s } : null;
+        }).filter(x => x !== null)"
+        @update:data="(val) => playerData = val"
       />
     </VCol>
-
-    <!-- 👉 Right Column: Invoice Action -->
-    <VCol
-      cols="12"
-      md="3"
-    >
-      <VCard class="mb-8">
-        <VCardText>
-          <!-- 👉 Send Invoice Trigger button -->
-          <VBtn
-            block
-            prepend-icon="tabler-send"
-            class="mb-4"
-            @click="isSendSidebarActive = true"
-          >
-            Send Invoice
-          </VBtn>
-
-          <div class="d-flex flex-wrap gap-4">
-            <!-- 👉  Preview button -->
-            <VBtn
-              color="secondary"
-              variant="tonal"
-              class="flex-grow-1"
-              :to="{ name: 'apps-invoice-preview-id', params: { id: route.params.id } }"
-            >
-              Preview
-            </VBtn>
-
-            <!-- 👉 Save button -->
-            <VBtn
-              color="secondary"
-              variant="tonal"
-              class="mb-4 flex-grow-1"
-            >
-              Save
-            </VBtn>
-          </div>
-
-          <!-- 👉 Add Payment trigger button -->
-          <VBtn
-            block
-            color="success"
-            prepend-icon="tabler-currency-dollar"
-            @click="isAddPaymentSidebarActive = true"
-          >
-            Add Payment
-          </VBtn>
-        </VCardText>
-      </VCard>
-
-      <!-- 👉 Accept payment via  -->
-      <AppSelect
-        id="payment-method"
-        v-model="selectedPaymentMethod"
-        :items="paymentMethods"
-        label="Accept Payment Via"
-        class="mb-4"
-      />
-
-      <!-- 👉 Payment Terms -->
-      <div class="d-flex align-center justify-space-between">
-        <VLabel for="payment-terms">
-          Payment Terms
-        </VLabel>
-        <div>
-          <VSwitch
-            id="payment-terms"
-            v-model="paymentTerms"
-          />
-        </div>
-      </div>
-
-      <!-- 👉 Client Notes -->
-      <div class="d-flex align-center justify-space-between">
-        <VLabel for="client-notes">
-          Client Notes
-        </VLabel>
-        <div>
-          <VSwitch
-            id="client-notes"
-            v-model="clientNotes"
-          />
-        </div>
-      </div>
-
-      <!-- 👉 Payment Stub -->
-      <div class="d-flex align-center justify-space-between">
-        <VLabel for="payment-stub">
-          Payment Stub
-        </VLabel>
-        <div>
-          <VSwitch
-            id="payment-stub"
-            v-model="paymentStub"
-          />
-        </div>
-      </div>
-    </VCol>
-
-    <!-- 👉 Invoice send drawer -->
-    <InvoiceSendInvoiceDrawer v-model:is-drawer-open="isSendSidebarActive" />
-
-    <!-- 👉 Invoice add payment drawer -->
-    <InvoiceAddPaymentDrawer v-model:is-drawer-open="isAddPaymentSidebarActive" />
   </VRow>
-
-  <section v-else>
-    <VAlert
-      type="error"
-      variant="tonal"
-    >
-      Invoice with ID  {{ route.params.id }} not found!
-    </VAlert>
-  </section>
 </template>

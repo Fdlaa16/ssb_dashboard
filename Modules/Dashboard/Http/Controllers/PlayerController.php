@@ -3,10 +3,19 @@
 namespace Modules\Dashboard\Http\Controllers;
 
 use App\Helpers\Helper;
+use App\Http\Resources\PlayerResource;
+use App\Http\Resources\PlayerResources;
+use App\Http\Resources\SportResource;
+use App\Models\Club;
+use App\Models\File;
 use App\Models\Player;
+use App\Models\Sport;
+use App\Models\SportPlayer;
+use App\Models\User;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
 
 class PlayerController extends Controller
@@ -86,7 +95,13 @@ class PlayerController extends Controller
      */
     public function create()
     {
-        return view('dashboard::create');
+        $sports = Sport::select('id', 'code', 'name')->get();
+
+        $data = [
+            'sports' => SportResource::collection($sports),
+        ];
+
+        return $data;
     }
 
     /**
@@ -96,7 +111,132 @@ class PlayerController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $postData = $request->all();
+        $rules = [
+            'email' => 'required|unique:users,email',
+            'password' => 'required',
+            'nisn' => 'required|unique:players,nisn',
+            'name' => 'required',
+            'height' => 'required',
+            'weight' => 'required',
+        ];
+
+        $messages = [
+            'nisn.required' => 'NISN harus diisi.',
+            'nisn.unique' => 'NISN harus kode unik.',
+            'name.required' => 'Name harus diisi.',
+            'height.required' => 'Height harus diisi.',
+            'weight.required' => 'Weight harus diisi.',
+        ];
+
+        $validator = Validator::make($postData, $rules, $messages);
+
+        if ($validator->fails()) {
+            return response()->json(array('errors' => $validator->messages()->toArray()), 422);
+        } else {
+            $user = new User();
+            $user = $user->create([
+                'email' => $request->email,
+                'password' => bcrypt($request->password),
+            ]);
+
+            $player = new Player();
+            $player = $player->create([
+                'user_id' => $user->id,
+                'nisn' => $request->nisn,
+                'name' => $request->name,
+                'height' => $request->height,
+                'weight' => $request->weight,
+            ]);
+
+            if ($request->hasFile('avatar')) {
+                $file = $request->file('avatar');
+
+                $fileObj = new File();
+                $fileDir = $fileObj->getDirectory('avatar');
+                $fileName = $fileObj->getFileName('avatar', $player->id, $file);
+
+                $file->storeAs("public/$fileDir", $fileName);
+
+                $player->files()->where('type', 'avatar')->delete();
+                $player->files()->create([
+                    'type' => 'avatar',
+                    'name' => $fileName,
+                    'original_name' => $file->getClientOriginalName(),
+                    'extension' => $file->getClientOriginalExtension(),
+                    'path' => "$fileDir$fileName",
+                ]);
+            }
+
+            if ($request->hasFile('family_card')) {
+                $file = $request->file('family_card');
+
+                $fileObj = new File();
+                $fileDir = $fileObj->getDirectory('family_card');
+                $fileName = $fileObj->getFileName('family_card', $player->id, $file);
+
+                $file->storeAs("public/$fileDir", $fileName);
+
+                $player->files()->where('type', 'family_card')->delete();
+                $player->files()->create([
+                    'type' => 'family_card',
+                    'name' => $fileName,
+                    'original_name' => $file->getClientOriginalName(),
+                    'extension' => $file->getClientOriginalExtension(),
+                    'path' => "$fileDir$fileName",
+                ]);
+            }
+
+            if ($request->hasFile('report_grades')) {
+                $file = $request->file('report_grades');
+
+                $fileObj = new File();
+                $fileDir = $fileObj->getDirectory('report_grades');
+                $fileName = $fileObj->getFileName('report_grades', $player->id, $file);
+
+                $file->storeAs("public/$fileDir", $fileName);
+                $player->files()->where('type', 'report_grades')->delete();
+
+                $player->files()->create([
+                    'type' => 'report_grades',
+                    'name' => $fileName,
+                    'original_name' => $file->getClientOriginalName(),
+                    'extension' => $file->getClientOriginalExtension(),
+                    'path' => "$fileDir$fileName",
+                ]);
+            }
+
+            if ($request->hasFile('birth_certificate')) {
+                $file = $request->file('birth_certificate');
+
+                $fileObj = new File();
+                $fileDir = $fileObj->getDirectory('birth_certificate');
+                $fileName = $fileObj->getFileName('birth_certificate', $player->id, $file);
+
+                $file->storeAs("public/$fileDir", $fileName);
+                $player->files()->where('type', 'birth_certificate')->delete();
+
+                $player->files()->create([
+                    'type' => 'birth_certificate',
+                    'name' => $fileName,
+                    'original_name' => $file->getClientOriginalName(),
+                    'extension' => $file->getClientOriginalExtension(),
+                    'path' => "$fileDir$fileName",
+                ]);
+            }
+
+            $sportPlayers = json_decode($request->sport_players, true);
+            foreach ($sportPlayers as $sportPlayerData) {
+                $player->sportPlayers()->create([
+                    'sport_id' => $sportPlayerData['sport']['id'],
+                ]);
+            }
+
+            return response()->json([
+                'message' => 'Player created successfully.',
+                'data' => $player->load('sportPlayers.sport')
+            ], 201);
+        }
     }
 
     /**
@@ -116,7 +256,33 @@ class PlayerController extends Controller
      */
     public function edit($id)
     {
-        return view('dashboard::edit');
+        $players = Player::query()
+            ->with([
+                'user',
+                'clubs',
+                'sportPlayers',
+                'avatar',
+                'birth_certificate',
+                'family_card',
+                'report_grades',
+            ])
+            ->find($id);
+
+        $sports = Sport::query()
+            ->select('id', 'name')
+            ->get();
+
+        $clubs = Club::query()
+            ->select('id', 'name')
+            ->get();
+
+        $data = [
+            'data' => $players,
+            'sports' => $sports,
+            'clubs' => $clubs,
+        ];
+
+        return $data;
     }
 
     /**

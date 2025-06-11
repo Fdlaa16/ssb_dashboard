@@ -10,6 +10,7 @@ class Player extends Model
 {
     use HasFactory, SoftDeletes;
     protected $fillable = [
+        'user_id',
         'code',
         'name',
         'nisn',
@@ -60,7 +61,7 @@ class Player extends Model
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
-    public function sportPlayer()
+    public function sportPlayers()
     {
         return $this->hasMany(SportPlayer::class, 'player_id', 'id');
     }
@@ -68,5 +69,30 @@ class Player extends Model
     public function sports()
     {
         return $this->belongsToMany(Sport::class, 'sport_players', 'player_id', 'sport_id');
+    }
+
+    public function files()
+    {
+        return $this->morphMany(File::class, 'fileable');
+    }
+
+    public function family_card()
+    {
+        return $this->morphMany(File::class, 'fileable')->where('type', 'family_card')->latest()->one();
+    }
+
+    public function report_grades()
+    {
+        return $this->morphMany(File::class, 'fileable')->where('type', 'report_grades')->latest()->one();
+    }
+
+    public function birth_certificate()
+    {
+        return $this->morphMany(File::class, 'fileable')->where('type', 'birth_certificate')->latest()->one();
+    }
+
+    public function avatar()
+    {
+        return $this->morphMany(File::class, 'fileable')->where('type', 'avatar')->latest()->one();
     }
 }

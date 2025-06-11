@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 
 class File extends Model
 {
-    use SoftDeletes, Blameable;
+    use SoftDeletes;
 
     protected $fillable = [
         'type',
@@ -39,9 +39,9 @@ class File extends Model
 
     public static $file_directories = [
         'avatar' => 'avatar/',
-        'kk' => 'kk/',
-        'akta' => 'akta/',
-        'report_card_grades' => 'report_card_grades/',
+        'family_card' => 'family_card/',
+        'birth_certificate' => 'birth_certificate/',
+        'report_grades' => 'report_grades/',
     ];
 
     public function getDirectory($type)
