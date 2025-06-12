@@ -93,15 +93,17 @@ const handleSubmit = async () => {
   <VRow>
     <VCol cols="12" md="12">
       <PlayerEditable
-        :data="playerData"
+        :data="readonly(playerData)"  
         :sports="sports"
         @submit="handleSubmit"
-        @update:selectedSports="(val) => playerData.sport_players = val.map(id => {
-          const s = sports.find(x => x.id === id);
-          return s ? { id: 0, sport: s } : null;
-        }).filter(x => x !== null)"
-        @update:data="(val) => playerData = val"
+        @update:selectedSports="(val) => {
+          playerData.value.sport_players = val.map(id => {
+            const s = sports.value.find(x => x.id === id);
+            return s ? { id: 0, sport: s } : null;
+          }).filter(x => x !== null);
+        }"
       />
+
     </VCol>
   </VRow>
 </template>

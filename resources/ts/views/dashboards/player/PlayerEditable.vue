@@ -30,15 +30,30 @@ const rules = [
 ]
 
 const props = defineProps<{ data: PlayerData, sports: Sport[] }>()
-const emit = defineEmits(['update:data', 'update:selectedSports'])
+const emit = defineEmits(['submit', 'update:data', 'update:selectedSports'])
 
 
 const selectedItem = ref<number[]>([])
 const items = computed(() => props.sports.map(s => s.name))
 
-console.log('hehe', props)
+const localData = reactive<PlayerData>({ ...toRaw(props.data) })
 
-const localData = ref<PlayerData>(JSON.parse(JSON.stringify(props.data))) 
+watch(() => props.data, (newVal) => {
+  Object.assign(localData, toRaw(newVal))
+}, { deep: true })
+
+watch(() => localData.sport_players, (newVal) => {
+  if (newVal && newVal.length > 0) {
+    selectedItem.value = newVal
+      .filter(sp => sp.sport !== undefined && sp.sport !== null)
+      .map(sp => sp.sport.id)
+  } else {
+    selectedItem.value = []
+  }
+}, { immediate: true })
+
+
+// const localData = ref<PlayerData>(JSON.parse(JSON.stringify(props.data))) 
 // const localData = reactive({ ...props.data })
 
 const getSports = async() => {
@@ -86,7 +101,7 @@ onMounted(async () => {
 
 
 watch(localData, () => {
-  emit('update:data', { ...localData })
+  emit('update:data', localData)
 }, { deep: true })
 
 
