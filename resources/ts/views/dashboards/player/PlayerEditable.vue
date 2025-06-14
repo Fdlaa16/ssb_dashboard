@@ -34,12 +34,12 @@ const emit = defineEmits(['submit', 'update:data', 'update:selectedSports'])
 
 
 const selectedItem = ref<number[]>([])
-const items = computed(() => props.sports.map(s => s.name))
 
-const localData = reactive<PlayerData>({ ...toRaw(props.data) })
+const localData = ref<PlayerData>(props.data)
+console.log('props.data', localData );
 
 watch(() => props.data, (newVal) => {
-  Object.assign(localData, toRaw(newVal))
+  localData.value = props.data
 }, { deep: true })
 
 watch(() => localData.sport_players, (newVal) => {
@@ -51,10 +51,6 @@ watch(() => localData.sport_players, (newVal) => {
     selectedItem.value = []
   }
 }, { immediate: true })
-
-
-// const localData = ref<PlayerData>(JSON.parse(JSON.stringify(props.data))) 
-// const localData = reactive({ ...props.data })
 
 const getSports = async() => {
   try {
@@ -73,7 +69,7 @@ const getClubs = async() => {
     const res = await $api('club')
     clubs.value = res.data
 
-    console.log('clubs ', clubs.value);
+    console.log('clubs ', clubs.value );
     
   } catch (error: any) {
     error.value = 'Gagal memuat data olahraga'
@@ -85,42 +81,23 @@ onMounted(async () => {
   getClubs()
 })
 
-// watch(() => props.data.sport_players, (newVal) => {
-//   if (newVal && newVal.length > 0) {
-//     selectedItem.value = newVal
-//       .filter(sp => sp.sport !== undefined && sp.sport !== null)  // filter aman
-//       .map(sp => sp.sport.id)
-//   } else {
-//     selectedItem.value = []
-//   }
-// }, { immediate: true })
 
-// watch(() => props.data, (newVal) => {
-//   Object.assign(localData, newVal)
-// }, { deep: true, immediate: true })
-
-
-watch(localData, () => {
-  emit('update:data', localData)
+watch(localData, (newVal, oldVal) => {
+  if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
+    emit('update:data', newVal)
+  }
 }, { deep: true })
 
+const submitForm = () => {
+  emit('update:data', localData) 
+  emit('submit')
+}
 
-watch(selectedItem, (val) => {
-  emit('update:selectedSports', val)
-
-  localData.value.sport_players = val.map(sportId => {
-    const sport = sports.value.find(s => s.id === sportId)
-    return {
-      id: 0,
-      sport: {
-        id: sport?.id || 0,
-        code: sport?.code || '',
-        name: sport?.name || '',
-      },
-    }
-  })
-})
-
+const getImageUrl = (path: string) => {
+  console.log('path', import.meta.env.VITE_APP_URL + path);
+  
+  return import.meta.env.VITE_APP_URL + path
+}
 </script>
 
 <template>
@@ -153,7 +130,13 @@ watch(selectedItem, (val) => {
 
               <VRow>
                 <VCol cols="4" class="d-flex justify-center align-center text-no-wrap">
-                  <!-- <VNodeRenderer v-if="themeConfig.app.logo" :nodes="themeConfig.app.logo" /> -->
+                  <img
+                      v-if="localData.avatar"
+                      :src="getImageUrl(localData.avatar.url)"
+                      class="card-website-analytics-img"
+                      style="width: 12%; filter: drop-shadow(0 4px 60px rgba(0, 0, 0, 50%));"
+                    />
+                    
                   <VFileInput
                     v-model="localData.avatar"
                     :rules="rules"
@@ -164,14 +147,14 @@ watch(selectedItem, (val) => {
 
                 <VCol cols="8" class="text-no-wrap">
                   <AppTextField
-                    v-model="localData.email"
+                    v-model="localData.user.email"
                     label="Email"
                     placeholder="Contoh: admin@gmail.com"
                     class="mb-4"
                   />
 
                   <AppTextField
-                    v-model="localData.password"
+                    v-model="localData.user.password"
                     :append-inner-icon="show1 ? 'tabler-eye-off' : 'tabler-eye' "
                     :rules="[rulesPassword.required, rulesPassword.min]"
                     :type="show1 ? 'text' : 'password'"
@@ -238,12 +221,13 @@ watch(selectedItem, (val) => {
                 <VCol class="text-no-wrap">
                   <div class="text-h6 mt-2">
                     <h6 class="text-h6 mb-2">Kartu Keluarga</h6>
-                    <!-- <img
-                      v-if="sliderBar1"
-                      :src="sliderBar1"
+                    <img
+                      v-if="localData.family_card"
+                      :src="getImageUrl(localData.family_card.url)"
                       class="card-website-analytics-img"
                       style="width: 12%; filter: drop-shadow(0 4px 60px rgba(0, 0, 0, 50%));"
-                    > -->
+                    />
+                    
                     <VFileInput
                       v-model="localData.family_card"
                       :rules="rules"
@@ -253,12 +237,12 @@ watch(selectedItem, (val) => {
 
                   <div class="text-h6 mt-4">
                     <h6 class="text-h6 mb-2">Rapor Terakhir</h6>
-                    <!-- <img
-                      v-if="sliderBar2"
-                      :src="sliderBar2"
+                    <img
+                      v-if="localData.report_grades"
+                      :src="getImageUrl(localData.report_grades.url)"
                       class="card-website-analytics-img"
                       style="width: 12%; filter: drop-shadow(0 4px 60px rgba(0, 0, 0, 50%));"
-                    > -->
+                    />
                     <VFileInput
                       v-model="localData.report_grades"
                       :rules="rules"
@@ -268,12 +252,12 @@ watch(selectedItem, (val) => {
 
                   <div class="text-h6 mt-4">
                     <h6 class="text-h6 mb-2">Akte Kelahiran</h6>
-                    <!-- <img
-                      v-if="sliderBar3"
-                      :src="sliderBar3"
+                    <img
+                      v-if="localData.birth_certificate"
+                      :src="getImageUrl(localData.birth_certificate.url)"
                       class="card-website-analytics-img"
                       style="width: 12%; filter: drop-shadow(0 4px 60px rgba(0, 0, 0, 50%));"
-                    > -->
+                    />
                     <VFileInput
                       v-model="localData.birth_certificate"
                       :rules="rules"
@@ -288,8 +272,11 @@ watch(selectedItem, (val) => {
 
         <!-- Tombol Submit -->
         <VCol cols="12" class="d-flex justify-end">
-          <VBtn type="submit">
-            Submit
+          <VBtn
+            color="primary"
+            @click="submitForm"
+          >
+            Simpan
           </VBtn>
         </VCol>
       </VCard>

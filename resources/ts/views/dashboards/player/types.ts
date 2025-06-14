@@ -1,3 +1,8 @@
+export interface User {
+  email: string;
+  password?: string;
+}
+
 export interface Club {
   id: number;
   code: string;
@@ -25,14 +30,12 @@ export interface SportPlayer {
 }
 
 export interface PlayerData {
-  id: number;
-  email: string;
-  password?: string; // ← sekarang opsional, untuk update
+  id: number; 
   name: string;
   nisn: string;
   height: string;
   weight: string;
-  user?: string; // ← sekarang opsional
+  user: User; 
   clubs?: Club[];
   club_players?: ClubPlayer[];
   sports?: Sport[];

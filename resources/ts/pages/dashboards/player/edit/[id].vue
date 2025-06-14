@@ -12,8 +12,10 @@ const playerId = route.params.id as string;
 const playerData = ref<PlayerData>({
   id: 0,
   name: '',
-  email: '',
-  password: '',
+  user: {
+    email: '',
+    password: '',
+  },
   nisn: '',
   height: '',
   weight: '',
@@ -59,25 +61,35 @@ onMounted(async () => {
 // Submit handler (edit update)
 const handleSubmit = async () => {
   try {
+    console.log('Submitting player data:', playerData.value);
+    
     const formData = new FormData();
-    formData.append('email', playerData.value.email);
-    // password kosong berarti tidak update password
-    if (playerData.value.password) {
-      formData.append('password', playerData.value.password);
-    }
+    formData.append('_method', 'PUT'); // 👈 tambahkan ini
+
+    formData.append('email', playerData.value.user.email);
+    if (playerData.value.user.password)
+      formData.append('password', playerData.value.user.password);
+
     formData.append('nisn', playerData.value.nisn);
     formData.append('name', playerData.value.name);
     formData.append('height', playerData.value.height);
     formData.append('weight', playerData.value.weight);
     formData.append('sport_players', JSON.stringify(playerData.value.sport_players));
-    // file uploads
-    formData.append('avatar', playerData.value.avatar || '');
-    formData.append('family_card', playerData.value.family_card || '');
-    formData.append('report_grades', playerData.value.report_grades || '');
-    formData.append('birth_certificate', playerData.value.birth_certificate || '');
+
+    if (playerData.value.avatar instanceof File)
+      formData.append('avatar', playerData.value.avatar);
+
+    if (playerData.value.family_card instanceof File)
+      formData.append('family_card', playerData.value.family_card);
+
+    if (playerData.value.report_grades instanceof File)
+      formData.append('report_grades', playerData.value.report_grades);
+
+    if (playerData.value.birth_certificate instanceof File)
+      formData.append('birth_certificate', playerData.value.birth_certificate);
 
     const res = await $api(`player/${playerId}`, {
-      method: 'POST', // atau PUT tergantung API
+      method: 'POST', // 👈 ubah jadi POST
       body: formData,
     });
 
@@ -87,18 +99,19 @@ const handleSubmit = async () => {
     alert('Gagal update data: ' + (err.message || 'Unknown error'));
   }
 };
+
 </script>
 
 <template>
   <VRow>
     <VCol cols="12" md="12">
       <PlayerEditable
-        :data="readonly(playerData)"  
+        :data="playerData"  
         :sports="sports"
         @submit="handleSubmit"
         @update:selectedSports="(val) => {
-          playerData.value.sport_players = val.map(id => {
-            const s = sports.value.find(x => x.id === id);
+          playerData.sport_players = val.map(id => {
+            const s = sports.find(x => x.id === id);
             return s ? { id: 0, sport: s } : null;
           }).filter(x => x !== null);
         }"

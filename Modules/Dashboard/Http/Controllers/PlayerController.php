@@ -122,6 +122,9 @@ class PlayerController extends Controller
         ];
 
         $messages = [
+            'email.required' => 'Email harus diisi.',
+            'email.unique' => 'Email harus kode unik.',
+            'password.required' => 'Password harus diisi.',
             'nisn.required' => 'NISN harus diisi.',
             'nisn.unique' => 'NISN harus kode unik.',
             'name.required' => 'Name harus diisi.',
@@ -149,80 +152,28 @@ class PlayerController extends Controller
                 'weight' => $request->weight,
             ]);
 
-            if ($request->hasFile('avatar')) {
-                $file = $request->file('avatar');
+            $types = ['avatar', 'family_card', 'report_grades', 'birth_certificate'];
+            $fileObj = new File();
 
-                $fileObj = new File();
-                $fileDir = $fileObj->getDirectory('avatar');
-                $fileName = $fileObj->getFileName('avatar', $player->id, $file);
+            foreach ($types as $type) {
+                if ($request->hasFile($type)) {
+                    $file = $request->file($type);
 
-                $file->storeAs("public/$fileDir", $fileName);
+                    $fileDir = $fileObj->getDirectory($type);
+                    $fileName = $fileObj->getFileName($type, $player->id, $file);
 
-                $player->files()->where('type', 'avatar')->delete();
-                $player->files()->create([
-                    'type' => 'avatar',
-                    'name' => $fileName,
-                    'original_name' => $file->getClientOriginalName(),
-                    'extension' => $file->getClientOriginalExtension(),
-                    'path' => "$fileDir$fileName",
-                ]);
-            }
+                    $file->storeAs($fileDir, $fileName, 'public');
 
-            if ($request->hasFile('family_card')) {
-                $file = $request->file('family_card');
+                    $player->files()->where('type', $type)->delete();
 
-                $fileObj = new File();
-                $fileDir = $fileObj->getDirectory('family_card');
-                $fileName = $fileObj->getFileName('family_card', $player->id, $file);
-
-                $file->storeAs("public/$fileDir", $fileName);
-
-                $player->files()->where('type', 'family_card')->delete();
-                $player->files()->create([
-                    'type' => 'family_card',
-                    'name' => $fileName,
-                    'original_name' => $file->getClientOriginalName(),
-                    'extension' => $file->getClientOriginalExtension(),
-                    'path' => "$fileDir$fileName",
-                ]);
-            }
-
-            if ($request->hasFile('report_grades')) {
-                $file = $request->file('report_grades');
-
-                $fileObj = new File();
-                $fileDir = $fileObj->getDirectory('report_grades');
-                $fileName = $fileObj->getFileName('report_grades', $player->id, $file);
-
-                $file->storeAs("public/$fileDir", $fileName);
-                $player->files()->where('type', 'report_grades')->delete();
-
-                $player->files()->create([
-                    'type' => 'report_grades',
-                    'name' => $fileName,
-                    'original_name' => $file->getClientOriginalName(),
-                    'extension' => $file->getClientOriginalExtension(),
-                    'path' => "$fileDir$fileName",
-                ]);
-            }
-
-            if ($request->hasFile('birth_certificate')) {
-                $file = $request->file('birth_certificate');
-
-                $fileObj = new File();
-                $fileDir = $fileObj->getDirectory('birth_certificate');
-                $fileName = $fileObj->getFileName('birth_certificate', $player->id, $file);
-
-                $file->storeAs("public/$fileDir", $fileName);
-                $player->files()->where('type', 'birth_certificate')->delete();
-
-                $player->files()->create([
-                    'type' => 'birth_certificate',
-                    'name' => $fileName,
-                    'original_name' => $file->getClientOriginalName(),
-                    'extension' => $file->getClientOriginalExtension(),
-                    'path' => "$fileDir$fileName",
-                ]);
+                    $player->files()->create([
+                        'type' => $type,
+                        'name' => $fileName,
+                        'original_name' => $file->getClientOriginalName(),
+                        'extension' => $file->getClientOriginalExtension(),
+                        'path' => "$fileDir$fileName",
+                    ]);
+                }
             }
 
             $sportPlayers = json_decode($request->sport_players, true);
@@ -293,7 +244,7 @@ class PlayerController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        dd($request);
     }
 
     /**

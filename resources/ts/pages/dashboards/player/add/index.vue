@@ -17,55 +17,42 @@ const snackbarColor = ref<'success' | 'error'>('success')
 const playerData = ref<PlayerData>({
   id: 0,
   name: '',
-  email: '',
-  password: '',
+  user: {
+    email: '',
+    password: '',
+  },
   nisn: '',
   height: '',
   weight: '',
-  sport_players: [
-    {
-      id: 0,
-      sport: {
-        id: 0,
-        code: '',
-        name: '',
-      },
-    },
-  ],
+  sport_players: [],
 })
 
 const handleSubmit = async () => {
-  console.log('selectedSports:', selectedSports.value);
-  
   playerData.value.sport_players = selectedSports.value.map(sport => ({
     id: 0,
-    sport: {
-      id: sport.id,
-      code: sport.code,
-      name: sport.name,
-    },
+    player_id: '', 
+    sport_id: sport.id,
   }))
 
   const formData = new FormData()
-  formData.append('email', playerData.value.email)
-  formData.append('password', playerData.value.password || '')
+  formData.append('email', playerData.value.user.email)
+  formData.append('password', playerData.value.user.password || '')
   formData.append('nisn', playerData.value.nisn)
   formData.append('name', playerData.value.name)
   formData.append('height', playerData.value.height)
   formData.append('weight', playerData.value.weight)
 
   if (playerData.value.avatar instanceof File)
-  formData.append('avatar', playerData.value.avatar)
+    formData.append('avatar', playerData.value.avatar)
 
   if (playerData.value.family_card instanceof File)
-  formData.append('family_card', playerData.value.family_card)
+    formData.append('family_card', playerData.value.family_card)
 
   if (playerData.value.report_grades instanceof File)
-  formData.append('report_grades', playerData.value.report_grades)
+    formData.append('report_grades', playerData.value.report_grades)
 
   if (playerData.value.birth_certificate instanceof File)
-  formData.append('birth_certificate', playerData.value.birth_certificate)
-
+    formData.append('birth_certificate', playerData.value.birth_certificate)
   
   formData.append('sport_players', JSON.stringify(playerData.value.sport_players))
 
@@ -85,13 +72,15 @@ const handleSubmit = async () => {
         success: 'Data berhasil dibuat!',
       },
     })
-
-    console.log(response)
   } catch (err: any) {
     snackbarMessage.value = 'Gagal mengirim data: ' + (err?.message || 'Unknown error')
     snackbarColor.value = 'error'
     isFlatSnackbarVisible.value = true
   }
+}
+
+const onSubmit = () => {
+  handleSubmit()
 }
 </script>
 
@@ -101,13 +90,13 @@ const handleSubmit = async () => {
       cols="12"
       md="12"
     >
-      <PlayerEditable
-        :data="playerData"
-        :sports="sports"
-        @submit="handleSubmit"
-        @update:selectedSports="selectedSports = $event"
-        @update:data="playerData = $event"
-      />
+    <PlayerEditable
+      :data="playerData"
+      :sports="sports"
+      @update:data="playerData = $event"
+      @update:selectedSports="selectedSports = $event"
+      @submit="onSubmit"
+    />
     </VCol>
   </VRow>
 
