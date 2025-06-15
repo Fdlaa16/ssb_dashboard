@@ -1,39 +1,40 @@
 <script setup lang="ts">
+import Swal from 'sweetalert2'
 import { computed, onMounted, ref } from 'vue'
+import type { LocationQueryValue } from 'vue-router'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+const route = useRoute()
+
 const searchQuery = ref('')
-const selectedStatus = ref<invoiceStatus>(null)
-const selectedRows = ref([])
+const selectedClub = ref('')
+const selectedSport = ref('')
+const selectedStatus = ref('')
+const selectedSort = ref('')
 
 const players = ref<any[]>([])
+const clubs = ref<{ title: string; value: string | number }[]>([])
+const sports = ref<{ title: string; value: string | number }[]>([])
+
 const loading = ref(false)
 const error = ref<string | null>(null)
 const currentPage = ref(1)
 
 const itemsPerPage = 5 
-const page = ref(1)
-const sortBy = ref()
-const orderBy = ref()
-
-const route = useRoute()
 const isSnackbarVisible = ref(false)
 const snackbarMessage = ref('')
 const snackbarColor = ref<'success' | 'error'>('success')
 
-// Cek query saat mounted
 onMounted(() => {
   if (route.query.success) {
     snackbarMessage.value = String(route.query.success)
     snackbarColor.value = 'success'
     isSnackbarVisible.value = true
 
-    // Bersihkan query param setelah ditampilkan
     router.replace({ query: {} })
   }
 })
-
 
 const totalPages = computed(() => {
   return Math.ceil(players.value.length / itemsPerPage)
@@ -54,35 +55,46 @@ const headers = [
   { title: 'Weight (kg)', key: 'weight' },
   { title: 'Sport', key: 'sports' },
   // { title: 'Club', key: 'clubs' },
+  { title: 'Status', key: 'status' },
   { title: 'Action', key: 'action', sortable: false },
 ]
+
+const statusColorMap = {
+  1: { label: 'Active', color: 'success' },
+  0: { label: 'In Confirm', color: 'warning', textColor: 'black' },
+  2: { label: 'Non Active', color: 'error' },
+}
 
 const paginatedPlayers = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage
   return players.value.slice(start, start + itemsPerPage)
 })
 
-const { data: invoiceData, execute: fetchInvoices } = await useApi<any>(createUrl('/apps/invoice', {
-  query: {
-    q: searchQuery,
-    status: selectedStatus,
-    itemsPerPage,
-    page,
-    sortBy,
-    orderBy,
-  },
-}))
-
-const invoices = computed((): Invoice[] => invoiceData.value.invoices)
-const totalInvoices = computed(() => invoiceData.value.totalInvoices)
-
 async function fetchPlayer() {
   loading.value = true
   error.value = null
-  try {
-    const response = await $api('/api/player')
-    players.value = response.data
 
+  try {
+    const response = await $api('player', {
+      method: 'GET',
+      params: {
+        search: searchQuery.value,
+        club_id: selectedClub.value,
+        sport_id: selectedSport.value,
+        status: selectedStatus.value,
+        sort: selectedSort.value,
+      },
+    })
+
+    players.value = response.data 
+    const totals = response.totals
+
+    widgetData.value = [
+      { title: 'All', value: totals.all, icon: 'tabler-user', iconColor: 'primary', change: 0, desc: 'Total semua player' },
+      { title: 'Active', value: totals.active, icon: 'tabler-user-check', iconColor: 'success', change: 0, desc: 'Player aktif' },
+      { title: 'In Confirm', value: totals.in_confirm, icon: 'tabler-user-question', iconColor: 'warning', change: 0, desc: 'Menunggu konfirmasi' },
+      { title: 'Non Active', value: totals.in_active, icon: 'tabler-user-x', iconColor: 'error', change: 0, desc: 'Player tidak aktif' },
+    ]
   } catch (err: any) {
     error.value = err.message || 'Gagal memuat data'
   } finally {
@@ -90,23 +102,211 @@ async function fetchPlayer() {
   }
 }
 
-// function editPlayer(player: any) {
-//   console.log('Edit', player)
-// }
+async function fetchClubs() {
+  try {
+    const response = await $api('club', {
+      method: 'GET',
+    })
 
-function deletePlayer(player: any) {
-  console.log('Delete', player)
+    const clubData = response.data.map((club: any) => ({
+      title: club.name,
+      value: club.id,
+    }))
+
+    clubs.value = [{ title: 'Pilih Club', value: '' }, ...clubData]
+  } catch (error) {
+    console.error('Gagal memuat clubs', error)
+  }
 }
 
-function activatePlayer(player: any) {
-  console.log('Activate', player)
+async function fetchSports() {
+  try {
+    const response = await $api('sport', {
+      method: 'GET',
+    })
+
+    const sportData = response.data.map((sport: any) => ({
+      title: sport.name,
+      value: sport.id,
+    }))
+
+    sports.value = [{ title: 'Pilih Sport', value: '' }, ...sportData]
+  } catch (error) {
+    console.error('Gagal memuat sports', error)
+  }
 }
 
 function editPlayer(player: any) {
   router.push({ name: 'dashboards-player-edit-id', params: { id: player.id } })
 }
 
+async function deletePlayer(player: any) {
+  const confirm = await Swal.fire({
+    title: 'Apakah kamu yakin?',
+    text: `Data player dengan nama ${player.name} akan dihapus.`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ya, hapus!',
+    cancelButtonText: 'Batal',
+    customClass: {
+      confirmButton: 'swal2-confirm-btn',
+      cancelButton: 'swal2-cancel-btn',
+    },
+  })
+
+  if (confirm.isConfirmed) {
+    try {
+      loading.value = true
+
+      await $api(`player/${player.id}`, {
+        method: 'DELETE',
+      })
+
+      await fetchPlayer()
+
+      snackbarMessage.value = 'Player berhasil dihapus'
+      snackbarColor.value = 'success'
+      isSnackbarVisible.value = true
+    } catch (err: any) {
+      snackbarMessage.value = err?.response?.data?.message || 'Gagal menghapus player'
+      snackbarColor.value = 'error'
+      isSnackbarVisible.value = true
+    } finally {
+      loading.value = false
+    }
+  }
+}
+
+async function activatePlayer(player: any) {
+  const confirm = await Swal.fire({
+    title: 'Aktifkan Player?',
+    text: `Player ${player.name} akan diaktifkan kembali.`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Ya, aktifkan!',
+    cancelButtonText: 'Batal',
+    customClass: {
+      confirmButton: 'swal2-confirm-btn',
+      cancelButton: 'swal2-cancel-btn',
+    },
+  })
+
+  if (confirm.isConfirmed) {
+    try {
+      loading.value = true
+
+      await $api(`player/${player.id}/active`, {
+        method: 'PUT',
+      })
+
+      await fetchPlayer()
+
+      snackbarMessage.value = 'Player berhasil diaktifkan kembali'
+      snackbarColor.value = 'success'
+      isSnackbarVisible.value = true
+    } catch (err: any) {
+      snackbarMessage.value = err?.response?.data?.message || 'Gagal mengaktifkan player'
+      snackbarColor.value = 'error'
+      isSnackbarVisible.value = true
+    } finally {
+      loading.value = false
+    }
+  }
+}
+
+async function approvePlayer(player: any) {
+  const result = await Swal.fire({
+    title: 'Terima Player?',
+    text: `Player ${player.name} akan diterima?.`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Ya, terima!',
+    cancelButtonText: 'Batal',
+    customClass: {
+      confirmButton: 'swal2-confirm-btn',
+      cancelButton: 'swal2-cancel-btn',
+    },
+  })
+
+  if (result.isConfirmed) {
+    $api(`player/${player.id}/approve`, {
+      method: 'PUT',
+    })
+      .then(() => {
+        fetchPlayer()
+        snackbarMessage.value = 'Player diterima'
+        snackbarColor.value = 'success'
+        isSnackbarVisible.value = true
+      })
+      .catch((err: any) => {
+        snackbarMessage.value = err?.response?.data?.message || 'Gagal menerima player'
+        snackbarColor.value = 'error'
+        isSnackbarVisible.value = true
+      })
+  }
+}
+
+async function rejectPlayer(player: any) {
+  const result = await Swal.fire({
+    title: 'Tolak Player?',
+    text: `Player ${player.name} akan ditolak?.`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Ya, tolak!',
+    cancelButtonText: 'Batal',
+    customClass: {
+      confirmButton: 'swal2-confirm-btn',
+      cancelButton: 'swal2-cancel-btn',
+    },
+  })
+
+  if (result.isConfirmed) {
+    $api(`player/${player.id}/reject`, {
+      method: 'PUT',
+    })
+      .then(() => {
+        fetchPlayer()
+        snackbarMessage.value = 'Player ditolak'
+        snackbarColor.value = 'success'
+        isSnackbarVisible.value = true
+      })
+      .catch((err: any) => {
+        snackbarMessage.value = err?.response?.data?.message || 'Gagal menolak player'
+        snackbarColor.value = 'error'
+        isSnackbarVisible.value = true
+      })
+  }
+}
+
+
+function getQueryParam(param: LocationQueryValue | LocationQueryValue[] | undefined): string {
+  return Array.isArray(param) ? param[0] || '' : param || ''
+}
+
 onMounted(() => {
+  searchQuery.value = getQueryParam(route.query.search)
+  selectedClub.value = getQueryParam(route.query.club_id)
+  selectedSport.value = getQueryParam(route.query.sport_id)
+  selectedStatus.value = getQueryParam(route.query.status)
+  selectedSort.value = getQueryParam(route.query.sort)
+
+  fetchPlayer()
+  fetchClubs()
+  fetchSports()
+})
+
+watch([searchQuery, selectedClub, selectedSport, selectedStatus, selectedSort], () => {
+  router.replace({
+    query: {
+      ...route.query,
+      search: searchQuery.value || undefined,
+      club_id: selectedClub.value || undefined,
+      sport_id: selectedSport.value || undefined,
+      status: selectedStatus.value || undefined,
+      sort: selectedSort.value || undefined,
+    },
+  })
+
   fetchPlayer()
 })
 </script>
@@ -114,142 +314,158 @@ onMounted(() => {
 <template>
   <VRow>
     <VCol cols="12">
-      <VCard class="mb-6">
-        <VCardText class="px-3">
-          <VRow>
-            <template
-              v-for="(data, id) in widgetData"
-              :key="id"
+      <div class="d-flex mb-6">
+        <VRow>
+          <template
+            v-for="(data, id) in widgetData"
+            :key="id"
+          >
+            <VCol
+              cols="12"
+              md="3"
+              sm="6"
             >
-              <VCol
-                cols="12"
-                sm="6"
-                md="3"
-                class="px-6"
-              >
-                <div
-                  class="d-flex justify-space-between align-center"
-                  :class="$vuetify.display.xs
-                    ? id !== widgetData.length - 1 ? 'border-b pb-4' : ''
-                    : $vuetify.display.sm
-                      ? id < (widgetData.length / 2) ? 'border-b pb-4' : ''
-                      : ''"
-                >
-                  <div class="d-flex flex-column">
-                    <h4 class="text-h4">
-                      {{ data.value }}
-                    </h4>
-                    <span class="text-body-1 text-capitalize">{{ data.title }}</span>
+              <VCard>
+                <VCardText>
+                  <div class="d-flex justify-space-between">
+                    <div class="d-flex flex-column gap-y-1">
+                      <div class="text-body-1 text-high-emphasis">
+                        {{ data.title }}
+                      </div>
+                      <div class="d-flex gap-x-2 align-center">
+                        <h4 class="text-h4">
+                          {{ data.value }}
+                        </h4>
+                      </div>
+                      <div class="text-sm">
+                        {{ data.desc }}
+                      </div>
+                    </div>
+                    <VAvatar
+                      :color="data.iconColor"
+                      variant="tonal"
+                      rounded
+                      size="42"
+                    >
+                      <VIcon
+                        :icon="data.icon"
+                        size="26"
+                      />
+                    </VAvatar>
                   </div>
+                </VCardText>
+              </VCard>
+            </VCol>
+          </template>
+        </VRow>
+      </div>
 
-                  <VAvatar
-                    variant="tonal"
-                    rounded
-                    size="42"
-                  >
-                    <VIcon
-                      :icon="data.icon"
-                      size="26"
-                      color="high-emphasis"
-                    />
-                  </VAvatar>
-                </div>
-              </VCol>
-              <VDivider
-                v-if="$vuetify.display.mdAndUp ? id !== widgetData.length - 1
-                  : $vuetify.display.smAndUp ? id % 2 === 0
-                    : false"
-                vertical
-                inset
-                length="60"
-              />
-            </template>
-          </VRow>
-        </VCardText>
-      </VCard>
-      
-      <VCard>
-        <VCardItem title="Player Master"/>
-        <VCardText class="d-flex justify-space-between align-center flex-wrap gap-4">
-          <div class="d-flex gap-4 align-center flex-wrap">
-            <div class="d-flex align-center gap-2">
-              <span>Show</span>
-              <AppSelect
-                :model-value="itemsPerPage"
-                :items="[
-                  { value: 10, title: '10' },
-                  { value: 25, title: '25' },
-                  { value: 50, title: '50' },
-                  { value: 100, title: '100' },
-                  { value: -1, title: 'All' },
-                ]"
-                style="inline-size: 5.5rem;"
-                @update:model-value="itemsPerPage = parseInt($event, 10)"
-              />
-            </div>
-            <!-- 👉 Create invoice -->
-            <VBtn
-              prepend-icon="tabler-plus"
-              :to="{ name: 'dashboards-player-add' }"
+      <VCard class="mb-6">
+        <VCardItem class="pb-4">
+          <VCardTitle>Players</VCardTitle>
+        </VCardItem>
+
+        <VCardText>
+          <VRow>
+            <VCol
+              cols="12"
+              sm="3"
             >
-              Create
-            </VBtn>
-            <VBtn
-              value="download"
-              prepend-icon="tabler-download"
-            >
-              Convert Data
-            </VBtn>
-          </div>
-
-          <div class="d-flex align-center flex-wrap gap-4">
-            <div class="invoice-list-filter">
-              <AppTextField
-                v-model="searchQuery"
-                placeholder="Search Player"
-                style="inline-size: 10rem;"
-              />
-            </div>
-
-            <div class="invoice-list-filter">
               <AppSelect
-                v-model="selectedStatus"
+                v-model="selectedClub"
+                :items="clubs"
                 placeholder="Club"
                 clearable
                 clear-icon="tabler-x"
                 single-line
-                style="inline-size: 10rem;"
-                :items="['Downloaded', 'Draft', 'Sent', 'Paid', 'Partial Payment', 'Past Due']"
               />
-            </div>
+            </VCol>
 
-            <div class="invoice-list-filter">
+            <VCol
+              cols="12"
+              sm="3"
+            >
               <AppSelect
-                v-model="selectedStatus"
+                v-model="selectedSport"
                 placeholder="Sport"
                 clearable
                 clear-icon="tabler-x"
                 single-line
-                style="inline-size: 10rem;"
-                :items="['Downloaded', 'Draft', 'Sent', 'Paid', 'Partial Payment', 'Past Due']"
+                :items="sports"
               />
-            </div>
+            </VCol>
 
-            <div class="invoice-list-filter">
+            <VCol
+              cols="12"
+              sm="3"
+            >
               <AppSelect
                 v-model="selectedStatus"
                 placeholder="Status"
                 clearable
                 clear-icon="tabler-x"
                 single-line
-                style="inline-size: 10rem;"
-                :items="['All', 'Active', 'Pending', 'Inactive']"
+                :items="[
+                  { title: 'Pilih Status', value: '' },
+                  { title: 'Semua', value: 'all' },
+                  { title: 'Aktif', value: 'active' },
+                  { title: 'Menunggu Konfirmasi', value: 'in_confirm' },
+                  { title: 'Tidak Aktif', value: 'in_active' }
+                ]"
               />
-            </div>
+            </VCol>
+
+            <VCol
+              cols="12"
+              sm="3"
+            >
+              <AppSelect
+                v-model="selectedSort"
+                placeholder="Z-A"
+                clearable
+                clear-icon="tabler-x"
+                single-line
+                :items="[
+                  { title: 'Pilih Sort', value: '' },
+                  { title: 'A-Z', value: 'asc' },
+                  { title: 'Z-A', value: 'desc' },
+                ]"
+              />
+            </VCol>
+          </VRow>
+        </VCardText>
+
+        <VDivider />
+
+        <VCardText class="d-flex flex-wrap gap-4">
+          <div style="inline-size: 15.625rem;">
+            <AppTextField
+                v-model="searchQuery"
+                placeholder="Search User"
+            />
+          </div>
+          <VSpacer />
+
+          <div class="app-user-search-filter d-flex align-center flex-wrap gap-4">
+            <VBtn
+              variant="tonal"
+              color="secondary"
+              prepend-icon="tabler-upload"
+            >
+              Export
+            </VBtn>
+
+            <VBtn
+              prepend-icon="tabler-plus"
+              :to="{ name: 'dashboards-player-add' }"
+            >
+              Add New User
+            </VBtn>
           </div>
         </VCardText>
 
-        <VDivider />  
+        <VDivider />
+
         <VDataTable
           :headers="headers"
           :items="paginatedPlayers"
@@ -306,10 +522,23 @@ onMounted(() => {
             </div>
           </template> -->
 
+          <template #item.status="{ item }">
+            <VChip
+              label
+              class="text-body-1 font-weight-medium"
+              :color="statusColorMap[item.status]?.color"
+              :text-color="statusColorMap[item.status]?.textColor || 'white'"
+              variant="tonal"
+              size="small"
+            >
+              {{ statusColorMap[item.status]?.label || 'Unknown' }}
+            </VChip>
+          </template>
+
           <template #item.action="{ item }">
             <div class="d-flex gap-x-2">
               <VBtn
-                v-if="!item.deleted_at"
+                v-if="!item.deleted_at && item.status !== 0"
                 icon
                 size="small"
                 color="primary"
@@ -320,7 +549,7 @@ onMounted(() => {
               </VBtn>
 
               <VBtn  
-                v-if="!item.deleted_at"
+                v-if="!item.deleted_at && item.status !== 0"
                 icon
                 size="small"
                 color="error"
@@ -329,7 +558,7 @@ onMounted(() => {
               >
                 <VIcon icon="tabler-trash" />
               </VBtn>
-
+              
               <VBtn
                 v-if="item.deleted_at"
                 icon
@@ -339,6 +568,28 @@ onMounted(() => {
                 title="Activate"
               >
                 <VIcon icon="tabler-check" />
+              </VBtn>
+
+              <VBtn
+                v-if="item.status === 0"
+                icon
+                size="small"
+                color="warning"
+                @click="approvePlayer(item)"
+                title="Approve"
+              >
+                <VIcon icon="tabler-help" />
+              </VBtn>
+
+              <VBtn
+                v-if="item.status === 0"
+                icon
+                size="small"
+                color="error"
+                @click="rejectPlayer(item)"
+                title="Reject"
+              >
+                <VIcon icon="tabler-x" />
               </VBtn>
             </div>
           </template>
@@ -368,3 +619,21 @@ onMounted(() => {
   </VSnackbar>
 
 </template>
+
+<style lang="scss">
+.swal2-confirm-btn {
+  background-color: #7B68EE !important;
+  color: #ffffff !important;
+  border: none;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.375rem;
+}
+
+.swal2-cancel-btn {
+  background-color: #6c757d !important;
+  color: #ffffff !important;
+  border: none;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.375rem;
+}
+</style>

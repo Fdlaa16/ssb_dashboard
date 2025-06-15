@@ -1,67 +1,89 @@
 <script setup lang="ts">
+import Swal from 'sweetalert2'
 import { computed, onMounted, ref } from 'vue'
+import type { LocationQueryValue } from 'vue-router'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const route = useRoute()
 
 const searchQuery = ref('')
-const selectedStatus = ref<invoiceStatus>(null)
-const selectedRows = ref([])
+const selectedClub = ref('')
+const selectedSport = ref('')
+const selectedStatus = ref('')
+const selectedSort = ref('')
 
-const players = ref<any[]>([])
+const clubs = ref<any[]>([])
+
 const loading = ref(false)
 const error = ref<string | null>(null)
 const currentPage = ref(1)
 
 const itemsPerPage = 5 
-const page = ref(1)
-const sortBy = ref()
-const orderBy = ref()
+const isSnackbarVisible = ref(false)
+const snackbarMessage = ref('')
+const snackbarColor = ref<'success' | 'error'>('success')
+
+onMounted(() => {
+  if (route.query.success) {
+    snackbarMessage.value = String(route.query.success)
+    snackbarColor.value = 'success'
+    isSnackbarVisible.value = true
+
+    router.replace({ query: {} })
+  }
+})
 
 const totalPages = computed(() => {
-  return Math.ceil(players.value.length / itemsPerPage)
+  return Math.ceil(clubs.value.length / itemsPerPage)
 })
 
 const widgetData = ref([
-  { title: 'Active Club', value: 24, icon: 'tabler-user' },
-  { title: 'Inactive Club', value: 24, icon: 'tabler-user' },
+  { title: 'All', value: 24, icon: 'tabler-user' },
+  { title: 'Active', value: 24, icon: 'tabler-user' },
+  { title: 'Non Active', value: 24, icon: 'tabler-user' },
 ])
 
 const headers = [
   { title: 'ID', key: 'id' },
+  { title: 'Code', key: 'code' },
   { title: 'Name', key: 'name' },
-  { title: 'NISN', key: 'nisn' },
-  { title: 'Height (cm)', key: 'height' },
-  { title: 'Weight (kg)', key: 'weight' },
-  { title: 'Sport', key: 'sports' },
-  { title: 'Club', key: 'clubs' },
   { title: 'Action', key: 'action', sortable: false },
 ]
 
-const paginatedPlayers = computed(() => {
+const statusColorMap = {
+  1: { label: 'Active', color: 'success' },
+  0: { label: 'In Confirm', color: 'warning', textColor: 'black' },
+  2: { label: 'Non Active', color: 'error' },
+}
+
+const paginatedClubs = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage
-  return players.value.slice(start, start + itemsPerPage)
+  return clubs.value.slice(start, start + itemsPerPage)
 })
 
-const { data: invoiceData, execute: fetchInvoices } = await useApi<any>(createUrl('/apps/invoice', {
-  query: {
-    q: searchQuery,
-    status: selectedStatus,
-    itemsPerPage,
-    page,
-    sortBy,
-    orderBy,
-  },
-}))
-
-const invoices = computed((): Invoice[] => invoiceData.value.invoices)
-const totalInvoices = computed(() => invoiceData.value.totalInvoices)
-
-async function fetchPlayer() {
+async function fetchClub() {
   loading.value = true
   error.value = null
-  try {
-    const response = await $api('/api/player')
-    players.value = response.data
 
-    console.log('players', response.data)
+  try {
+    const response = await $api('club', {
+      method: 'GET',
+      params: {
+        search: searchQuery.value,
+        sort: selectedSort.value,
+      },
+    })
+
+    clubs.value = response.data 
+    const totals = response.totals
+
+    widgetData.value = [
+      { title: 'All', value: totals.all, icon: 'tabler-shirt', iconColor: 'primary', change: 0, desc: 'Total semua club' },
+      { title: 'Active', value: totals.active, icon: 'tabler-shirt', iconColor: 'success', change: 0, desc: 'Club aktif' },
+      { title: 'Non Active', value: totals.in_active, icon: 'tabler-shirt', iconColor: 'error', change: 0, desc: 'Club tidak aktif' },
+    ]
+
   } catch (err: any) {
     error.value = err.message || 'Gagal memuat data'
   } finally {
@@ -69,226 +91,303 @@ async function fetchPlayer() {
   }
 }
 
-function editPlayer(player: any) {
-  console.log('Edit', player)
+function editClub(club: any) {
+  router.push({ name: 'dashboards-club-edit-id', params: { id: club.id } })
 }
 
-function deletePlayer(player: any) {
-  console.log('Delete', player)
+async function deleteClub(club: any) {
+  const confirm = await Swal.fire({
+    title: 'Apakah kamu yakin?',
+    text: `Data club dengan nama ${club.name} akan dihapus.`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ya, hapus!',
+    cancelButtonText: 'Batal',
+    customClass: {
+      confirmButton: 'swal2-confirm-btn',
+      cancelButton: 'swal2-cancel-btn',
+    },
+  })
+
+  if (confirm.isConfirmed) {
+    try {
+      loading.value = true
+
+      await $api(`club/${club.id}`, {
+        method: 'DELETE',
+      })
+
+      await fetchClub()
+
+      snackbarMessage.value = 'Club berhasil dihapus'
+      snackbarColor.value = 'success'
+      isSnackbarVisible.value = true
+    } catch (err: any) {
+      snackbarMessage.value = err?.response?.data?.message || 'Gagal menghapus club'
+      snackbarColor.value = 'error'
+      isSnackbarVisible.value = true
+    } finally {
+      loading.value = false
+    }
+  }
 }
 
-function activatePlayer(player: any) {
-  console.log('Activate', player)
+async function activateClub(club: any) {
+  const confirm = await Swal.fire({
+    title: 'Aktifkan Club?',
+    text: `Club ${club.name} akan diaktifkan kembali.`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Ya, aktifkan!',
+    cancelButtonText: 'Batal',
+    customClass: {
+      confirmButton: 'swal2-confirm-btn',
+      cancelButton: 'swal2-cancel-btn',
+    },
+  })
+
+  if (confirm.isConfirmed) {
+    try {
+      loading.value = true
+
+      await $api(`club/${club.id}/active`, {
+        method: 'PUT',
+      })
+
+      await fetchClub()
+
+      snackbarMessage.value = 'Club berhasil diaktifkan kembali'
+      snackbarColor.value = 'success'
+      isSnackbarVisible.value = true
+    } catch (err: any) {
+      snackbarMessage.value = err?.response?.data?.message || 'Gagal mengaktifkan club'
+      snackbarColor.value = 'error'
+      isSnackbarVisible.value = true
+    } finally {
+      loading.value = false
+    }
+  }
+}
+
+function getQueryParam(param: LocationQueryValue | LocationQueryValue[] | undefined): string {
+  return Array.isArray(param) ? param[0] || '' : param || ''
 }
 
 onMounted(() => {
-  fetchPlayer()
+  searchQuery.value = getQueryParam(route.query.search)
+  selectedSort.value = getQueryParam(route.query.sort)
+
+  fetchClub()
+})
+
+watch([searchQuery, selectedSort], () => {
+  router.replace({
+    query: {
+      ...route.query,
+      search: searchQuery.value || undefined,
+      sort: selectedSort.value || undefined,
+    },
+  })
+
+  fetchClub()
 })
 </script>
 
 <template>
   <VRow>
     <VCol cols="12">
-      <VCard class="mb-6">
-        <VCardText class="px-3">
-          <VRow>
-            <template
-              v-for="(data, id) in widgetData"
-              :key="id"
+      <div class="d-flex mb-6">
+        <VRow>
+          <template
+            v-for="(data, id) in widgetData"
+            :key="id"
+          >
+            <VCol
+              cols="12"
+              md="4"
+              sm="6"
             >
-              <VCol
-                cols="12"
-                sm="6"
-                md="6"
-                class="px-6"
-              >
-                <div
-                  class="d-flex justify-space-between align-center"
-                  :class="$vuetify.display.xs
-                    ? id !== widgetData.length - 1 ? 'border-b pb-4' : ''
-                    : $vuetify.display.sm
-                      ? id < (widgetData.length / 2) ? 'border-b pb-4' : ''
-                      : ''"
-                >
-                  <div class="d-flex flex-column">
-                    <h4 class="text-h4">
-                      {{ data.value }}
-                    </h4>
-                    <span class="text-body-1 text-capitalize">{{ data.title }}</span>
+              <VCard>
+                <VCardText>
+                  <div class="d-flex justify-space-between">
+                    <div class="d-flex flex-column gap-y-1">
+                      <div class="text-body-1 text-high-emphasis">
+                        {{ data.title }}
+                      </div>
+                      <div class="d-flex gap-x-2 align-center">
+                        <h4 class="text-h4">
+                          {{ data.value }}
+                        </h4>
+                      </div>
+                      <div class="text-sm">
+                        {{ data.desc }}
+                      </div>
+                    </div>
+                    <VAvatar
+                      :color="data.iconColor"
+                      variant="tonal"
+                      rounded
+                      size="42"
+                    >
+                      <VIcon
+                        :icon="data.icon"
+                        size="26"
+                      />
+                    </VAvatar>
                   </div>
+                </VCardText>
+              </VCard>
+            </VCol>
+          </template>
+        </VRow>
+      </div>
 
-                  <VAvatar
-                    variant="tonal"
-                    rounded
-                    size="42"
-                  >
-                    <VIcon
-                      :icon="data.icon"
-                      size="26"
-                      color="high-emphasis"
-                    />
-                  </VAvatar>
-                </div>
-              </VCol>
-              <VDivider
-                v-if="$vuetify.display.mdAndUp ? id !== widgetData.length - 1
-                  : $vuetify.display.smAndUp ? id % 2 === 0
-                    : false"
-                vertical
-                inset
-                length="60"
-              />
-            </template>
-          </VRow>
-        </VCardText>
-      </VCard>
-      
-      <VCard>
-        <VCardItem title="Club"/>
-        <VCardText class="d-flex justify-space-between align-center flex-wrap gap-4">
-          <div class="d-flex gap-4 align-center flex-wrap">
-            <div class="d-flex align-center gap-2">
-              <span>Show</span>
-              <AppSelect
-                :model-value="itemsPerPage"
-                :items="[
-                  { value: 10, title: '10' },
-                  { value: 25, title: '25' },
-                  { value: 50, title: '50' },
-                  { value: 100, title: '100' },
-                  { value: -1, title: 'All' },
-                ]"
-                style="inline-size: 5.5rem;"
-                @update:model-value="itemsPerPage = parseInt($event, 10)"
-              />
-            </div>
-            <!-- 👉 Create invoice -->
-            <VBtn
-              prepend-icon="tabler-plus"
-              :to="{ name: 'apps-invoice-add' }"
+      <VCard class="mb-6">
+        <VCardItem class="pb-4">
+          <VCardTitle>Clubs</VCardTitle>
+        </VCardItem>
+
+        <VCardText>
+          <VRow>
+            <VCol
+              cols="12"
+              sm="3"
             >
-              Create
-            </VBtn>
-          </div>
-
-          <div class="d-flex align-center flex-wrap gap-4">
-            <div class="invoice-list-filter">
-              <AppTextField
+             <AppTextField
                 v-model="searchQuery"
                 placeholder="Search Club"
-                style="inline-size: 10rem;"
               />
-            </div>
+            </VCol>
+            <VCol
+              cols="12"
+              sm="3"
+            >
+              <AppSelect
+                v-model="selectedSort"
+                placeholder="Z-A"
+                clearable
+                clear-icon="tabler-x"
+                single-line
+                :items="[
+                  { title: 'Pilih Sort', value: '' },
+                  { title: 'A-Z', value: 'asc' },
+                  { title: 'Z-A', value: 'desc' },
+                ]"
+              />
+            </VCol>
+
+            <VSpacer />
+
+          <div class="app-user-search-filter d-flex align-center flex-wrap gap-4">
+            <VBtn
+              prepend-icon="tabler-plus"
+              :to="{ name: 'dashboards-club-add' }"
+            >
+              Add New Club
+            </VBtn>
           </div>
+          </VRow>
         </VCardText>
+
         <VDivider />
-          
-        <VCardText>
-          <VDataTable
-            :headers="headers"
-            :items="paginatedPlayers"
-            :loading="loading"
-            class="text-no-wrap"
-            :items-per-page="itemsPerPage"
-            hide-default-footer
-          >
-            <template #item.name="{ item }">
-              <div class="d-flex gap-x-3 align-center">
-                <!-- <VAvatar
-                  size="34"
-                  :image="item.productImage"
-                  :rounded="0"
-                /> -->
 
-                <div class="text-body-1">
-                  {{ item.name }}
-                </div>
-              </div>
-            </template>
+        <VDataTable
+          :headers="headers"
+          :items="paginatedClubs"
+          :loading="loading"
+          class="text-no-wrap"
+          :items-per-page="itemsPerPage"
+          hide-default-footer
+        >
+          <template #item.code="{ item }">
+            <div class="text-body-1">{{ item.code }}</div>
+          </template>
 
-            <template #item.nisn="{ item }">
-              <div class="text-body-1">{{ item.nisn }}</div>
-            </template>
-
-            <template #item.height="{ item }">
-              <div class="text-body-1">{{ item.height }}</div>
-            </template>
-
-            <template #item.weight="{ item }">
-              <div class="text-body-1">{{ item.weight }}</div>
-            </template>
-
-            <template #item.sports="{ item }">
+          <template #item.name="{ item }">
+            <div class="d-flex gap-x-3 align-center">
               <div class="text-body-1">
-                <span
-                  v-for="(sport, index) in item.sports"
-                  :key="sport.id"
-                >
-                  {{ sport.name }}<span v-if="index < item.sports.length - 1">, </span>
-                </span>
+                {{ item.name }}
               </div>
-            </template>
+            </div>
+          </template>
 
-            <template #item.clubs="{ item }">
-              <div class="text-body-1">
-                <span
-                  v-for="(club, index) in item.clubs"
-                  :key="club.id"
-                >
-                  {{ club.name }}<span v-if="index < item.clubs.length - 1">, </span>
-                </span>
-              </div>
-            </template>
+          <template #item.action="{ item }">
+            <div class="d-flex gap-x-2">
+              <VBtn
+                v-if="!item.deleted_at"
+                icon
+                size="small"
+                color="primary"
+                @click="editClub(item)"
+                title="Edit"
+              >
+                <VIcon icon="tabler-pencil" />
+              </VBtn>
 
-            <template #item.action="{ item }">
-              <div class="d-flex gap-x-2">
-                <VBtn
-                  v-if="!item.deleted_at"
-                  icon
-                  size="small"
-                  color="primary"
-                  @click="editPlayer(item)"
-                  title="Edit"
-                >
-                  <VIcon icon="tabler-pencil" />
-                </VBtn>
+              <VBtn  
+                v-if="!item.deleted_at"
+                icon
+                size="small"
+                color="error"
+                @click="deleteClub(item)"
+                title="Delete"
+              >
+                <VIcon icon="tabler-trash" />
+              </VBtn>
+              
+              <VBtn
+                v-if="item.deleted_at"
+                icon
+                size="small"
+                color="success"
+                @click="activateClub(item)"
+                title="Activate"
+              >
+                <VIcon icon="tabler-check" />
+              </VBtn>
+            </div>
+          </template>
+        </VDataTable>
 
-                <VBtn  
-                  v-if="!item.deleted_at"
-                  icon
-                  size="small"
-                  color="error"
-                  @click="deletePlayer(item)"
-                  title="Delete"
-                >
-                  <VIcon icon="tabler-trash" />
-                </VBtn>
-
-                <VBtn
-                  v-if="item.deleted_at"
-                  icon
-                  size="small"
-                  color="success"
-                  @click="activatePlayer(item)"
-                  title="Activate"
-                >
-                  <VIcon icon="tabler-check" />
-                </VBtn>
-              </div>
-            </template>
-          </VDataTable>
-
-          <!-- Pagination -->
-          <div class="d-flex justify-end mt-4">
-            <VPagination
-              v-model="currentPage"
-              :length="totalPages"
-              total-visible="5"
-              color="primary"
-            />
-          </div>
-        </VCardText>
+        <!-- Pagination -->
+        <div class="d-flex justify-end mt-4 mb-3 mr-2">
+          <VPagination
+            v-model="currentPage"
+            :length="totalPages"
+            total-visible="5"
+            color="primary"
+          />
+        </div>
       </VCard>
     </VCol>
   </VRow>
+
+  <VSnackbar
+    v-model="isSnackbarVisible"
+    :color="snackbarColor"
+    location="bottom start"
+    variant="flat"
+    timeout="3000"
+  >
+    {{ snackbarMessage }}
+  </VSnackbar>
+
 </template>
+
+<style lang="scss">
+.swal2-confirm-btn {
+  background-color: #7B68EE !important;
+  color: #ffffff !important;
+  border: none;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.375rem;
+}
+
+.swal2-cancel-btn {
+  background-color: #6c757d !important;
+  color: #ffffff !important;
+  border: none;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.375rem;
+}
+</style>

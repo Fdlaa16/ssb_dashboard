@@ -1,188 +1,156 @@
 <script lang="ts" setup>
-import InvoiceAddPaymentDrawer from '@/views/apps/invoice/InvoiceAddPaymentDrawer.vue'
-import InvoiceEditable from '@/views/apps/invoice/InvoiceEditable.vue'
-import InvoiceSendInvoiceDrawer from '@/views/apps/invoice/InvoiceSendInvoiceDrawer.vue'
+import PlayerEditable from '@/views/dashboards/player/PlayerEditable.vue';
+import type { PlayerData } from '@/views/dashboards/player/types';
+import { onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
-// Type: Invoice data
-import type { InvoiceData, PurchasedProduct } from '@/views/apps/invoice/types'
+const route = useRoute();
+const router = useRouter();
 
-const invoiceData = ref<InvoiceData>()
-const route = useRoute('apps-invoice-edit-id')
+const playerId = route.params.id as string;
+const error = ref<string | null>(null)
+const loading = ref(false)
+const isFlatSnackbarVisible = ref(false)
+const snackbarMessage = ref('')
+const snackbarColor = ref<'success' | 'error'>('success')
 
-// 👉 fetchInvoice
+const playerData = ref<PlayerData>({
+  id: 0,
+  name: '',
+  user: {
+    id: 0,
+    email: '',
+    password: '',
+  },
+  nisn: '',
+  height: '',
+  weight: '',
+  sport_players: [],
+  club: {
+    id: 0,
+    code: '',
+    name: '',
+  },
+  club_player: {
+    club_id: 0,
+    player_id: 0,
+    back_number: '',   
+    position: '',
+    is_captain: false,   
+    status: false,
+  },
+  avatar: null,
+  family_card: null,
+  report_grades: null,
+  birth_certificate: null,
+});
 
-const { data: invoiceDetails } = await useApi<any>(`/apps/invoice/${route.params.id}`)
 
-if (invoiceDetails.value) {
-  invoiceData.value = {
-    invoice: invoiceDetails.value.invoice,
-    paymentDetails: invoiceDetails.value.paymentDetails,
+const fetchPlayer = async () => {
+  loading.value = true;
+  try {
+    const res = await $api(`player/${playerId}/edit`);
+    const data = res.data
 
-    /*
-      We are adding some extra data in response for data purpose
-      Your response will contain this extra data
-      Purpose is to make it more API friendly and less static as possible
-    */
+    const clubPlayer = data.club_players?.[0]
+    
+    data.club_player = clubPlayer || {
+      club_id: 0,
+      player_id: 0,
+      back_number: '',   
+      position: '',
+      is_captain: false,   
+      status: false,
+    }
 
-    purchasedProducts: [
-      {
-        title: 'App Design',
-        cost: 24,
-        hours: 2,
-        description: 'Designed UI kit & app pages.',
-      },
-    ],
-    note: 'It was a pleasure working with you and your team. We hope you will keep us in mind for future freelance projects. Thank You!',
-    paymentMethod: 'Bank Account',
-    salesperson: 'Tom Cook',
-    thanksNote: 'Thanks for your business',
+    playerData.value = data 
+
+    console.log('Fetched player data:', playerData.value);
+    
+  } catch (err: any) {
+    error.value = err.message || 'Gagal mengambil data player';
+  } finally {
+    loading.value = false;
   }
-}
+};
 
-const addProduct = (value: PurchasedProduct) => {
-  invoiceData.value?.purchasedProducts.push(value)
-}
+onMounted(async () => {
+  await fetchPlayer();
+});
 
-const removeProduct = (id: number) => {
-  invoiceData.value?.purchasedProducts.splice(id, 1)
-}
+const handleSubmit = async () => {
+  try {    
 
-const isSendSidebarActive = ref(false)
-const isAddPaymentSidebarActive = ref(false)
-const paymentTerms = ref(true)
-const clientNotes = ref(false)
-const paymentStub = ref(false)
-const selectedPaymentMethod = ref('Bank Account')
-const paymentMethods = ['Bank Account', 'PayPal', 'UPI Transfer']
+    console.log('Submitting player data:', playerData.value);
+    
+    const formData = new FormData();
+    formData.append('_method', 'PUT'); 
+
+    formData.append('email', playerData.value.user.email);
+    formData.append('nisn', playerData.value.nisn);
+    formData.append('name', playerData.value.name);
+    formData.append('height', playerData.value.height);
+    formData.append('weight', playerData.value.weight);
+    formData.append('club_id', playerData.value.club_player.club_id.toString())
+
+    if (typeof playerData.value.user.id === 'number') {
+      formData.append('user_id', playerData.value.user.id.toString());
+    }
+
+    formData.append('sport_players', JSON.stringify(playerData.value.sport_players));
+
+    if (playerData.value.avatar instanceof File)
+      formData.append('avatar', playerData.value.avatar);
+
+    if (playerData.value.family_card instanceof File)
+      formData.append('family_card', playerData.value.family_card);
+
+    if (playerData.value.report_grades instanceof File)
+      formData.append('report_grades', playerData.value.report_grades);
+
+    if (playerData.value.birth_certificate instanceof File)
+      formData.append('birth_certificate', playerData.value.birth_certificate);
+
+    const res = await $api(`player/${playerId}`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    snackbarMessage.value = 'Data berhasil dibuat!';
+    snackbarColor.value = 'success';
+    isFlatSnackbarVisible.value = true;
+
+    router.push({
+      name: 'dashboards-sport-list',
+      query: {
+        success: 'Data berhasil diperbarui!',
+      },
+    });
+  } catch (err: any) {
+    const errors = err?.data?.errors
+
+    if (err?.status === 422 && errors) {
+      const messages = Object.values(errors).flat()
+      snackbarMessage.value = 'Validasi gagal: ' + messages.join(', ')
+    } else {
+      snackbarMessage.value = 'Gagal mengirim data: ' + (err?.message || 'Unknown error')
+    }
+
+    snackbarColor.value = 'error'
+    isFlatSnackbarVisible.value = true
+  }
+};
+
 </script>
 
 <template>
-  <VRow v-if="invoiceData && invoiceData?.invoice">
-    <!-- 👉 InvoiceEditable -->
-    <VCol
-      cols="12"
-      md="9"
-    >
-      <InvoiceEditable
-        v-if="invoiceData?.invoice"
-        :data="invoiceData"
-        @push="addProduct"
-        @remove="removeProduct"
-      />
-    </VCol>
-
-    <!-- 👉 Right Column: Invoice Action -->
-    <VCol
-      cols="12"
-      md="3"
-    >
-      <VCard class="mb-8">
-        <VCardText>
-          <!-- 👉 Send Invoice Trigger button -->
-          <VBtn
-            block
-            prepend-icon="tabler-send"
-            class="mb-4"
-            @click="isSendSidebarActive = true"
-          >
-            Send Invoice
-          </VBtn>
-
-          <div class="d-flex flex-wrap gap-4">
-            <!-- 👉  Preview button -->
-            <VBtn
-              color="secondary"
-              variant="tonal"
-              class="flex-grow-1"
-              :to="{ name: 'apps-invoice-preview-id', params: { id: route.params.id } }"
-            >
-              Preview
-            </VBtn>
-
-            <!-- 👉 Save button -->
-            <VBtn
-              color="secondary"
-              variant="tonal"
-              class="mb-4 flex-grow-1"
-            >
-              Save
-            </VBtn>
-          </div>
-
-          <!-- 👉 Add Payment trigger button -->
-          <VBtn
-            block
-            color="success"
-            prepend-icon="tabler-currency-dollar"
-            @click="isAddPaymentSidebarActive = true"
-          >
-            Add Payment
-          </VBtn>
-        </VCardText>
-      </VCard>
-
-      <!-- 👉 Accept payment via  -->
-      <AppSelect
-        id="payment-method"
-        v-model="selectedPaymentMethod"
-        :items="paymentMethods"
-        label="Accept Payment Via"
-        class="mb-4"
+  <VRow>
+    <VCol cols="12" md="12">
+      <PlayerEditable
+        :data="playerData"  
+        @submit="handleSubmit"
       />
 
-      <!-- 👉 Payment Terms -->
-      <div class="d-flex align-center justify-space-between">
-        <VLabel for="payment-terms">
-          Payment Terms
-        </VLabel>
-        <div>
-          <VSwitch
-            id="payment-terms"
-            v-model="paymentTerms"
-          />
-        </div>
-      </div>
-
-      <!-- 👉 Client Notes -->
-      <div class="d-flex align-center justify-space-between">
-        <VLabel for="client-notes">
-          Client Notes
-        </VLabel>
-        <div>
-          <VSwitch
-            id="client-notes"
-            v-model="clientNotes"
-          />
-        </div>
-      </div>
-
-      <!-- 👉 Payment Stub -->
-      <div class="d-flex align-center justify-space-between">
-        <VLabel for="payment-stub">
-          Payment Stub
-        </VLabel>
-        <div>
-          <VSwitch
-            id="payment-stub"
-            v-model="paymentStub"
-          />
-        </div>
-      </div>
     </VCol>
-
-    <!-- 👉 Invoice send drawer -->
-    <InvoiceSendInvoiceDrawer v-model:is-drawer-open="isSendSidebarActive" />
-
-    <!-- 👉 Invoice add payment drawer -->
-    <InvoiceAddPaymentDrawer v-model:is-drawer-open="isAddPaymentSidebarActive" />
   </VRow>
-
-  <section v-else>
-    <VAlert
-      type="error"
-      variant="tonal"
-    >
-      Invoice with ID  {{ route.params.id }} not found!
-    </VAlert>
-  </section>
 </template>

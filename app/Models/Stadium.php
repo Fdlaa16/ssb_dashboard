@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Stadium extends Model
 {
     use HasFactory, SoftDeletes;
+
+    protected $table = 'stadiums';
     protected $fillable = [
         'code',
         'name',

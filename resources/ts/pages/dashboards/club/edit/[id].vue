@@ -1,188 +1,99 @@
 <script lang="ts" setup>
-import InvoiceAddPaymentDrawer from '@/views/apps/invoice/InvoiceAddPaymentDrawer.vue'
-import InvoiceEditable from '@/views/apps/invoice/InvoiceEditable.vue'
-import InvoiceSendInvoiceDrawer from '@/views/apps/invoice/InvoiceSendInvoiceDrawer.vue'
+import ClubEditable from '@/views/dashboards/club/ClubEditable.vue';
+import type { ClubData } from '@/views/dashboards/club/types';
+import { onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
-// Type: Invoice data
-import type { InvoiceData, PurchasedProduct } from '@/views/apps/invoice/types'
+const route = useRoute();
+const router = useRouter();
 
-const invoiceData = ref<InvoiceData>()
-const route = useRoute('apps-invoice-edit-id')
+const clubId = route.params.id as string;
+const error = ref<string | null>(null)
+const loading = ref(false)
+const isFlatSnackbarVisible = ref(false)
+const snackbarMessage = ref('')
+const snackbarColor = ref<'success' | 'error'>('success')
 
-// 👉 fetchInvoice
+const clubData = ref<ClubData>({
+  id: 0,
+  code: '',
+  name: '',
+  profile_club: null,
+});
 
-const { data: invoiceDetails } = await useApi<any>(`/apps/invoice/${route.params.id}`)
+const fetchClub = async () => {
+  loading.value = true;
+  try {
+    const res = await $api(`club/${clubId}/edit`);
 
-if (invoiceDetails.value) {
-  invoiceData.value = {
-    invoice: invoiceDetails.value.invoice,
-    paymentDetails: invoiceDetails.value.paymentDetails,
+    clubData.value = res.data
 
-    /*
-      We are adding some extra data in response for data purpose
-      Your response will contain this extra data
-      Purpose is to make it more API friendly and less static as possible
-    */
-
-    purchasedProducts: [
-      {
-        title: 'App Design',
-        cost: 24,
-        hours: 2,
-        description: 'Designed UI kit & app pages.',
-      },
-    ],
-    note: 'It was a pleasure working with you and your team. We hope you will keep us in mind for future freelance projects. Thank You!',
-    paymentMethod: 'Bank Account',
-    salesperson: 'Tom Cook',
-    thanksNote: 'Thanks for your business',
+    console.log('Fetched club data:', clubData.value);
+    
+  } catch (err: any) {
+    error.value = err.message || 'Gagal mengambil data club';
+  } finally {
+    loading.value = false;
   }
-}
+};
 
-const addProduct = (value: PurchasedProduct) => {
-  invoiceData.value?.purchasedProducts.push(value)
-}
+onMounted(async () => {
+  await fetchClub();
+});
 
-const removeProduct = (id: number) => {
-  invoiceData.value?.purchasedProducts.splice(id, 1)
-}
+const handleSubmit = async () => {
+  try {    
 
-const isSendSidebarActive = ref(false)
-const isAddPaymentSidebarActive = ref(false)
-const paymentTerms = ref(true)
-const clientNotes = ref(false)
-const paymentStub = ref(false)
-const selectedPaymentMethod = ref('Bank Account')
-const paymentMethods = ['Bank Account', 'PayPal', 'UPI Transfer']
+    console.log('Submitting club data:', clubData.value);
+    
+    const formData = new FormData();
+    formData.append('_method', 'PUT'); 
+
+    formData.append('name', clubData.value.name);
+
+    if (clubData.value.profile_club instanceof File)
+      formData.append('profile_club', clubData.value.profile_club);
+
+    const res = await $api(`club/${clubId}`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    snackbarMessage.value = 'Data berhasil dibuat!';
+    snackbarColor.value = 'success';
+    isFlatSnackbarVisible.value = true;
+
+    router.push({
+      name: 'dashboards-club-list',
+      query: {
+        success: 'Data berhasil diperbarui!',
+      },
+    });
+  } catch (err: any) {
+    const errors = err?.data?.errors
+
+    if (err?.status === 422 && errors) {
+      const messages = Object.values(errors).flat()
+      snackbarMessage.value = 'Validasi gagal: ' + messages.join(', ')
+    } else {
+      snackbarMessage.value = 'Gagal mengirim data: ' + (err?.message || 'Unknown error')
+    }
+
+    snackbarColor.value = 'error'
+    isFlatSnackbarVisible.value = true
+  }
+};
+
 </script>
 
 <template>
-  <VRow v-if="invoiceData && invoiceData?.invoice">
-    <!-- 👉 InvoiceEditable -->
-    <VCol
-      cols="12"
-      md="9"
-    >
-      <InvoiceEditable
-        v-if="invoiceData?.invoice"
-        :data="invoiceData"
-        @push="addProduct"
-        @remove="removeProduct"
-      />
-    </VCol>
-
-    <!-- 👉 Right Column: Invoice Action -->
-    <VCol
-      cols="12"
-      md="3"
-    >
-      <VCard class="mb-8">
-        <VCardText>
-          <!-- 👉 Send Invoice Trigger button -->
-          <VBtn
-            block
-            prepend-icon="tabler-send"
-            class="mb-4"
-            @click="isSendSidebarActive = true"
-          >
-            Send Invoice
-          </VBtn>
-
-          <div class="d-flex flex-wrap gap-4">
-            <!-- 👉  Preview button -->
-            <VBtn
-              color="secondary"
-              variant="tonal"
-              class="flex-grow-1"
-              :to="{ name: 'apps-invoice-preview-id', params: { id: route.params.id } }"
-            >
-              Preview
-            </VBtn>
-
-            <!-- 👉 Save button -->
-            <VBtn
-              color="secondary"
-              variant="tonal"
-              class="mb-4 flex-grow-1"
-            >
-              Save
-            </VBtn>
-          </div>
-
-          <!-- 👉 Add Payment trigger button -->
-          <VBtn
-            block
-            color="success"
-            prepend-icon="tabler-currency-dollar"
-            @click="isAddPaymentSidebarActive = true"
-          >
-            Add Payment
-          </VBtn>
-        </VCardText>
-      </VCard>
-
-      <!-- 👉 Accept payment via  -->
-      <AppSelect
-        id="payment-method"
-        v-model="selectedPaymentMethod"
-        :items="paymentMethods"
-        label="Accept Payment Via"
-        class="mb-4"
+  <VRow>
+    <VCol cols="12" md="12">
+      <ClubEditable
+        :data="clubData"  
+        @submit="handleSubmit"
       />
 
-      <!-- 👉 Payment Terms -->
-      <div class="d-flex align-center justify-space-between">
-        <VLabel for="payment-terms">
-          Payment Terms
-        </VLabel>
-        <div>
-          <VSwitch
-            id="payment-terms"
-            v-model="paymentTerms"
-          />
-        </div>
-      </div>
-
-      <!-- 👉 Client Notes -->
-      <div class="d-flex align-center justify-space-between">
-        <VLabel for="client-notes">
-          Client Notes
-        </VLabel>
-        <div>
-          <VSwitch
-            id="client-notes"
-            v-model="clientNotes"
-          />
-        </div>
-      </div>
-
-      <!-- 👉 Payment Stub -->
-      <div class="d-flex align-center justify-space-between">
-        <VLabel for="payment-stub">
-          Payment Stub
-        </VLabel>
-        <div>
-          <VSwitch
-            id="payment-stub"
-            v-model="paymentStub"
-          />
-        </div>
-      </div>
     </VCol>
-
-    <!-- 👉 Invoice send drawer -->
-    <InvoiceSendInvoiceDrawer v-model:is-drawer-open="isSendSidebarActive" />
-
-    <!-- 👉 Invoice add payment drawer -->
-    <InvoiceAddPaymentDrawer v-model:is-drawer-open="isAddPaymentSidebarActive" />
   </VRow>
-
-  <section v-else>
-    <VAlert
-      type="error"
-      variant="tonal"
-    >
-      Invoice with ID  {{ route.params.id }} not found!
-    </VAlert>
-  </section>
 </template>

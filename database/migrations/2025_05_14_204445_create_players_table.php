@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('nisn')->nullable();
             $table->integer('height')->nullable();
             $table->integer('weight')->nullable();
+            $table->tinyInteger('status')->default(0)->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

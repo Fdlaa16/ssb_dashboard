@@ -70,7 +70,7 @@ export const db: DB = {
     },
     {
       title: 'Player & Club',
-      category: 'appsPages',
+      category: 'playerClub',
       children: [
         {
           url: { name: 'dashboards-player-list' },
@@ -84,14 +84,50 @@ export const db: DB = {
         },
         {
           url: { name: 'dashboards-club-list' },
-          icon: 'tabler-user',
+          icon: 'tabler-shirt',
           title: 'Club',
         },
         {
-          url: { name: 'dashboards-sport-list' },
+          url: { name: 'dashboards-club-edit-id' },
+          icon: 'tabler-shirt',
+          title: 'Club',
+        },
+        {
+          url: { name: 'dashboards-media-list' },
+          icon: 'tabler-shirt',
+          title: 'Media',
+        },
+        {
+          url: { name: 'dashboards-media-edit-id' },
+          icon: 'tabler-shirt',
+          title: 'Media',
+        },
+      ]
+    },
+    {
+      title: 'Schedule Player',
+      category: 'schedulePlayer',
+      children: [
+        {
+          url: { name: 'dashboards-schedule-match-list' },
           icon: 'tabler-user',
-          title: 'Sport',
-        }
+          title: 'Player',
+        },
+        {
+          url: { name: 'dashboards-schedule-match-edit-id' },
+          icon: 'tabler-user',
+          title: 'Player',
+        },
+        {
+          url: { name: 'dashboards-schedule-training-list' },
+          icon: 'tabler-user',
+          title: 'Player',
+        },
+        {
+          url: { name: 'dashboards-schedule-training-edit-id' },
+          icon: 'tabler-user',
+          title: 'Player',
+        },
       ]
     },
     {
