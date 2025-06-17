@@ -125,6 +125,12 @@ export default [
             target: '_blank',
 
           },
+          {
+            title: 'About',
+            to: 'front-pages-about',
+            target: '_blank',
+
+          },
         ],
       },
     ],

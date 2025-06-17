@@ -33,14 +33,14 @@ interface Pricing {
       >
       <div class="text-center">
         <h3 class="text-h3 pricing-title">
-          Sejarah 
+          Tentang 
         </h3>
         <p class="mb-0">
-          PERSIB adalah klub sepak bola Indonesia yang berbasis di Kota Bandung, Jawa Barat, dan saat ini merupakan peserta dari kompetisi tertinggi Indonesia, Liga 1.
-          Cikal bakal PERSIB adalah Bandoeng Inlandsche Voetbal Bond (BIVB) yang didirikan pada 05 Januari 1919. BIVB kala itu dibentuk sebagai perserikatan klub-klub sepakbola bumi putera pertama di Bandung. 
-          Pada 19 April 1930, BIVB tercatat sebagai salah satu dari tujuh klub yang membidani lahirnya PSSI (Persatuan Sepakbola Seluruh Indonesia). Sebagai bagian dari alat perjuangan kemerdekaan Republik Indonesia, BIVB pun mengalami beberapa transformasi dan perubahan nama. Huruf "I" yang semula Indlansche menjadi Indonesische, lalu  menjadi Perserikatan Sepakraga Indonesia Bandung (PSIB), hingga melakukan fusi bersama NVB (National Voetball Bond) dan berubah nama menjadi PERSIB pada 18 Maret 1934.
-          Sejak 9 September 2009, PERSIB kembali bertransformasi dan menjadi klub profesional di bawah pengelolaan PT PERSIB Bandung Bermartabat.
-          Unduh dan baca selengkapnya terkait Hari Jadi PERSIB 05 Januari 1919 dalam Naskah Akademik berikut.    
+          Indonesia Junior League merupakan operator kompetisi sepak bola usia dini dengan level berjenjang mulai dari usia delapan tahun yang menancapkan eksistensinya di Tanah Air sejak 17 Agustus 2014. 
+          Khusus untuk IJL edisi pertama dan kedua lalu, kompetisi dibagi khusus pada dua kelompok usia yakni U-9 dan U-11 dan menampung sekitar 600-700 pemain. 
+          Di musim ketiganya dengan dukungan Mayapada Heath Care Group, IJL melakukan terobosan baru dengan menggelar tiga kompetisi sekaligus yakni U-9, U-11 hingga U-13. 
+          Sekitar 24 SSB akan jadi kontestan di tiap kelompok umur yang diperkirakan akan menampung lebih dari 1000 pemain. Sistem tanam, rawat, panen jadi visi misi terbentuknya IJL. 
+          Hingga pada akhirnya pemain jebolan Indonesia Junior League nantinya akan dipetik oleh PSSI dan Timnas Indonesia demi menghadirkan tim sepak bola Tanah Air yang solid.
         </p>
       </div>
       </VCard>

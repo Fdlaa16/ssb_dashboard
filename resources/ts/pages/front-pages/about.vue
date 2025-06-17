@@ -16,19 +16,19 @@ definePage({
 </script>
 
 <template>
-  <div class="history-page">
+  <div class="about-page">
     <Navbar />
 
-    <VCard class="history-card full-height-card">
+    <VCard class="about-card full-height-card">
       <VContainer class="d-flex justify-center align-center fill-height">
-        <AppHistory md="4" />
+        <AppAbout md="4" />
       </VContainer>
     </VCard>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.history-card {
+.about-card {
   padding-block-start: 0 !important; 
   height: 100vh !important;
 }
@@ -43,7 +43,7 @@ definePage({
 </style>
 
 <style lang="scss">
-.history-page {
+.about-page {
   @media (min-width: 600px) and (max-width: 960px) {
     .v-container {
       padding-inline: 2rem !important;

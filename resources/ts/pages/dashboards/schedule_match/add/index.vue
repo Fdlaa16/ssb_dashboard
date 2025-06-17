@@ -93,3 +93,15 @@ const onSubmit = () => {
   </VSnackbar>
 
 </template>
+
+<!-- <route lang="yaml">
+meta:
+  title: 'Tambah Jadwal Pertandingan'
+  icon: 'mdi-soccer-field'
+  breadcrumb:
+    - name: 'Dashboard'
+      to: { name: 'dashboards-home' }
+    - name: 'Jadwal Pertandingan'
+      to: { name: 'dashboards-schedule-match-list' }
+    - name: 'Tambah Jadwal Pertandingan'
+</route> -->

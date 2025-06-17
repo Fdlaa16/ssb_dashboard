@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { register } from 'swiper/element/bundle'
 import { useGenerateImageVariant } from '@/@core/composable/useGenerateImageVariant'
 import logo1dark from '@images/front-pages/branding/logo-1-dark.png'
 import logo1light from '@images/front-pages/branding/logo-1-light.png'
@@ -15,6 +14,7 @@ import logo4light from '@images/front-pages/branding/logo-4-light.png'
 import logo4 from '@images/front-pages/branding/logo-4.png'
 import logo5dark from '@images/front-pages/branding/logo-5-dark.png'
 import logo5light from '@images/front-pages/branding/logo-5-light.png'
+import { register } from 'swiper/element/bundle'
 
 import avatar1 from '@images/avatars/avatar-1.png'
 import avatar2 from '@images/avatars/avatar-2.png'
@@ -128,10 +128,10 @@ const slide = (dir: string) => {
 
 <template>
   <div
-    id="customer-review"
+    id="media"
     class="position-relative"
   >
-    <div class="customer-reviews">
+    <div class="medias">
       <VContainer>
         <!-- 👉 Headers  -->
         <VRow>
@@ -353,17 +353,17 @@ swiper-container::part(bullet) {
 </style>
 
 <style lang="scss" scoped>
-.customer-reviews {
+.medias {
   padding-block: 72px 84px;
 }
 
 @media (max-width: 600px) {
-  .customer-reviews {
+  .medias {
     padding-block: 4rem;
   }
 }
 
-#customer-review {
+#media {
   border-radius: 3.75rem 3.75rem 0 0;
   background-color: rgb(var(--v-theme-background));
 }

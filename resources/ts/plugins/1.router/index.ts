@@ -36,6 +36,17 @@ const router = createRouter({
   ],
 })
 
+// router.beforeEach((to, from, next) => {
+  // const user = ref(null)
+
+  // console.log('asdasd', to.fullPath)
+  // if (to.fullPath == '/dashboards/schedule_match/list') {
+  //   console.log('lu ga boleh')
+  //   router.push('/dashboards/crm')
+  // }
+  // next()
+// })
+
 setupGuards(router)
 
 export { router }

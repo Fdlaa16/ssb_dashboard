@@ -45,6 +45,7 @@ const menuItems: MenuItem[] = [
     listIcon: 'tabler-layout-grid',
     navItems: [
       { name: 'History', to: { name: 'front-pages-history' } },
+      { name: 'About', to: { name: 'front-pages-about' } },
       { name: 'Pricing', to: { name: 'front-pages-pricing' } },
       { name: 'Payment', to: { name: 'front-pages-payment' } },
       { name: 'Checkout', to: { name: 'front-pages-checkout' } },

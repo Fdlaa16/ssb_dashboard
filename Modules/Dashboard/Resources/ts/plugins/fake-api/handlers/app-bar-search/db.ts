@@ -71,6 +71,11 @@ export const db: DB = {
           icon: 'tabler-file-description',
           title: 'Help Center Front',
         },
+        {
+          url: { name: 'front-pages-about' },
+          icon: 'tabler-file-description',
+          title: 'About',
+        },
       ],
     },
     {

@@ -1,15 +1,9 @@
 <script setup lang="ts">
 import Footer from '@/views/front-pages/front-page-footer.vue'
 import Navbar from '@/views/front-pages/front-page-navbar.vue'
-import Banner from '@/views/front-pages/landing-page/banner.vue'
-import ContactUs from '@/views/front-pages/landing-page/contact-us.vue'
 import CustomersReview from '@/views/front-pages/landing-page/customers-review.vue'
-import FaqSection from '@/views/front-pages/landing-page/faq-section.vue'
-import Features from '@/views/front-pages/landing-page/features.vue'
 import HeroSection from '@/views/front-pages/landing-page/hero-section.vue'
 import OurTeam from '@/views/front-pages/landing-page/our-team.vue'
-import PricingPlans from '@/views/front-pages/landing-page/pricing-plans.vue'
-import ProductStats from '@/views/front-pages/landing-page/product-stats.vue'
 import { useConfigStore } from '@core/stores/config'
 
 const store = useConfigStore()
@@ -49,39 +43,39 @@ useIntersectionObserver(
     <!-- 👉 Hero Section  -->
     <HeroSection ref="refHome" />
 
-    <!-- 👉 Useful features  -->
+    <!-- 👉 Our Team -->
     <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
-      <Features ref="refFeatures" />
+      <OurTeam ref="refTeam" />
     </div>
+
+    <!-- 👉 Useful features  -->
+    <!-- <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
+      <Features ref="refFeatures" />
+    </div> -->
 
     <!-- 👉 Customer Review -->
     <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
       <CustomersReview />
     </div>
 
-    <!-- 👉 Our Team -->
-    <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
-      <OurTeam ref="refTeam" />
-    </div>
-
     <!-- 👉 Pricing Plans -->
-    <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
+    <!-- <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
       <PricingPlans />
-    </div>
+    </div> -->
 
     <!-- 👉 Product stats -->
-    <ProductStats />
+    <!-- <ProductStats /> -->
 
     <!-- 👉 FAQ Section -->
-    <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
+    <!-- <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
       <FaqSection ref="refFaq" />
-    </div>
+    </div> -->
 
     <!-- 👉 Banner  -->
-    <Banner />
+    <!-- <Banner /> -->
 
     <!-- 👉 Contact Us  -->
-    <ContactUs ref="refContact" />
+    <!-- <ContactUs ref="refContact" /> -->
 
     <!-- 👉 Footer -->
     <Footer />
