@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import navImg from '@images/front-pages/misc/nav-item-col-img.png'
 import { useWindowScroll } from '@vueuse/core'
 import type { RouteLocationRaw } from 'vue-router/auto'
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
 import { useDisplay } from 'vuetify'
-import navImg from '@images/front-pages/misc/nav-item-col-img.png'
 
 import NavbarThemeSwitcher from '@/layouts/components/NavbarThemeSwitcher.vue'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
@@ -44,6 +44,7 @@ const menuItems: MenuItem[] = [
     listTitle: 'Page',
     listIcon: 'tabler-layout-grid',
     navItems: [
+      { name: 'History', to: { name: 'front-pages-history' } },
       { name: 'Pricing', to: { name: 'front-pages-pricing' } },
       { name: 'Payment', to: { name: 'front-pages-payment' } },
       { name: 'Checkout', to: { name: 'front-pages-checkout' } },

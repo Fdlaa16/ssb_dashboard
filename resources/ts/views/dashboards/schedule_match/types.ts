@@ -1,8 +1,8 @@
 export interface ScheduleMatchData {
   id: number; 
-  first_club_id: number;
-  secound_club_id: number;
-  stadium_id: number;
+  first_club_id: string;
+  secound_club_id: string;
+  stadium_id: string;
   schedule_date: string;
   schedule_start_at: string;
   schedule_end_at: string;

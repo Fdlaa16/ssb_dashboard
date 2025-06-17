@@ -17,6 +17,7 @@ interface Menu {
 const footerBg = useGenerateImageVariant(footerLightBg, footerDarkBg)
 
 const pagesList: Menu[] = [
+  { name: 'History', to: { name: 'front-pages-history' } },
   { name: 'Pricing', to: { name: 'front-pages-pricing' } },
   { name: 'Payment', to: { name: 'front-pages-payment' }, isNew: true },
   { name: 'Checkout', to: { name: 'front-pages-checkout' } },

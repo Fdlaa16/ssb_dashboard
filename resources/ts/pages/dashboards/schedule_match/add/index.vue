@@ -5,16 +5,15 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter() 
-const selectedSports = ref<Sport[]>([])
 const isFlatSnackbarVisible = ref(false)
 const snackbarMessage = ref('')
 const snackbarColor = ref<'success' | 'error'>('success')
 
 const scheduleMatchData = ref<ScheduleMatchData>({
   id: 0, 
-  first_club_id: 0,
-  secound_club_id: 0,
-  stadium_id: 0,
+  first_club_id: '',
+  secound_club_id: '',
+  stadium_id: '',
   schedule_date: '',
   schedule_start_at: '',
   schedule_end_at: '',

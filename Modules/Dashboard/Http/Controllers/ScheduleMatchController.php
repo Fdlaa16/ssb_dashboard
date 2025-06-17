@@ -5,10 +5,12 @@ namespace Modules\Dashboard\Http\Controllers;
 use App\Helpers\Helper;
 use App\Http\Resources\ScheduleMatchResource;
 use App\Models\ScheduleMatch;
+use Carbon\Carbon;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class ScheduleMatchController extends Controller
 {
@@ -129,7 +131,60 @@ class ScheduleMatchController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        DB::beginTransaction();
+
+        try {
+            $postData = $request->all();
+            $rules = [
+                'first_club_id'     => 'required',
+                'secound_club_id'   => 'required',
+                'stadium_id'        => 'required',
+                'schedule_date'     => 'required',
+                'schedule_start_at' => 'required',
+                'schedule_end_at'   => 'required',
+                'score'             => 'nullable',
+                'status'            => 'nullable',
+            ];
+
+            $messages = [
+                'first_club_id.required'     => 'Club pertama harus diisi',
+                'secound_club_id.required'   => 'Club kedua harus diisi',
+                'stadium_id.required'        => 'Stadium harus diisi',
+                'schedule_date.required'     => 'Schedule Date harus diisi',
+                'schedule_start_at.required' => 'Schedule Start At harus diisi',
+                'schedule_end_at.required'   => 'Schedule End At harus diisi',
+            ];
+
+            $validator = Validator::make($postData, $rules, $messages);
+
+            if ($validator->fails()) {
+                return response()->json(array('errors' => $validator->messages()->toArray()), 422);
+            } else {
+                $scheduleMatch = ScheduleMatch::create([
+                    'first_club_id'     => $request->first_club_id,
+                    'secound_club_id'   => $request->secound_club_id,
+                    'stadium_id'        => $request->stadium_id,
+                    'schedule_date'     => Carbon::parse($request->schedule_date)->format('Y-m-d'),
+                    'schedule_start_at' => Carbon::parse($request->schedule_start_at)->format('H:i:s'),
+                    'schedule_end_at'   => Carbon::parse($request->schedule_end_at)->format('H:i:s'),
+                    'score'             => $request->score,
+                    'status'            => $request->status ?? 0,
+                ]);
+
+                DB::commit();
+
+                return response()->json([
+                    'message' => 'Schedule Match created successfully.',
+                    'data' => $scheduleMatch,
+                ], 201);
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -172,7 +227,62 @@ class ScheduleMatchController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        DB::beginTransaction();
+
+        try {
+            $postData = $request->all();
+            $rules = [
+                'first_club_id'     => 'required',
+                'secound_club_id'   => 'required',
+                'stadium_id'        => 'required',
+                'schedule_date'     => 'required',
+                'schedule_start_at' => 'required',
+                'schedule_end_at'   => 'required',
+                'score'             => 'nullable',
+                'status'            => 'nullable',
+            ];
+
+            $messages = [
+                'first_club_id.required'     => 'Club pertama harus diisi',
+                'secound_club_id.required'   => 'Club kedua harus diisi',
+                'stadium_id.required'        => 'Stadium harus diisi',
+                'schedule_date.required'     => 'Schedule Date harus diisi',
+                'schedule_start_at.required' => 'Schedule Start At harus diisi',
+                'schedule_end_at.required'   => 'Schedule End At harus diisi',
+            ];
+
+            $validator = Validator::make($postData, $rules, $messages);
+
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->messages()], 422);
+            }
+
+            $scheduleMatch = ScheduleMatch::findOrFail($id);
+
+            $scheduleMatch->update([
+                'first_club_id'     => $request->first_club_id,
+                'secound_club_id'   => $request->secound_club_id,
+                'stadium_id'        => $request->stadium_id,
+                'schedule_date'     => \Carbon\Carbon::parse($request->schedule_date)->format('Y-m-d'),
+                'schedule_start_at' => \Carbon\Carbon::parse($request->schedule_start_at)->format('H:i:s'),
+                'schedule_end_at'   => \Carbon\Carbon::parse($request->schedule_end_at)->format('H:i:s'),
+                'score'             => $request->score,
+                'status'            => $request->status ?? 0,
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Schedule Match updated successfully.',
+                'data' => $scheduleMatch,
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

@@ -42,6 +42,11 @@ export const db: DB = {
       category: 'frontPages',
       children: [
         {
+          url: { name: 'front-pages-history' },
+          icon: 'tabler-file-description',
+          title: 'History',
+        },
+        {
           url: { name: 'front-pages-landing-page' },
           icon: 'tabler-file-description',
           title: 'Landing Front',

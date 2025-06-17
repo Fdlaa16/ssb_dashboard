@@ -107,10 +107,11 @@ const getImageUrl = (path: string) => {
                       v-if="localData.avatar"
                       :src="getImageUrl(localData.avatar.url)"
                       class="card-website-analytics-img"
-                      style="width: 12%; filter: drop-shadow(0 4px 60px rgba(0, 0, 0, 50%));"
+                      style="width: 70%; filter: drop-shadow(0 4px 60px rgba(0, 0, 0, 50%));"
                     />
                     
                   <VFileInput
+                    v-if="!localData.avatar"
                     v-model="localData.avatar"
                     :rules="rules"
                     label="Kartu Keluarga"
@@ -188,6 +189,7 @@ const getImageUrl = (path: string) => {
                     />
                     
                     <VFileInput
+                      v-if="!localData.family_card"
                       v-model="localData.family_card"
                       :rules="rules"
                       accept="image/png, image/jpeg, image/bmp"
@@ -202,7 +204,9 @@ const getImageUrl = (path: string) => {
                       class="card-website-analytics-img"
                       style="width: 12%; filter: drop-shadow(0 4px 60px rgba(0, 0, 0, 50%));"
                     />
+
                     <VFileInput
+                      v-if="!localData.report_grades"
                       v-model="localData.report_grades"
                       :rules="rules"
                       accept="image/png, image/jpeg, image/bmp"
@@ -218,6 +222,7 @@ const getImageUrl = (path: string) => {
                       style="width: 12%; filter: drop-shadow(0 4px 60px rgba(0, 0, 0, 50%));"
                     />
                     <VFileInput
+                      v-if="!localData.birth_certificate"
                       v-model="localData.birth_certificate"
                       :rules="rules"
                       accept="image/png, image/jpeg, image/bmp"

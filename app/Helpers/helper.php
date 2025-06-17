@@ -9,14 +9,19 @@ use Illuminate\Http\Response;
 
 class Helper
 {
-    public static function formatDate($date, $format = 'd/m/Y')
+    public static function formatDate($date, $format = 'Y-m-d')
     {
         return Carbon::parse($date)->format($format);
     }
 
-    public static function formatDateTime($date, $format = 'd/m/Y H:i:s')
+    public static function formatTime($time, $format = 'H:i:s')
     {
-        return Carbon::parse($date)->format($format);
+        return Carbon::parse($time)->format($format);
+    }
+
+    public static function formatDateTime($dateTime, $format = 'd/m/Y H:i:s')
+    {
+        return Carbon::parse($dateTime)->format($format);
     }
 
     public static function convertDateTz($date, $from_tz = 'UTC', $to_tz = 'Asia/Jakarta')

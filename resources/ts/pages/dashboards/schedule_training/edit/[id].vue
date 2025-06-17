@@ -1,117 +1,75 @@
 <script lang="ts" setup>
-import PlayerEditable from '@/views/dashboards/player/PlayerEditable.vue';
-import type { PlayerData } from '@/views/dashboards/player/types';
+import ScheduleTrainingEditable from '@/views/dashboards/schedule_training/ScheduleTrainingEditable.vue';
+import type { ScheduleTrainingData } from '@/views/dashboards/schedule_training/types';
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
 const router = useRouter();
 
-const playerId = route.params.id as string;
+const scheduleTrainingId = route.params.id as string;
 const error = ref<string | null>(null)
 const loading = ref(false)
 const isFlatSnackbarVisible = ref(false)
 const snackbarMessage = ref('')
 const snackbarColor = ref<'success' | 'error'>('success')
 
-const playerData = ref<PlayerData>({
-  id: 0,
-  name: '',
-  user: {
-    id: 0,
-    email: '',
-    password: '',
-  },
-  nisn: '',
-  height: '',
-  weight: '',
-  sport_players: [],
-  club: {
-    id: 0,
-    code: '',
-    name: '',
-  },
-  club_player: {
-    club_id: 0,
-    player_id: 0,
-    back_number: '',   
-    position: '',
-    is_captain: false,   
-    status: false,
-  },
-  avatar: null,
-  family_card: null,
-  report_grades: null,
-  birth_certificate: null,
+const scheduleTrainingData = ref<ScheduleTrainingData>({
+  id: 0, 
+  first_club_id: '',
+  secound_club_id: '',
+  stadium_id: '',
+  schedule_date: '',
+  schedule_start_at: '',
+  schedule_end_at: '',
+  score: '',
+  status: false,
 });
 
 
-const fetchPlayer = async () => {
+const fetchScheduleTraining = async () => {
   loading.value = true;
   try {
-    const res = await $api(`player/${playerId}/edit`);
-    const data = res.data
-
-    const clubPlayer = data.club_players?.[0]
-    
-    data.club_player = clubPlayer || {
-      club_id: 0,
-      player_id: 0,
-      back_number: '',   
-      position: '',
-      is_captain: false,   
-      status: false,
+    const res = await $api(`schedule-training/${scheduleTrainingId}/edit`);
+  
+    scheduleTrainingData.value = {
+      ...res.data,
+      first_club_id: res.data.first_club?.id ?? 0,
+      secound_club_id: res.data.secound_club?.id ?? 0,
+      stadium_id: res.data.stadium?.id ?? 0,
     }
 
-    playerData.value = data 
-
-    console.log('Fetched player data:', playerData.value);
+    console.log('Fetched schedule training data:', scheduleTrainingData.value);
     
   } catch (err: any) {
-    error.value = err.message || 'Gagal mengambil data player';
+    error.value = err.message || 'Gagal mengambil data schedule training';
   } finally {
     loading.value = false;
   }
 };
 
 onMounted(async () => {
-  await fetchPlayer();
+  await fetchScheduleTraining();
 });
 
 const handleSubmit = async () => {
   try {    
 
-    console.log('Submitting player data:', playerData.value);
+    console.log('Submitting schedule training data:', scheduleTrainingData.value);
     
     const formData = new FormData();
     formData.append('_method', 'PUT'); 
 
-    formData.append('email', playerData.value.user.email);
-    formData.append('nisn', playerData.value.nisn);
-    formData.append('name', playerData.value.name);
-    formData.append('height', playerData.value.height);
-    formData.append('weight', playerData.value.weight);
-    formData.append('club_id', playerData.value.club_player.club_id.toString())
-
-    if (typeof playerData.value.user.id === 'number') {
-      formData.append('user_id', playerData.value.user.id.toString());
-    }
-
-    formData.append('sport_players', JSON.stringify(playerData.value.sport_players));
-
-    if (playerData.value.avatar instanceof File)
-      formData.append('avatar', playerData.value.avatar);
-
-    if (playerData.value.family_card instanceof File)
-      formData.append('family_card', playerData.value.family_card);
-
-    if (playerData.value.report_grades instanceof File)
-      formData.append('report_grades', playerData.value.report_grades);
-
-    if (playerData.value.birth_certificate instanceof File)
-      formData.append('birth_certificate', playerData.value.birth_certificate);
-
-    const res = await $api(`player/${playerId}`, {
+    formData.append('first_club_id', String(scheduleTrainingData.value.first_club_id));
+    formData.append('secound_club_id', String(scheduleTrainingData.value.secound_club_id));
+    formData.append('stadium_id', String(scheduleTrainingData.value.stadium_id));
+    formData.append('schedule_date', scheduleTrainingData.value.schedule_date); 
+    formData.append('schedule_start_at', scheduleTrainingData.value.schedule_start_at);
+    formData.append('schedule_end_at', scheduleTrainingData.value.schedule_end_at);
+    formData.append('score', scheduleTrainingData.value.score ?? '');
+    formData.append('status', scheduleTrainingData.value.status ? '1' : '0');
+    
+    const res = await $api(`schedule-training/${scheduleTrainingId}`, {
       method: 'POST',
       body: formData,
     });
@@ -146,8 +104,8 @@ const handleSubmit = async () => {
 <template>
   <VRow>
     <VCol cols="12" md="12">
-      <PlayerEditable
-        :data="playerData"  
+      <ScheduleTrainingEditable
+        :data="scheduleTrainingData"  
         @submit="handleSubmit"
       />
 

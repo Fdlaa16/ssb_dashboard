@@ -9,13 +9,13 @@ const route = useRoute()
 
 const searchQuery = ref('')
 const selectedClub = ref('')
-const selectedSport = ref('')
+const selectedStadium = ref('')
 const selectedStatus = ref('')
 const selectedSort = ref('')
 
-const players = ref<any[]>([])
+const scheduleTrainings = ref<any[]>([])
 const clubs = ref<{ title: string; value: string | number }[]>([])
-const sports = ref<{ title: string; value: string | number }[]>([])
+const stadiums = ref<{ title: string; value: string | number }[]>([])
 
 const loading = ref(false)
 const error = ref<string | null>(null)
@@ -37,64 +37,61 @@ onMounted(() => {
 })
 
 const totalPages = computed(() => {
-  return Math.ceil(players.value.length / itemsPerPage)
+  return Math.ceil(scheduleTrainings.value.length / itemsPerPage)
 })
 
 const widgetData = ref([
-  { title: 'All', value: 24, icon: 'tabler-user' },
-  { title: 'Active', value: 24, icon: 'tabler-user' },
-  { title: 'In Confirm', value: 24, icon: 'tabler-user' },
-  { title: 'Non Active', value: 24, icon: 'tabler-user' },
+  { title: 'All', value: 24, icon: 'tabler-calendar-check' },
+  { title: 'Active', value: 24, icon: 'tabler-calendar-check' },
+  { title: 'Non Active', value: 24, icon: 'tabler-calendar-check' },
 ])
 
 const headers = [
   { title: 'ID', key: 'id' },
-  { title: 'Name', key: 'name' },
-  { title: 'NISN', key: 'nisn' },
-  { title: 'Height (cm)', key: 'height' },
-  { title: 'Weight (kg)', key: 'weight' },
-  { title: 'Sport', key: 'sports' },
-  // { title: 'Club', key: 'clubs' },
+  { title: 'Club 1', key: 'first_club.name' },
+  { title: 'Club 2', key: 'secound_club.name' },
+  { title: 'Stadium', key: 'stadium.name' },
+  { title: 'Schedule Date', key: 'schedule_date' },
+  { title: 'Schedule Start At', key: 'schedule_start_at' },
   { title: 'Status', key: 'status' },
   { title: 'Action', key: 'action', sortable: false },
 ]
 
 const statusColorMap = {
   1: { label: 'Active', color: 'success' },
-  0: { label: 'In Confirm', color: 'warning', textColor: 'black' },
-  2: { label: 'Non Active', color: 'error' },
+  0: { label: 'Non Active', color: 'error' },
 }
 
-const paginatedPlayers = computed(() => {
+const paginatedScheduleTrainings = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage
-  return players.value.slice(start, start + itemsPerPage)
+  return scheduleTrainings.value.slice(start, start + itemsPerPage)
 })
 
-async function fetchPlayer() {
+async function fetchScheduleTraining() {
   loading.value = true
   error.value = null
 
   try {
-    const response = await $api('player', {
+    const response = await $api('schedule-training', {
       method: 'GET',
       params: {
         search: searchQuery.value,
         club_id: selectedClub.value,
-        sport_id: selectedSport.value,
+        stadium_id: selectedStadium.value,
         status: selectedStatus.value,
         sort: selectedSort.value,
       },
     })
 
-    players.value = response.data 
+    scheduleTrainings.value = response.data 
     const totals = response.totals
 
     widgetData.value = [
-      { title: 'All', value: totals.all, icon: 'tabler-user', iconColor: 'primary', change: 0, desc: 'Total semua player' },
-      { title: 'Active', value: totals.active, icon: 'tabler-user-check', iconColor: 'success', change: 0, desc: 'Player aktif' },
-      { title: 'In Confirm', value: totals.in_confirm, icon: 'tabler-user-question', iconColor: 'warning', change: 0, desc: 'Menunggu konfirmasi' },
-      { title: 'Non Active', value: totals.in_active, icon: 'tabler-user-x', iconColor: 'error', change: 0, desc: 'Player tidak aktif' },
+      { title: 'All', value: totals.all, icon: 'tabler-calendar-check', iconColor: 'primary', change: 0, desc: 'Total semua scheduletraining' },
+      { title: 'Active', value: totals.active, icon: 'tabler-calendar-check', iconColor: 'success', change: 0, desc: 'Schedule Training aktif' },
+      { title: 'Non Active', value: totals.in_active, icon: 'tabler-calendar-check', iconColor: 'error', change: 0, desc: 'Schedule Training tidak aktif' },
     ]
+
   } catch (err: any) {
     error.value = err.message || 'Gagal memuat data'
   } finally {
@@ -119,31 +116,31 @@ async function fetchClubs() {
   }
 }
 
-async function fetchSports() {
+async function fetchStadiums() {
   try {
-    const response = await $api('sport', {
+    const response = await $api('stadium', {
       method: 'GET',
     })
 
-    const sportData = response.data.map((sport: any) => ({
-      title: sport.name,
-      value: sport.id,
+    const stadiumData = response.data.map((stadium: any) => ({
+      title: stadium.name,
+      value: stadium.id,
     }))
 
-    sports.value = [{ title: 'Pilih Sport', value: '' }, ...sportData]
+    stadiums.value = [{ title: 'Pilih Stadium', value: '' }, ...stadiumData]
   } catch (error) {
-    console.error('Gagal memuat sports', error)
+    console.error('Gagal memuat stadiums', error)
   }
 }
 
-function editPlayer(player: any) {
-  router.push({ name: 'dashboards-schedule-training-edit-id', params: { id: player.id } })
+function editScheduleTraining(scheduleTraining: any) {
+  router.push({ name: 'dashboards-schedule-training-edit-id', params: { id: scheduleTraining.id } })
 }
 
-async function deletePlayer(player: any) {
+async function deleteScheduleTraining(scheduleTraining: any) {
   const confirm = await Swal.fire({
     title: 'Apakah kamu yakin?',
-    text: `Data player dengan nama ${player.name} akan dihapus.`,
+    text: `Data Schedule Training ${scheduleTraining.first_club.name} melawan ${scheduleTraining.secound_club.name} pada tanggal ${scheduleTraining.schedule_date} pukul ${scheduleTraining.schedule_start_at} akan dihapus.`,
     icon: 'warning',
     showCancelButton: true,
     confirmButtonText: 'Ya, hapus!',
@@ -158,17 +155,17 @@ async function deletePlayer(player: any) {
     try {
       loading.value = true
 
-      await $api(`player/${player.id}`, {
+      await $api(`schedule-training/${scheduleTraining.id}`, {
         method: 'DELETE',
       })
 
-      await fetchPlayer()
+      await fetchScheduleTraining()
 
-      snackbarMessage.value = 'Player berhasil dihapus'
+      snackbarMessage.value = 'Schedule Training berhasil dihapus'
       snackbarColor.value = 'success'
       isSnackbarVisible.value = true
     } catch (err: any) {
-      snackbarMessage.value = err?.response?.data?.message || 'Gagal menghapus player'
+      snackbarMessage.value = err?.response?.data?.message || 'Gagal menghapus schedule Training'
       snackbarColor.value = 'error'
       isSnackbarVisible.value = true
     } finally {
@@ -177,10 +174,10 @@ async function deletePlayer(player: any) {
   }
 }
 
-async function activatePlayer(player: any) {
+async function activateScheduletraining(scheduleTraining: any) {
   const confirm = await Swal.fire({
-    title: 'Aktifkan Player?',
-    text: `Player ${player.name} akan diaktifkan kembali.`,
+    title: 'Aktifkan Schedule Training?',
+    text: `Schedule Training ${scheduleTraining.first_club.name} melawan ${scheduleTraining.secound_club.name} pada tanggal ${scheduleTraining.schedule_date} pukul ${scheduleTraining.schedule_start_at} akan diaktifkan kembali.`,
     icon: 'question',
     showCancelButton: true,
     confirmButtonText: 'Ya, aktifkan!',
@@ -195,17 +192,17 @@ async function activatePlayer(player: any) {
     try {
       loading.value = true
 
-      await $api(`player/${player.id}/active`, {
+      await $api(`schedule-training/${scheduleTraining.id}/active`, {
         method: 'PUT',
       })
 
-      await fetchPlayer()
+      await fetchScheduleTraining()
 
-      snackbarMessage.value = 'Player berhasil diaktifkan kembali'
+      snackbarMessage.value = 'Schedule Training berhasil diaktifkan kembali'
       snackbarColor.value = 'success'
       isSnackbarVisible.value = true
     } catch (err: any) {
-      snackbarMessage.value = err?.response?.data?.message || 'Gagal mengaktifkan player'
+      snackbarMessage.value = err?.response?.data?.message || 'Gagal mengaktifkan Schedule Training'
       snackbarColor.value = 'error'
       isSnackbarVisible.value = true
     } finally {
@@ -214,71 +211,6 @@ async function activatePlayer(player: any) {
   }
 }
 
-async function approvePlayer(player: any) {
-  const result = await Swal.fire({
-    title: 'Terima Player?',
-    text: `Player ${player.name} akan diterima?.`,
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonText: 'Ya, terima!',
-    cancelButtonText: 'Batal',
-    customClass: {
-      confirmButton: 'swal2-confirm-btn',
-      cancelButton: 'swal2-cancel-btn',
-    },
-  })
-
-  if (result.isConfirmed) {
-    $api(`player/${player.id}/approve`, {
-      method: 'PUT',
-    })
-      .then(() => {
-        fetchPlayer()
-        snackbarMessage.value = 'Player diterima'
-        snackbarColor.value = 'success'
-        isSnackbarVisible.value = true
-      })
-      .catch((err: any) => {
-        snackbarMessage.value = err?.response?.data?.message || 'Gagal menerima player'
-        snackbarColor.value = 'error'
-        isSnackbarVisible.value = true
-      })
-  }
-}
-
-async function rejectPlayer(player: any) {
-  const result = await Swal.fire({
-    title: 'Tolak Player?',
-    text: `Player ${player.name} akan ditolak?.`,
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonText: 'Ya, tolak!',
-    cancelButtonText: 'Batal',
-    customClass: {
-      confirmButton: 'swal2-confirm-btn',
-      cancelButton: 'swal2-cancel-btn',
-    },
-  })
-
-  if (result.isConfirmed) {
-    $api(`player/${player.id}/reject`, {
-      method: 'PUT',
-    })
-      .then(() => {
-        fetchPlayer()
-        snackbarMessage.value = 'Player ditolak'
-        snackbarColor.value = 'success'
-        isSnackbarVisible.value = true
-      })
-      .catch((err: any) => {
-        snackbarMessage.value = err?.response?.data?.message || 'Gagal menolak player'
-        snackbarColor.value = 'error'
-        isSnackbarVisible.value = true
-      })
-  }
-}
-
-
 function getQueryParam(param: LocationQueryValue | LocationQueryValue[] | undefined): string {
   return Array.isArray(param) ? param[0] || '' : param || ''
 }
@@ -286,28 +218,28 @@ function getQueryParam(param: LocationQueryValue | LocationQueryValue[] | undefi
 onMounted(() => {
   searchQuery.value = getQueryParam(route.query.search)
   selectedClub.value = getQueryParam(route.query.club_id)
-  selectedSport.value = getQueryParam(route.query.sport_id)
+  selectedStadium.value = getQueryParam(route.query.stadium_id)
   selectedStatus.value = getQueryParam(route.query.status)
   selectedSort.value = getQueryParam(route.query.sort)
 
-  fetchPlayer()
+  fetchScheduleTraining()
   fetchClubs()
-  fetchSports()
+  fetchStadiums()
 })
 
-watch([searchQuery, selectedClub, selectedSport, selectedStatus, selectedSort], () => {
+watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort], () => {
   router.replace({
     query: {
       ...route.query,
       search: searchQuery.value || undefined,
       club_id: selectedClub.value || undefined,
-      sport_id: selectedSport.value || undefined,
+      stadium_id: selectedStadium.value || undefined,
       status: selectedStatus.value || undefined,
       sort: selectedSort.value || undefined,
     },
   })
 
-  fetchPlayer()
+  fetchScheduleTraining()
 })
 </script>
 
@@ -322,7 +254,7 @@ watch([searchQuery, selectedClub, selectedSport, selectedStatus, selectedSort], 
           >
             <VCol
               cols="12"
-              md="3"
+              md="4"
               sm="6"
             >
               <VCard>
@@ -362,7 +294,7 @@ watch([searchQuery, selectedClub, selectedSport, selectedStatus, selectedSort], 
 
       <VCard class="mb-6">
         <VCardItem class="pb-4">
-          <VCardTitle>Players</VCardTitle>
+          <VCardTitle>Schedule Trainings</VCardTitle>
         </VCardItem>
 
         <VCardText>
@@ -386,12 +318,12 @@ watch([searchQuery, selectedClub, selectedSport, selectedStatus, selectedSort], 
               sm="3"
             >
               <AppSelect
-                v-model="selectedSport"
-                placeholder="Sport"
+                v-model="selectedStadium"
+                placeholder="Stadium"
                 clearable
                 clear-icon="tabler-x"
                 single-line
-                :items="sports"
+                :items="stadiums"
               />
             </VCol>
 
@@ -408,9 +340,8 @@ watch([searchQuery, selectedClub, selectedSport, selectedStatus, selectedSort], 
                 :items="[
                   { title: 'Pilih Status', value: '' },
                   { title: 'Semua', value: 'all' },
-                  { title: 'Aktif', value: 'active' },
-                  { title: 'Menunggu Konfirmasi', value: 'in_confirm' },
-                  { title: 'Tidak Aktif', value: 'in_active' }
+                  { title: 'Aktif', value: 1 },
+                  { title: 'Tidak Aktif', value: 0 }
                 ]"
               />
             </VCol>
@@ -441,7 +372,7 @@ watch([searchQuery, selectedClub, selectedSport, selectedStatus, selectedSort], 
           <div style="inline-size: 15.625rem;">
             <AppTextField
                 v-model="searchQuery"
-                placeholder="Search User"
+                placeholder="Search Schedule Training"
             />
           </div>
           <VSpacer />
@@ -459,7 +390,7 @@ watch([searchQuery, selectedClub, selectedSport, selectedStatus, selectedSort], 
               prepend-icon="tabler-plus"
               :to="{ name: 'dashboards-schedule-training-add' }"
             >
-              Add New User
+              Add New Schedule Training
             </VBtn>
           </div>
         </VCardText>
@@ -468,7 +399,7 @@ watch([searchQuery, selectedClub, selectedSport, selectedStatus, selectedSort], 
 
         <VDataTable
           :headers="headers"
-          :items="paginatedPlayers"
+          :items="paginatedScheduleTrainings"
           :loading="loading"
           class="text-no-wrap"
           :items-per-page="itemsPerPage"
@@ -488,8 +419,8 @@ watch([searchQuery, selectedClub, selectedSport, selectedStatus, selectedSort], 
             </div>
           </template>
 
-          <template #item.nisn="{ item }">
-            <div class="text-body-1">{{ item.nisn }}</div>
+          <template #item.first_club.name="{ item }">
+            <div class="text-body-1">{{ item.first_club.name }}</div>
           </template>
 
           <template #item.height="{ item }">
@@ -500,13 +431,13 @@ watch([searchQuery, selectedClub, selectedSport, selectedStatus, selectedSort], 
             <div class="text-body-1">{{ item.weight }}</div>
           </template>
 
-          <template #item.sports="{ item }">
+          <template #item.stadiums="{ item }">
             <div class="text-body-1">
               <span
-                v-for="(sport, index) in item.sports"
-                :key="sport.id"
+                v-for="(stadium, index) in item.stadiums"
+                :key="stadium.id"
               >
-                {{ sport.name }}<span v-if="index < item.sports.length - 1">, </span>
+                {{ stadium.name }}<span v-if="index < item.stadiums.length - 1">, </span>
               </span>
             </div>
           </template>
@@ -538,22 +469,22 @@ watch([searchQuery, selectedClub, selectedSport, selectedStatus, selectedSort], 
           <template #item.action="{ item }">
             <div class="d-flex gap-x-2">
               <VBtn
-                v-if="!item.deleted_at && item.status !== 0"
+                v-if="!item.deleted_at"
                 icon
                 size="small"
                 color="primary"
-                @click="editPlayer(item)"
+                @click="editScheduleTraining(item)"
                 title="Edit"
               >
                 <VIcon icon="tabler-pencil" />
               </VBtn>
 
               <VBtn  
-                v-if="!item.deleted_at && item.status !== 0"
+                v-if="!item.deleted_at"
                 icon
                 size="small"
                 color="error"
-                @click="deletePlayer(item)"
+                @click="deleteScheduleTraining(item)"
                 title="Delete"
               >
                 <VIcon icon="tabler-trash" />
@@ -564,32 +495,10 @@ watch([searchQuery, selectedClub, selectedSport, selectedStatus, selectedSort], 
                 icon
                 size="small"
                 color="success"
-                @click="activatePlayer(item)"
+                @click="activateScheduletraining(item)"
                 title="Activate"
               >
                 <VIcon icon="tabler-check" />
-              </VBtn>
-
-              <VBtn
-                v-if="item.status === 0"
-                icon
-                size="small"
-                color="warning"
-                @click="approvePlayer(item)"
-                title="Approve"
-              >
-                <VIcon icon="tabler-help" />
-              </VBtn>
-
-              <VBtn
-                v-if="item.status === 0"
-                icon
-                size="small"
-                color="error"
-                @click="rejectPlayer(item)"
-                title="Reject"
-              >
-                <VIcon icon="tabler-x" />
               </VBtn>
             </div>
           </template>

@@ -32,6 +32,11 @@ export default [
     icon: { icon: 'tabler-files' },
     children: [
       {
+        title: 'History',
+        to: 'front-pages-history',
+        target: '_blank',
+      },
+      {
         title: 'Landing',
         to: 'front-pages-landing-page',
         target: '_blank',

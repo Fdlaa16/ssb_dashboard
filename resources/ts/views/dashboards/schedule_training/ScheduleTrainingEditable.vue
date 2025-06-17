@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import type { Club, ScheduleMatchData, Stadium } from './types';
+import type { Club, ScheduleTrainingData, Stadium } from './types';
 
 const clubs = ref<Club[]>([])
 const stadiums = ref<Stadium[]>([])
 
-const props = defineProps<{ data: ScheduleMatchData }>()
+const props = defineProps<{ data: ScheduleTrainingData }>()
 const emit = defineEmits(['submit', 'update:data'])
 
-const localData = ref<ScheduleMatchData>({
+const localData = ref<ScheduleTrainingData>({
   ...props.data,
 })
 
@@ -69,7 +69,7 @@ const submitForm = () => {
 <template>
   <form @submit.prevent="$emit('submit')">
     <div class="d-flex flex-column gap-6 mb-6">
-      <VCard title="Create Schedule Match" >
+      <VCard title="Create Schedule Training" >
         <VCardText>
           <VWindow>
             <VWindowItem>

@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { useMouse } from '@vueuse/core'
-import { useTheme } from 'vuetify'
 import { useGenerateImageVariant } from '@/@core/composable/useGenerateImageVariant'
-import joinArrow from '@images/front-pages/icons/Join-community-arrow.png'
 import heroDashboardImgDark from '@images/front-pages/landing-page/hero-dashboard-dark.png'
 import heroDashboardImgLight from '@images/front-pages/landing-page/hero-dashboard-light.png'
+import { useMouse } from '@vueuse/core'
+import { useTheme } from 'vuetify'
 
 import heroElementsImgDark from '@images/front-pages/landing-page/hero-elements-dark.png'
 import heroElementsImgLight from '@images/front-pages/landing-page/hero-elements-light.png'
@@ -26,6 +25,21 @@ const translateMouse = computed(() => {
   // Provide a default return value when `window` is undefined
   return { transform: 'perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)' }
 })
+
+const colors = [
+  'indigo',
+  'warning',
+  'pink darken-2',
+  'red lighten-1',
+  'deep-purple accent-4',
+]
+const slides = [
+  'First',
+  'Second',
+  'Third',
+  'Fourth',
+  'Fifth',
+]
 </script>
 
 <template>
@@ -33,73 +47,28 @@ const translateMouse = computed(() => {
     id="home"
     :style="{ background: 'rgb(var(--v-theme-surface))' }"
   >
-    <div id="landingHero">
-      <div
-        class="landing-hero"
-        :class="theme.current.value.dark ? 'landing-hero-dark-bg' : 'landing-hero-light-bg'"
+    <v-carousel
+      height="900"
+      show-arrows="hover"
+      cycle
+      hide-delimiter-background
+    >
+      <v-carousel-item
+        v-for="(slide, i) in slides"
+        :key="i"
       >
-        <VContainer>
-          <div class="hero-text-box text-center px-6">
-            <h1 class="hero-title mb-4">
-              One dashboard to manage all your business
-            </h1>
-            <h6 class="mb-6 text-h6">
-              Production-ready & easy to use Admin Template
-              for Reliability and Customizability.
-            </h6>
-            <div class="position-relative">
-              <h6 class="position-absolute hero-btn-item d-md-flex d-none text-h6 text-medium-emphasis">
-                Join Community
-                <VImg
-                  :src="joinArrow"
-                  class="flip-in-rtl"
-                  width="54"
-                  height="31"
-                />
-              </h6>
-
-              <VBtn
-                :size="$vuetify.display.smAndUp ? 'large' : 'default' "
-                :to="{ name: 'front-pages-landing-page', hash: `#pricing-plan` }"
-                :active="false"
-              >
-                Get early Access
-              </VBtn>
+        <v-sheet
+          :color="colors[i]"
+          height="100%"
+        >
+          <div class="d-flex fill-height justify-center align-center">
+            <div class="text-h2">
+              {{ slide }} Slide
             </div>
           </div>
-        </VContainer>
-      </div>
-    </div>
-
-    <VContainer>
-      <div class="position-relative">
-        <div class="blank-section" />
-        <div class="hero-animation-img position-absolute">
-          <RouterLink
-            :to="{ name: 'dashboards-ecommerce' }"
-            target="_blank"
-          >
-            <div
-              class="hero-dashboard-img position-relative"
-              :style="translateMouse"
-              data-allow-mismatch
-            >
-              <img
-                :src="heroDashboardImg"
-                alt="Hero Dashboard"
-                class="animation-img"
-              >
-              <img
-                :src="heroElementsImg"
-                alt="hero elements"
-                class="hero-elements-img animation-img position-absolute"
-                style="transform: translateZ(1rem);"
-              >
-            </div>
-          </RouterLink>
-        </div>
-      </div>
-    </VContainer>
+        </v-sheet>
+      </v-carousel-item>
+    </v-carousel>
   </div>
 </template>
 
