@@ -38,7 +38,7 @@ class PlayerController extends Controller
         $playersQuery = Player::query()
             ->with([
                 'user',
-                'clubs',
+                'clubPlayers.club',
                 'sports' => function ($query) {
                     $query->whereNull('sports.deleted_at');
                 },
@@ -220,17 +220,15 @@ class PlayerController extends Controller
                 ClubPlayer::create([
                     'club_id' => $request->club_id,
                     'player_id' => $player->id,
-                    // 'back_number' => $request->back_number,
-                    // 'position' => $request->position,
-                    // 'is_captain' => $request->is_captain,
-                    // 'status' => $request->status,
+                    'position' => $request->position,
+                    'back_number' => $request->back_number,
                 ]);
 
                 DB::commit();
 
                 return response()->json([
                     'message' => 'Player created successfully.',
-                    'data' => $player->load('sportPlayers.sport')
+                    'data' => $player
                 ], 201);
             }
         } catch (\Exception $e) {
@@ -298,10 +296,10 @@ class PlayerController extends Controller
             $rules = [
                 'email'     => 'required|email|unique:users,email,' . $player->user_id,
                 'nisn'      => 'required|unique:players,nisn,' . $player->id,
-                'name'      => 'required|string',
-                'height'    => 'required|numeric',
-                'weight'    => 'required|numeric',
-                'club_id'   => 'required|exists:clubs,id',
+                'name'      => 'required',
+                'height'    => 'required',
+                'weight'    => 'required',
+                'club_id'   => 'required',
             ];
 
             $messages = [
@@ -313,60 +311,63 @@ class PlayerController extends Controller
                 'name.required'      => 'Nama harus diisi',
                 'height.required'    => 'Tinggi badan harus diisi',
                 'weight.required'    => 'Berat badan harus diisi',
-                'club_id.required'   => 'Klub harus diisi',
-                'club_id.exists'     => 'Klub tidak ditemukan',
+                'club_id.required'   => 'Club harus diisi',
+                'club_id.exists'     => 'Club tidak ditemukan',
             ];
 
             $validator = Validator::make($request->all(), $rules, $messages);
 
             if ($validator->fails()) {
-                return response()->json(['errors' => $validator->errors()], 422);
-            }
+                return response()->json(array('errors' => $validator->messages()->toArray()), 422);
+            } else {
 
-            $player->user()->update([
-                'email' => $request->email,
-            ]);
+                $player->user()->update([
+                    'email' => $request->email,
+                ]);
 
-            $player->update([
-                'nisn'   => $request->nisn,
-                'name'   => $request->name,
-                'height' => $request->height,
-                'weight' => $request->weight,
-            ]);
+                $player->update([
+                    'nisn'   => $request->nisn,
+                    'name'   => $request->name,
+                    'height' => $request->height,
+                    'weight' => $request->weight,
+                ]);
 
-            $types = ['avatar', 'family_card', 'report_grades', 'birth_certificate'];
-            $fileObj = new File();
+                $types = ['avatar', 'family_card', 'report_grades', 'birth_certificate'];
+                $fileObj = new File();
 
-            foreach ($types as $type) {
-                if ($request->hasFile($type)) {
-                    $file = $request->file($type);
-                    $fileDir = $fileObj->getDirectory($type);
-                    $fileName = $fileObj->getFileName($type, $player->id, $file);
+                foreach ($types as $type) {
+                    if ($request->hasFile($type)) {
+                        $file = $request->file($type);
+                        $fileDir = $fileObj->getDirectory($type);
+                        $fileName = $fileObj->getFileName($type, $player->id, $file);
 
-                    $file->storeAs($fileDir, $fileName, 'public');
-                    $player->files()->where('type', $type)->delete();
+                        $file->storeAs($fileDir, $fileName, 'public');
+                        $player->files()->where('type', $type)->delete();
 
-                    $player->files()->create([
-                        'type'           => $type,
-                        'name'           => $fileName,
-                        'original_name'  => $file->getClientOriginalName(),
-                        'extension'      => $file->getClientOriginalExtension(),
-                        'path'           => $fileDir . $fileName,
-                    ]);
+                        $player->files()->create([
+                            'type'           => $type,
+                            'name'           => $fileName,
+                            'original_name'  => $file->getClientOriginalName(),
+                            'extension'      => $file->getClientOriginalExtension(),
+                            'path'           => $fileDir . $fileName,
+                        ]);
+                    }
                 }
+
+                $player->clubPlayers()->update([
+                    'player_id' => $player->id,
+                    'club_id' => $request->club_id,
+                    'position' => $request->position,
+                    'back_number' => $request->back_number,
+                ]);
+
+                DB::commit();
+
+                return response()->json([
+                    'message' => 'Player updated successfully.',
+                    'data' => $player,
+                ]);
             }
-
-            $player->clubPlayers()->update([
-                'player_id' => $player->id,
-                'club_id' => $request->club_id
-            ]);
-
-            DB::commit();
-
-            return response()->json([
-                'message' => 'Player berhasil diperbarui.',
-                'data' => $player->load(['sportPlayers.sport', 'files']),
-            ]);
         } catch (\Exception $e) {
             DB::rollBack();
 

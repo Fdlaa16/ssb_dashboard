@@ -53,8 +53,8 @@ const headers = [
   { title: 'NISN', key: 'nisn' },
   { title: 'Height (cm)', key: 'height' },
   { title: 'Weight (kg)', key: 'weight' },
-  { title: 'Sport', key: 'sports' },
-  // { title: 'Club', key: 'clubs' },
+  { title: 'Back Number', key: 'back_number' },
+  { title: 'Club', key: 'club' },
   { title: 'Status', key: 'status' },
   { title: 'Action', key: 'action', sortable: false },
 ]
@@ -86,7 +86,10 @@ async function fetchPlayer() {
       },
     })
 
-    players.value = response.data 
+    players.value = response.data     
+
+    console.log('Fetched players:', players.value);
+    
     const totals = response.totals
 
     widgetData.value = [
@@ -500,27 +503,15 @@ watch([searchQuery, selectedClub, selectedSport, selectedStatus, selectedSort], 
             <div class="text-body-1">{{ item.weight }}</div>
           </template>
 
-          <template #item.sports="{ item }">
-            <div class="text-body-1">
-              <span
-                v-for="(sport, index) in item.sports"
-                :key="sport.id"
-              >
-                {{ sport.name }}<span v-if="index < item.sports.length - 1">, </span>
-              </span>
-            </div>
+          <template #item.back_number="{ item }">
+            <div class="text-body-1">{{ item.club_players[0]?.back_number || '-' }}</div>
           </template>
 
-          <!-- <template #item.clubs="{ item }">
+          <template #item.club="{ item }">
             <div class="text-body-1">
-              <span
-                v-for="(club, index) in item.clubs"
-                :key="club.id"
-              >
-                {{ club.name }}<span v-if="index < item.clubs.length - 1">, </span>
-              </span>
+              {{ item.club_players[0]?.club?.name || '-' }}
             </div>
-          </template> -->
+          </template>
 
           <template #item.status="{ item }">
             <VChip

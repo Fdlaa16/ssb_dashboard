@@ -92,7 +92,9 @@ const handleSubmit = async () => {
     formData.append('height', playerData.value.height);
     formData.append('weight', playerData.value.weight);
     formData.append('club_id', playerData.value.club_player.club_id.toString())
-
+    formData.append('back_number', playerData.value.club_player.back_number)
+    formData.append('position', playerData.value.club_player.position)
+    
     if (typeof playerData.value.user.id === 'number') {
       formData.append('user_id', playerData.value.user.id.toString());
     }
@@ -116,7 +118,7 @@ const handleSubmit = async () => {
       body: formData,
     });
 
-    snackbarMessage.value = 'Data berhasil dibuat!';
+    snackbarMessage.value = 'Data berhasil diperbarui!';
     snackbarColor.value = 'success';
     isFlatSnackbarVisible.value = true;
 
@@ -141,6 +143,10 @@ const handleSubmit = async () => {
   }
 };
 
+const onSubmit = () => {
+  handleSubmit()
+}
+
 </script>
 
 <template>
@@ -148,7 +154,8 @@ const handleSubmit = async () => {
     <VCol cols="12" md="12">
       <PlayerEditable
         :data="playerData"  
-        @submit="handleSubmit"
+        @update:data="playerData = $event"
+        @submit="onSubmit"
       />
 
     </VCol>

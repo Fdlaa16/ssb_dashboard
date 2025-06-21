@@ -5,10 +5,12 @@ namespace Modules\Dashboard\Http\Controllers;
 use App\Helpers\Helper;
 use App\Http\Resources\ClubResource;
 use App\Models\Club;
+use App\Models\File;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class ClubController extends Controller
 {
@@ -90,7 +92,64 @@ class ClubController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        DB::beginTransaction();
+
+        try {
+            $postData = $request->all();
+            $rules = [
+                'name'     => 'required',
+            ];
+
+            $messages = [
+                'name.required'     => 'Nama harus diisi',
+            ];
+
+            $validator = Validator::make($postData, $rules, $messages);
+
+            if ($validator->fails()) {
+                return response()->json(array('errors' => $validator->messages()->toArray()), 422);
+            } else {
+                $club = Club::create([
+                    'name' => $request->name,
+                ]);
+
+                $types = ['profile_club'];
+                $fileObj = new File();
+
+                foreach ($types as $type) {
+                    if ($request->hasFile($type)) {
+                        $file = $request->file($type);
+                        $fileDir = $fileObj->getDirectory($type);
+                        $fileName = $fileObj->getFileName($type, $club->id, $file);
+
+                        $file->storeAs($fileDir, $fileName, 'public');
+
+                        $club->files()->where('type', $type)->delete();
+
+                        $club->files()->create([
+                            'type' => $type,
+                            'name' => $fileName,
+                            'original_name' => $file->getClientOriginalName(),
+                            'extension' => $file->getClientOriginalExtension(),
+                            'path' => "$fileDir$fileName",
+                        ]);
+                    }
+                }
+
+                DB::commit();
+
+                return response()->json([
+                    'message' => 'Club created successfully.',
+                    'data' => $club
+                ], 201);
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -110,7 +169,12 @@ class ClubController extends Controller
      */
     public function edit($id)
     {
-        $clubs = Club::find($id);
+
+        $clubs = Club::query()
+            ->with([
+                'profile_club',
+            ])
+            ->find($id);
 
         $data = [
             'data' => $clubs,
@@ -127,7 +191,71 @@ class ClubController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        DB::beginTransaction();
+
+        $club = Club::find($id);
+
+        if (!$club) {
+            return response()->json(['message' => 'Club tidak ditemukan'], 404);
+        }
+
+        try {
+            // Validasi data
+            $rules = [
+                'name'   => 'required',
+            ];
+
+            $messages = [
+                'name.required'     => 'Nama harus diisi',
+            ];
+
+            $validator = Validator::make($request->all(), $rules, $messages);
+
+            if ($validator->fails()) {
+                return response()->json(array('errors' => $validator->messages()->toArray()), 422);
+            } else {
+
+                $club->update([
+                    'name'   => $request->name,
+                ]);
+
+                $types = ['profile_club'];
+                $fileObj = new File();
+
+                foreach ($types as $type) {
+                    if ($request->hasFile($type)) {
+                        $file = $request->file($type);
+                        $fileDir = $fileObj->getDirectory($type);
+                        $fileName = $fileObj->getFileName($type, $club->id, $file);
+
+                        $file->storeAs($fileDir, $fileName, 'public');
+                        $club->files()->where('type', $type)->delete();
+
+                        $club->files()->create([
+                            'type'           => $type,
+                            'name'           => $fileName,
+                            'original_name'  => $file->getClientOriginalName(),
+                            'extension'      => $file->getClientOriginalExtension(),
+                            'path'           => $fileDir . $fileName,
+                        ]);
+                    }
+                }
+
+                DB::commit();
+
+                return response()->json([
+                    'message' => 'Club updated successfully.',
+                    'data' => $club,
+                ]);
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat memperbarui club.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

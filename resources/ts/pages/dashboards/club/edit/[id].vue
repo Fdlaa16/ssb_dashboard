@@ -59,7 +59,7 @@ const handleSubmit = async () => {
       body: formData,
     });
 
-    snackbarMessage.value = 'Data berhasil dibuat!';
+    snackbarMessage.value = 'Data berhasil diperbarui!';
     snackbarColor.value = 'success';
     isFlatSnackbarVisible.value = true;
 
@@ -84,6 +84,10 @@ const handleSubmit = async () => {
   }
 };
 
+const onSubmit = () => {
+  handleSubmit()
+}
+
 </script>
 
 <template>
@@ -91,7 +95,8 @@ const handleSubmit = async () => {
     <VCol cols="12" md="12">
       <ClubEditable
         :data="clubData"  
-        @submit="handleSubmit"
+        @update:data="clubData = $event"
+        @submit="onSubmit"
       />
 
     </VCol>

@@ -73,4 +73,14 @@ class Club extends Model
     {
         return $this->belongsTo(Standing::class, 'club_id', 'id');
     }
+
+    public function files()
+    {
+        return $this->morphMany(File::class, 'fileable');
+    }
+
+    public function profile_club()
+    {
+        return $this->morphMany(File::class, 'fileable')->where('type', 'profile_club')->latest()->one();
+    }
 }

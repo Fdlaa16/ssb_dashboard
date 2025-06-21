@@ -1,11 +1,10 @@
 <script lang="ts" setup>
 import ClubEditable from '@/views/dashboards/club/ClubEditable.vue';
-import type { clubData, Sport } from '@/views/dashboards/club/types';
+import type { ClubData } from '@/views/dashboards/club/types';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter() 
-const selectedSports = ref<Sport[]>([])
 const isFlatSnackbarVisible = ref(false)
 const snackbarMessage = ref('')
 const snackbarColor = ref<'success' | 'error'>('success')
@@ -14,13 +13,15 @@ const clubData = ref<ClubData>({
   id: 0,
   code: '',
   name: '',
+  profile_club: null,
 })
 
 const handleSubmit = async () => {
-
+  console.log('Submitting club data:', clubData.value);
+  
   const formData = new FormData();
-  formData.append('name', clubData.value.user.email);
-
+  formData.append('name', clubData.value.name);
+  
   if (clubData.value.profile_club instanceof File)
     formData.append('profile_club', clubData.value.profile_club);
 

@@ -13,8 +13,10 @@ const rulesNisn = {
 };
 
 const rules = [
-  (fileList: FileList) =>
-    !fileList || !fileList.length || fileList[0].size < 1000000 || 'Ukuran gambar maksimal 1 MB!',
+  (file: File | null) => {
+    if (!file) return true
+    return file.size < 1000000 || 'Ukuran gambar maksimal 1 MB!'
+  },
 ]
 
 const props = defineProps<{ data: PlayerData }>()
@@ -32,9 +34,40 @@ const localData = ref<PlayerData>({
   },
 })
 
-watch(() => props.data, (newVal) => {
-  localData.value = props.data
-}, { deep: true })
+const avatarPreview = ref<string | null>(
+  props.data.avatar?.url ? getImageUrl(props.data.avatar.url) : null
+)
+
+const familyCardPreview = ref<string | null>(
+  props.data.family_card?.url ? getImageUrl(props.data.family_card.url) : null
+)
+
+const reportGradesPreview = ref<string | null>(
+  props.data.report_grades?.url ? getImageUrl(props.data.report_grades.url) : null
+)
+
+const birthCertificatePreview = ref<string | null>(
+  props.data.birth_certificate?.url ? getImageUrl(props.data.birth_certificate.url) : null
+)
+
+watch(
+  () => props.data.id,
+  (newId, oldId) => {
+    // Hanya reset localData saat data yang dimuat berbeda (halaman edit baru)
+    if (newId !== oldId) {
+      localData.value = JSON.parse(JSON.stringify(props.data))
+    }
+  },
+  { immediate: true }
+)
+
+const positions = [
+  { title: 'Pilih Posisi', value: '' },
+  { title: 'Penjaga Gawang', value: 'goalkeeper' },
+  { title: 'Bek', value: 'defender' },
+  { title: 'Gelandang', value: 'midfielder' },
+  { title: 'Penyerang', value: 'forward' },
+];
 
 async function getClubs() {
   try {
@@ -64,13 +97,77 @@ watch(localData, (newVal, oldVal) => {
 }, { deep: true })
 
 const submitForm = () => {
-  emit('update:data', localData) 
+  emit('update:data', localData.value) 
   emit('submit')
 }
 
 const getImageUrl = (path: string) => {  
   return import.meta.env.VITE_APP_URL + path
 }
+
+watch(() => localData.value.avatar, (newAvatar: any) => {
+  if (newAvatar instanceof File) {
+    avatarPreview.value = URL.createObjectURL(newAvatar)
+  } else if (newAvatar?.url) {
+    avatarPreview.value = getImageUrl(newAvatar.url)
+  } else {
+    avatarPreview.value = null
+  }
+})
+
+watch(() => localData.value.family_card, (newFamilyCard: any) => {
+  if (newFamilyCard instanceof File) {
+    familyCardPreview.value = URL.createObjectURL(newFamilyCard)
+  } else if (newFamilyCard?.url) {
+    familyCardPreview.value = getImageUrl(newFamilyCard.url)
+  } else {
+    familyCardPreview.value = null
+  }
+})
+
+watch(() => localData.value.report_grades, (newReportGrades: any) => {
+  if (newReportGrades instanceof File) {
+    reportGradesPreview.value = URL.createObjectURL(newReportGrades)
+  } else if (newReportGrades?.url) {
+    reportGradesPreview.value = getImageUrl(newReportGrades.url)
+  } else {
+    reportGradesPreview.value = null
+  }
+})
+
+watch(() => localData.value.birth_certificate, (newBirthCertificatePreview: any) => {
+  if (newBirthCertificatePreview instanceof File) {
+    birthCertificatePreview.value = URL.createObjectURL(newBirthCertificatePreview)
+  } else if (newBirthCertificatePreview?.url) {
+    birthCertificatePreview.value = getImageUrl(newBirthCertificatePreview.url)
+  } else {
+    birthCertificatePreview.value = null
+  }
+})
+
+onBeforeUnmount(() => {
+  if (avatarPreview.value?.startsWith('blob:')) {
+    URL.revokeObjectURL(avatarPreview.value)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (familyCardPreview.value?.startsWith('blob:')) {
+    URL.revokeObjectURL(familyCardPreview.value)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (reportGradesPreview.value?.startsWith('blob:')) {
+    URL.revokeObjectURL(reportGradesPreview.value)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (birthCertificatePreview.value?.startsWith('blob:')) {
+    URL.revokeObjectURL(birthCertificatePreview.value)
+  }
+})
 </script>
 
 <template>
@@ -102,21 +199,23 @@ const getImageUrl = (path: string) => {
               </div>
 
               <VRow>
-                <VCol cols="4" class="d-flex justify-center align-center text-no-wrap">
-                  <img
-                      v-if="localData.avatar"
-                      :src="getImageUrl(localData.avatar.url)"
-                      class="card-website-analytics-img"
-                      style="width: 70%; filter: drop-shadow(0 4px 60px rgba(0, 0, 0, 50%));"
+                <VCol cols="4" class="d-flex flex-column align-center justify-center">
+                  <div style="width: 100%; max-width: 300px;" class="text-center justify-center">
+                    <img
+                      v-if="avatarPreview"
+                      :src="avatarPreview"
+                      alt="Preview Avatar"
+                      style="width: 100%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); margin-bottom: 1rem;"
                     />
-                    
-                  <VFileInput
-                    v-if="!localData.avatar"
-                    v-model="localData.avatar"
-                    :rules="rules"
-                    label="Kartu Keluarga"
-                    accept="image/png, image/jpeg, image/bmp"
-                  />
+
+                    <VFileInput
+                      v-model="localData.avatar"
+                      :rules="rules"
+                      label="Ganti Foto"
+                      accept="image/png, image/jpeg, image/bmp"
+                      density="comfortable"
+                    />
+                  </div>
                 </VCol>
 
                 <VCol cols="8" class="text-no-wrap">
@@ -170,7 +269,24 @@ const getImageUrl = (path: string) => {
                     clear-icon="tabler-x"
                     single-line
                   />
-
+                  
+                  <AppTextField
+                    v-model="localData.club_player.back_number"
+                    label="Nomor Punggung"
+                    placeholder="Contoh: 07"
+                    class="mb-4"
+                    maxlength="3"
+                  />
+                  
+                  <AppSelect
+                    label="Position"
+                    v-model="localData.club_player.position"
+                    :items="positions"
+                    placeholder="Pilih Club"
+                    clearable
+                    clear-icon="tabler-x"
+                    single-line
+                  />
                 </VCol>
               </VRow>
             </VWindowItem>
@@ -182,50 +298,54 @@ const getImageUrl = (path: string) => {
                   <div class="text-h6 mt-2">
                     <h6 class="text-h6 mb-2">Kartu Keluarga</h6>
                     <img
-                      v-if="localData.family_card"
-                      :src="getImageUrl(localData.family_card.url)"
-                      class="card-website-analytics-img"
-                      style="width: 12%; filter: drop-shadow(0 4px 60px rgba(0, 0, 0, 50%));"
+                      v-if="familyCardPreview"
+                      :src="familyCardPreview"
+                      alt="Preview Family Card"
+                      style="width: 30%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); margin-bottom: 1rem;"
                     />
-                    
+
                     <VFileInput
-                      v-if="!localData.family_card"
                       v-model="localData.family_card"
                       :rules="rules"
+                      label="Ganti Foto"
                       accept="image/png, image/jpeg, image/bmp"
+                      density="comfortable"
                     />
                   </div>
 
                   <div class="text-h6 mt-4">
                     <h6 class="text-h6 mb-2">Rapor Terakhir</h6>
                     <img
-                      v-if="localData.report_grades"
-                      :src="getImageUrl(localData.report_grades.url)"
-                      class="card-website-analytics-img"
-                      style="width: 12%; filter: drop-shadow(0 4px 60px rgba(0, 0, 0, 50%));"
+                      v-if="reportGradesPreview"
+                      :src="reportGradesPreview"
+                      alt="Preview Report Grades"
+                      style="width: 30%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); margin-bottom: 1rem;"
                     />
 
                     <VFileInput
-                      v-if="!localData.report_grades"
                       v-model="localData.report_grades"
                       :rules="rules"
+                      label="Ganti Foto"
                       accept="image/png, image/jpeg, image/bmp"
+                      density="comfortable"
                     />
                   </div>
 
                   <div class="text-h6 mt-4">
                     <h6 class="text-h6 mb-2">Akte Kelahiran</h6>
                     <img
-                      v-if="localData.birth_certificate"
-                      :src="getImageUrl(localData.birth_certificate.url)"
-                      class="card-website-analytics-img"
-                      style="width: 12%; filter: drop-shadow(0 4px 60px rgba(0, 0, 0, 50%));"
+                      v-if="birthCertificatePreview"
+                      :src="birthCertificatePreview"
+                      alt="Preview Birth Certificate"
+                      style="width: 30%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); margin-bottom: 1rem;"
                     />
+
                     <VFileInput
-                      v-if="!localData.birth_certificate"
                       v-model="localData.birth_certificate"
                       :rules="rules"
+                      label="Ganti Foto"
                       accept="image/png, image/jpeg, image/bmp"
+                      density="comfortable"
                     />
                   </div>
                 </VCol>

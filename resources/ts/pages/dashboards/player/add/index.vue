@@ -25,7 +25,6 @@ const playerData = ref<PlayerData>({
     code: '',
     name: '',
   },
-  sport_players: [],
   club_player: {
     club_id: '',
     player_id: 0,
@@ -37,12 +36,6 @@ const playerData = ref<PlayerData>({
 })
 
 const handleSubmit = async () => {
-  playerData.value.sport_players = selectedSports.value.map(sport => ({
-    id: 0,
-    player_id: '',
-    sport_id: sport.id,
-  }));
-
   const formData = new FormData();
   formData.append('email', playerData.value.user.email);
   formData.append('nisn', playerData.value.nisn);
@@ -50,6 +43,8 @@ const handleSubmit = async () => {
   formData.append('height', playerData.value.height);
   formData.append('weight', playerData.value.weight);
   formData.append('club_id', playerData.value.club_player.club_id.toString())
+  formData.append('back_number', playerData.value.club_player.back_number)
+  formData.append('position', playerData.value.club_player.position)
 
   if (playerData.value.avatar instanceof File)
     formData.append('avatar', playerData.value.avatar);

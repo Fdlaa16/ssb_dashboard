@@ -1,19 +1,13 @@
 <script setup lang="ts">
-import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
-import { themeConfig } from '@themeConfig'
-import type { ClubData } from './types'
+import type { ClubData } from './types';
 
-const clubs = ref<Club[]>([])
 const error = ref<string | null>(null)
 
-const rulesNisn = {
-  required: (value: string) => !!value || 'Harus diisi.',
-  exactLength: (value: string) => value.length === 10 || 'Harus tepat 10 karakter',
-};
-
 const rules = [
-  (fileList: FileList) =>
-    !fileList || !fileList.length || fileList[0].size < 1000000 || 'Ukuran gambar maksimal 1 MB!',
+  (file: File | null) => {
+    if (!file) return true
+    return file.size < 1000000 || 'Ukuran gambar maksimal 1 MB!'
+  },
 ]
 
 const props = defineProps<{ data: ClubData }>()
@@ -23,9 +17,20 @@ const localData = ref<ClubData>({
   ...props.data,
 })
 
-watch(() => props.data, (newVal) => {
-  localData.value = props.data
-}, { deep: true })
+const profileClubPreview = ref<string | null>(
+  props.data.profile_club?.url ? getImageUrl(props.data.profile_club.url) : null
+)
+
+watch(
+  () => props.data.id,
+  (newId, oldId) => {
+    // Hanya reset localData saat data yang dimuat berbeda (halaman edit baru)
+    if (newId !== oldId) {
+      localData.value = JSON.parse(JSON.stringify(props.data))
+    }
+  },
+  { immediate: true }
+)
 
 watch(localData, (newVal, oldVal) => {
   if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
@@ -41,6 +46,22 @@ const submitForm = () => {
 const getImageUrl = (path: string) => {  
   return import.meta.env.VITE_APP_URL + path
 }
+
+watch(() => localData.value.profile_club, (newProfileClub: any) => {
+  if (newProfileClub instanceof File) {
+    profileClubPreview.value = URL.createObjectURL(newProfileClub)
+  } else if (newProfileClub?.url) {
+    profileClubPreview.value = getImageUrl(newProfileClub.url)
+  } else {
+    profileClubPreview.value = null
+  }
+})
+
+onBeforeUnmount(() => {
+  if (profileClubPreview.value?.startsWith('blob:')) {
+    URL.revokeObjectURL(profileClubPreview.value)
+  }
+})
 </script>
 
 <template>
@@ -52,21 +73,23 @@ const getImageUrl = (path: string) => {
             <div>
               <VRow>
                 <VCol cols="12" class="text-no-wrap">
+                  <h6 class="text-h6 mb-2">Profile Club</h6>
                   <img
-                      v-if="localData.profile_club"
-                      :src="getImageUrl(localData.profile_club.url)"
-                      class="card-website-analytics-img"
-                      style="width: 12%; filter: drop-shadow(0 4px 60px rgba(0, 0, 0, 50%));"
-                    />
-                    
+                    v-if="profileClubPreview"
+                    :src="profileClubPreview"
+                    alt="Preview Profile Club"
+                    style="width: 30%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); margin-bottom: 1rem;"
+                  />
+
                   <VFileInput
                     v-model="localData.profile_club"
                     :rules="rules"
-                    label="Profile Club"
+                    label="Ganti Foto"
                     accept="image/png, image/jpeg, image/bmp"
+                    density="comfortable"
                     class="mb-4"
                   />
-
+                  
                   <AppTextField
                     v-model="localData.name"
                     label="name"
