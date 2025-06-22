@@ -16,6 +16,7 @@ class ClubPlayer extends Model
         'position',
         'is_captain',
         'status',
+        'category'
     ];
 
     public function club()

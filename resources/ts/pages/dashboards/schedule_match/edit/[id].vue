@@ -23,7 +23,6 @@ const scheduleMatchData = ref<ScheduleMatchData>({
   schedule_start_at: '',
   schedule_end_at: '',
   score: '',
-  status: false,
 });
 
 
@@ -67,7 +66,6 @@ const handleSubmit = async () => {
     formData.append('schedule_start_at', scheduleMatchData.value.schedule_start_at);
     formData.append('schedule_end_at', scheduleMatchData.value.schedule_end_at);
     formData.append('score', scheduleMatchData.value.score ?? '');
-    formData.append('status', scheduleMatchData.value.status ? '1' : '0');
     
     const res = await $api(`schedule-match/${scheduleMatchId}`, {
       method: 'POST',
@@ -99,6 +97,9 @@ const handleSubmit = async () => {
   }
 };
 
+const onSubmit = () => {
+  handleSubmit()
+}
 </script>
 
 <template>
@@ -106,7 +107,8 @@ const handleSubmit = async () => {
     <VCol cols="12" md="12">
       <ScheduleMatchEditable
         :data="scheduleMatchData"  
-        @submit="handleSubmit"
+        @update:data="scheduleMatchData = $event"
+        @submit="onSubmit"
       />
 
     </VCol>

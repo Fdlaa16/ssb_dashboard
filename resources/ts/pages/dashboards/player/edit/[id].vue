@@ -36,6 +36,7 @@ const playerData = ref<PlayerData>({
     player_id: 0,
     back_number: '',   
     position: '',
+    category: '',
     is_captain: false,   
     status: false,
   },
@@ -94,6 +95,7 @@ const handleSubmit = async () => {
     formData.append('club_id', playerData.value.club_player.club_id.toString())
     formData.append('back_number', playerData.value.club_player.back_number)
     formData.append('position', playerData.value.club_player.position)
+    formData.append('category', playerData.value.club_player.category)
     
     if (typeof playerData.value.user.id === 'number') {
       formData.append('user_id', playerData.value.user.id.toString());

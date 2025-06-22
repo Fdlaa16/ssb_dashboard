@@ -39,7 +39,7 @@ watch(localData, (newVal, oldVal) => {
 }, { deep: true })
 
 const submitForm = () => {
-  emit('update:data', localData) 
+  emit('update:data', localData.value) 
   emit('submit')
 }
 
@@ -67,7 +67,7 @@ onBeforeUnmount(() => {
 <template>
   <form @submit.prevent="$emit('submit')">
     <div class="d-flex flex-column gap-6 mb-6">
-      <VCard title="Create Club">
+      <VCard :title="props.data.id ? 'Edit Club' : 'Create Club'">
         <VCardText>
           <VWindow>
             <div>
@@ -87,7 +87,6 @@ onBeforeUnmount(() => {
                     label="Ganti Foto"
                     accept="image/png, image/jpeg, image/bmp"
                     density="comfortable"
-                    class="mb-4"
                   />
                   
                   <AppTextField

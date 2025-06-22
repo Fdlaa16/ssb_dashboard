@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('back_number')->nullable();
             $table->string('position')->nullable();
             $table->string('is_captain')->nullable();
+            $table->string('category')->nullable();
             $table->boolean('status')->nullable();
             $table->timestamps();
             $table->softDeletes();

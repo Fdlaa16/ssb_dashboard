@@ -17,6 +17,7 @@ export interface ClubPlayer {
   position: string;
   is_captain: boolean;   
   status: boolean;
+  category: string; 
 }
 
 export interface Sport {

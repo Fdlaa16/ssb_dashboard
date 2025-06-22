@@ -17,7 +17,6 @@ class ScheduleMatch extends Model
         'schedule_start_at',
         'schedule_end_at',
         'score',
-        'status',
     ];
 
     public function stadium()
@@ -27,12 +26,12 @@ class ScheduleMatch extends Model
 
     public function firstClub()
     {
-        return $this->belongsTo(Club::class, 'first_club_id', 'id');
+        return $this->belongsTo(Club::class, 'first_club_id', 'id')->withTrashed();
     }
 
     public function secoundClub()
     {
-        return $this->belongsTo(Club::class, 'secound_club_id', 'id');
+        return $this->belongsTo(Club::class, 'secound_club_id', 'id')->withTrashed();
     }
 
     public function user()

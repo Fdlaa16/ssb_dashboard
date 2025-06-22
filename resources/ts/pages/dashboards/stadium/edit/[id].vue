@@ -1,73 +1,56 @@
 <script lang="ts" setup>
-import MediaEditable from '@/views/dashboards/media/MediaEditable.vue';
-import type { MediaData } from '@/views/dashboards/media/types';
+import StadiumEditable from '@/views/dashboards/stadium/StadiumEditable.vue';
+import type { stadiumData } from '@/views/dashboards/stadium/types';
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
 const router = useRouter();
 
-const mediaId = route.params.id as string;
+const stadiumId = route.params.id as string;
 const error = ref<string | null>(null)
 const loading = ref(false)
 const isFlatSnackbarVisible = ref(false)
 const snackbarMessage = ref('')
 const snackbarColor = ref<'success' | 'error'>('success')
 
-const mediaData = ref<MediaData>({
+const stadiumData = ref<StadiumData>({
   id: 0,
   code: '',
   name: '',
-  title: '',
-  hashtag: '',
-  description: '',
-  link: '',
-  start_date: '',
-  end_date: '',
-  document_media: null,
+  area: '',
 });
 
 
-const fetchMedia = async () => {
+const fetchstadium = async () => {
   loading.value = true;
   try {
-    const res = await $api(`media/${mediaId}/edit`);
+    const res = await $api(`stadium/${stadiumId}/edit`);
    
-    mediaData.value = res.data 
+    stadiumData.value = res.data 
 
-    console.log('Fetched media data:', mediaData.value);
+    console.log('Fetched stadium data:', stadiumData.value);
     
   } catch (err: any) {
-    error.value = err.message || 'Gagal mengambil data media';
+    error.value = err.message || 'Gagal mengambil data stadium';
   } finally {
     loading.value = false;
   }
 };
 
 onMounted(async () => {
-  await fetchMedia();
+  await fetchstadium();
 });
 
 const handleSubmit = async () => {
-  try {    
-
-    console.log('Submitting media data:', mediaData.value);
-    
+  try {        
     const formData = new FormData();
     formData.append('_method', 'PUT'); 
 
-    formData.append('name', mediaData.value.name);
-    formData.append('title', mediaData.value.title);
-    formData.append('hashtag', mediaData.value.hashtag);
-    formData.append('description', mediaData.value.description);
-    formData.append('link', mediaData.value.link);
-    formData.append('start_date', mediaData.value.start_date);
-    formData.append('end_date', mediaData.value.end_date);
+    formData.append('name', stadiumData.value.name);
+    formData.append('area', stadiumData.value.area);
 
-    if (mediaData.value.document_media instanceof File)
-      formData.append('document_media', mediaData.value.document_media);
-
-    const res = await $api(`media/${mediaId}`, {
+    const res = await $api(`stadium/${stadiumId}`, {
       method: 'POST',
       body: formData,
     });
@@ -77,7 +60,7 @@ const handleSubmit = async () => {
     isFlatSnackbarVisible.value = true;
 
     router.push({
-      name: 'dashboards-media-list',
+      name: 'dashboards-stadium-list',
       query: {
         success: 'Data berhasil diperbarui!',
       },
@@ -106,9 +89,9 @@ const onSubmit = () => {
 <template>
   <VRow>
     <VCol cols="12" md="12">
-      <MediaEditable
-        :data="mediaData"  
-        @update:data="mediaData = $event"
+      <StadiumEditable
+        :data="stadiumData"  
+        @update:data="stadiumData = $event"
         @submit="onSubmit"
       />
 

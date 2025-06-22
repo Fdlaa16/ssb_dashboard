@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Media extends Model
 {
     use HasFactory, SoftDeletes;
+
+    protected $table = 'medias';
     protected $fillable = [
         'code',
         'name',
@@ -17,6 +19,8 @@ class Media extends Model
         'description',
         'link',
         'thumbnail',
+        'start_date',
+        'end_date',
         'digital_platform',
         'status',
     ];
@@ -47,5 +51,15 @@ class Media extends Model
     public static function makeCode($next_number)
     {
         return (string) self::$code_prefix . '-' . str_pad($next_number, 5, 0, STR_PAD_LEFT);
+    }
+
+    public function files()
+    {
+        return $this->morphMany(File::class, 'fileable');
+    }
+
+    public function document_media()
+    {
+        return $this->morphMany(File::class, 'fileable')->where('type', 'document_media')->latest()->one();
     }
 }

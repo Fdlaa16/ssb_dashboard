@@ -50,14 +50,8 @@ const headers = [
   { title: 'ID', key: 'id' },
   { title: 'Name', key: 'name' },
   { title: 'Title', key: 'title' },
-  { title: 'Status', key: 'status' },
   { title: 'Action', key: 'action', sortable: false },
 ]
-
-const statusColorMap = {
-  1: { label: 'Active', color: 'success' },
-  0: { label: 'Non Active', color: 'error' },
-}
 
 const paginatedMedias = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage
@@ -73,6 +67,7 @@ async function fetchMedia() {
       method: 'GET',
       params: {
         search: searchQuery.value,
+        status: selectedStatus.value,
         sort: selectedSort.value,
       },
     })
@@ -242,16 +237,18 @@ function getQueryParam(param: LocationQueryValue | LocationQueryValue[] | undefi
 
 onMounted(() => {
   searchQuery.value = getQueryParam(route.query.search)
+  selectedStatus.value = getQueryParam(route.query.status)
   selectedSort.value = getQueryParam(route.query.sort)
 
   fetchMedia()
 })
 
-watch([searchQuery, selectedSort], () => {
+watch([searchQuery, selectedStatus, selectedSort], () => {
   router.replace({
     query: {
       ...route.query,
       search: searchQuery.value || undefined,
+      status: selectedStatus.value || undefined,
       sort: selectedSort.value || undefined,
     },
   })
@@ -325,6 +322,26 @@ watch([searchQuery, selectedSort], () => {
                 placeholder="Search Media"
               />
             </VCol>
+
+            <VCol
+              cols="12"
+              sm="3"
+            >
+              <AppSelect
+                v-model="selectedStatus"
+                placeholder="Status"
+                clearable
+                clear-icon="tabler-x"
+                single-line
+                :items="[
+                  { title: 'Pilih Status', value: '' },
+                  { title: 'Semua', value: 'all' },
+                  { title: 'Aktif', value: 'active' },
+                  { title: 'Tidak Aktif', value: 'in_active' }
+                ]"
+              />
+            </VCol>
+            
             <VCol
               cols="12"
               sm="3"
@@ -413,19 +430,6 @@ watch([searchQuery, selectedSort], () => {
               </span>
             </div>
           </template> -->
-
-          <template #item.status="{ item }">
-            <VChip
-              label
-              class="text-body-1 font-weight-medium"
-              :color="statusColorMap[item.status]?.color"
-              :text-color="statusColorMap[item.status]?.textColor || 'white'"
-              variant="tonal"
-              size="small"
-            >
-              {{ statusColorMap[item.status]?.label || 'Unknown' }}
-            </VChip>
-          </template>
 
           <template #item.action="{ item }">
             <div class="d-flex gap-x-2">

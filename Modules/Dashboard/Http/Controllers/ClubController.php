@@ -33,9 +33,22 @@ class ClubController extends Controller
         $clubsQuery->when(!empty($request->search), function ($q) use ($request) {
             $q->where(function ($q) use ($request) {
                 $q->where('created_at', 'like', '%' . $request->search . '%')
-                    ->orWhere('name', 'like', '%' . $request->search . '%')
-                    ->orWhere('description', 'like', '%' . $request->search . '%');
+                    ->orWhere('name', 'like', '%' . $request->search . '%');
             });
+        });
+
+        $clubsQuery->when($request->status, function ($query, $status) {
+            switch ($status) {
+                case 'in_active':
+                    $query->onlyTrashed();
+                    break;
+                case 'active':
+                    $query->whereNull('deleted_at');
+                    break;
+                case 'all':
+                default:
+                    break;
+            }
         });
 
         if ($request->filled('from_date')) {

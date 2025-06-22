@@ -9,7 +9,6 @@ const route = useRoute()
 
 const searchQuery = ref('')
 const selectedClub = ref('')
-const selectedSport = ref('')
 const selectedStatus = ref('')
 const selectedSort = ref('')
 
@@ -80,7 +79,6 @@ async function fetchPlayer() {
       params: {
         search: searchQuery.value,
         club_id: selectedClub.value,
-        sport_id: selectedSport.value,
         status: selectedStatus.value,
         sort: selectedSort.value,
       },
@@ -289,7 +287,6 @@ function getQueryParam(param: LocationQueryValue | LocationQueryValue[] | undefi
 onMounted(() => {
   searchQuery.value = getQueryParam(route.query.search)
   selectedClub.value = getQueryParam(route.query.club_id)
-  selectedSport.value = getQueryParam(route.query.sport_id)
   selectedStatus.value = getQueryParam(route.query.status)
   selectedSort.value = getQueryParam(route.query.sort)
 
@@ -298,13 +295,12 @@ onMounted(() => {
   fetchSports()
 })
 
-watch([searchQuery, selectedClub, selectedSport, selectedStatus, selectedSort], () => {
+watch([searchQuery, selectedClub, selectedStatus, selectedSort], () => {
   router.replace({
     query: {
       ...route.query,
       search: searchQuery.value || undefined,
       club_id: selectedClub.value || undefined,
-      sport_id: selectedSport.value || undefined,
       status: selectedStatus.value || undefined,
       sort: selectedSort.value || undefined,
     },
@@ -372,7 +368,7 @@ watch([searchQuery, selectedClub, selectedSport, selectedStatus, selectedSort], 
           <VRow>
             <VCol
               cols="12"
-              sm="3"
+              sm="4"
             >
               <AppSelect
                 v-model="selectedClub"
@@ -386,21 +382,7 @@ watch([searchQuery, selectedClub, selectedSport, selectedStatus, selectedSort], 
 
             <VCol
               cols="12"
-              sm="3"
-            >
-              <AppSelect
-                v-model="selectedSport"
-                placeholder="Sport"
-                clearable
-                clear-icon="tabler-x"
-                single-line
-                :items="sports"
-              />
-            </VCol>
-
-            <VCol
-              cols="12"
-              sm="3"
+              sm="4"
             >
               <AppSelect
                 v-model="selectedStatus"
@@ -420,7 +402,7 @@ watch([searchQuery, selectedClub, selectedSport, selectedStatus, selectedSort], 
 
             <VCol
               cols="12"
-              sm="3"
+              sm="4"
             >
               <AppSelect
                 v-model="selectedSort"

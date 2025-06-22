@@ -85,7 +85,7 @@ const submitForm = () => {
                       />
                     </VCol>
 
-                    <VCol cols="3">
+                    <VCol cols="4">
                       <AppDateTimePicker
                         v-model="localData.schedule_start_at"
                         label="Start At"
@@ -94,21 +94,12 @@ const submitForm = () => {
                       />
                     </VCol>
 
-                    <VCol cols="3">
+                    <VCol cols="4">
                       <AppDateTimePicker
                         v-model="localData.schedule_end_at"
                         label="End At"
                         placeholder="Select time"
                         :config="{ enableTime: true, noCalendar: true, dateFormat: 'H:i' }"
-                      />
-                    </VCol>
-
-                    <VCol cols="2" class="text-no-wrap mt-5">
-                      <VSwitch
-                        v-model="localData.status"
-                        :label="localData.status === 1 ? 'Active' : 'Non Active'"
-                        :true-value= 1
-                        :false-value= 0
                       />
                     </VCol>
                   </VRow>

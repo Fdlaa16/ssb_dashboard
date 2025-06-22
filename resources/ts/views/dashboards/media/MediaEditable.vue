@@ -1,54 +1,19 @@
 <script setup lang="ts">
-import type { MediaData } from './types'
-
-const currentTab = ref('biodata')
-const clubs = ref<Club[]>([])
-const error = ref<string | null>(null)
-const toggleSwitch = ref(true)
-const toggleFalseSwitch = ref(false)
-
-const rulesNisn = {
-  required: (value: string) => !!value || 'Harus diisi.',
-  exactLength: (value: string) => value.length === 10 || 'Harus tepat 10 karakter',
-};
-
-const rules = [
-  (fileList: FileList) =>
-    !fileList || !fileList.length || fileList[0].size < 1000000 || 'Ukuran gambar maksimal 1 MB!',
-]
+import { onBeforeUnmount, ref, watch } from 'vue';
+import type { MediaData } from './types';
 
 const props = defineProps<{ data: MediaData }>()
 const emit = defineEmits(['submit', 'update:data'])
 
-const localData = ref<MediaData>({
-  ...props.data,
-  status: props.data.status || 'active',
-})
+const localData = ref<MediaData>({ ...props.data })
+const currentTab = ref('biodata')
+const documentMediaPreview = ref<string | null>(null)
 
-watch(() => props.data, (newVal) => {
-  localData.value = props.data
-}, { deep: true })
-
-async function getClubs() {
-  try {
-    const response = await $api('club', {
-      method: 'GET',
-    })
-
-    const clubData = response.data.map((club: any) => ({
-      title: club.name,
-      value: club.id,
-    }))
-
-    clubs.value = [{ title: 'Pilih Club', value: '' }, ...clubData]
-  } catch (error) {
-    console.error('Gagal memuat clubs', error)
+watch(() => props.data.id, (newId, oldId) => {
+  if (newId !== oldId) {
+    localData.value = JSON.parse(JSON.stringify(props.data))
   }
-}
-
-onMounted(async () => {
-  getClubs()
-})
+}, { immediate: true })
 
 watch(localData, (newVal, oldVal) => {
   if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
@@ -57,25 +22,34 @@ watch(localData, (newVal, oldVal) => {
 }, { deep: true })
 
 const submitForm = () => {
-  emit('update:data', localData) 
+  emit('update:data', localData.value)
   emit('submit')
 }
 
-const getImageUrl = (path: string) => {  
-  return import.meta.env.VITE_APP_URL + path
-}
+const getImageUrl = (path: string) => import.meta.env.VITE_APP_URL + path
 
-const capitalizedLabel = (label: boolean) => {
-  const convertLabelText = label.toString()
+watch(() => localData.value.document_media, (newDocumentMedia: any) => {
+  if (newDocumentMedia instanceof File) {
+    documentMediaPreview.value = URL.createObjectURL(newDocumentMedia)
+  } else if (newDocumentMedia?.url) {
+    documentMediaPreview.value = getImageUrl(newDocumentMedia.url)
+  } else {
+    documentMediaPreview.value = null
+  }
+})
 
-  return convertLabelText.charAt(0).toUpperCase() + convertLabelText.slice(1)
-}
+onBeforeUnmount(() => {
+  if (documentMediaPreview.value?.startsWith('blob:')) {
+    URL.revokeObjectURL(documentMediaPreview.value)
+  }
+})
+
 </script>
 
 <template>
   <form @submit.prevent="$emit('submit')">
     <div class="d-flex flex-column gap-6 mb-6">
-      <VCard title="Create Media">
+      <VCard :title="props.data.id ? 'Edit Media' : 'Create Media'">
         <VCardText>
           <VWindow>
             <!-- Tab Biodata -->
@@ -83,32 +57,37 @@ const capitalizedLabel = (label: boolean) => {
 
               <VRow>
                 <VCol cols="12" class="text-no-wrap">
-                  <VRow class="justify-center align-center">
-                    <VCol cols="10" class="text-no-wrap">  
-                      <AppTextField
-                        v-model="localData.name"
-                        label="Name"
-                        placeholder="Name"
+                  <VRow>
+                    <VCol cols="6">
+                      <AppDateTimePicker
+                        v-model="localData.start_date"
+                        label="Start Date"
+                        placeholder="Start date"
                         class="mb-4"
                       />
                     </VCol>
-                    
-                    <VCol cols="2" class="text-no-wrap mt-5">
-                      <VSwitch
-                        v-model="localData.status"
-                        :label="localData.status === 1 ? 'Active' : 'Non Active'"
-                        :true-value= 1
-                        :false-value= 0
+
+                    <VCol cols="6">
+                      <AppDateTimePicker
+                        v-model="localData.end_date"
+                        label="End Date"
+                        placeholder="End date"
+                        class="mb-4"
                       />
                     </VCol>
                   </VRow>
+                  <AppTextField
+                    v-model="localData.name"
+                    label="Name"
+                    placeholder="Name"
+                    class="mb-4"
+                  />
 
                   <AppTextField
                     v-model="localData.title"
                     label="Title"
                     placeholder="Title"
                     class="mb-4"
-                    maxlength="3"
                   />
 
                   <AppTextField
@@ -116,7 +95,6 @@ const capitalizedLabel = (label: boolean) => {
                     label="Hashtag"
                     placeholder="Hashtag"
                     class="mb-4"
-                    maxlength="3"
                   />
 
                   <DemoTextareaBasic 
@@ -131,21 +109,23 @@ const capitalizedLabel = (label: boolean) => {
                     label="Link"
                     placeholder="Link"
                     class="mb-4"
-                    maxlength="3"
                   />
 
                   <h6 class="text-h6 mb-2">Document Media</h6>
                   <img
-                    v-if="localData.document_media"
-                    :src="getImageUrl(localData.document_media.url)"
-                    class="card-website-analytics-img"
-                    style="width: 12%; filter: drop-shadow(0 4px 60px rgba(0, 0, 0, 50%));"
+                    v-if="documentMediaPreview"
+                    :src="documentMediaPreview"
+                    alt="Preview Profile Club"
+                    style="width: 30%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); margin-bottom: 1rem;"
                   />
-                  
+
                   <VFileInput
                     v-model="localData.document_media"
                     :rules="rules"
+                    label="Ganti Foto"
                     accept="image/png, image/jpeg, image/bmp"
+                    density="comfortable"
+                    class="mb-4"
                   />
                 </VCol>
               </VRow>

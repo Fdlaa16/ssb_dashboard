@@ -8,12 +8,12 @@ const router = useRouter()
 const route = useRoute()
 
 const searchQuery = ref('')
-const selectedClub = ref('')
+const selectedStadium = ref('')
 const selectedSport = ref('')
 const selectedStatus = ref('')
 const selectedSort = ref('')
 
-const clubs = ref<any[]>([])
+const stadiums = ref<any[]>([])
 
 const loading = ref(false)
 const error = ref<string | null>(null)
@@ -35,7 +35,7 @@ onMounted(() => {
 })
 
 const totalPages = computed(() => {
-  return Math.ceil(clubs.value.length / itemsPerPage)
+  return Math.ceil(stadiums.value.length / itemsPerPage)
 })
 
 const widgetData = ref([
@@ -57,17 +57,17 @@ const statusColorMap = {
   2: { label: 'Non Active', color: 'error' },
 }
 
-const paginatedClubs = computed(() => {
+const paginatedStadiums = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage
-  return clubs.value.slice(start, start + itemsPerPage)
+  return stadiums.value.slice(start, start + itemsPerPage)
 })
 
-async function fetchClub() {
+async function fetchStadium() {
   loading.value = true
   error.value = null
 
   try {
-    const response = await $api('club', {
+    const response = await $api('stadium', {
       method: 'GET',
       params: {
         search: searchQuery.value,
@@ -76,13 +76,13 @@ async function fetchClub() {
       },
     })
 
-    clubs.value = response.data 
+    stadiums.value = response.data 
     const totals = response.totals
 
     widgetData.value = [
-      { title: 'All', value: totals.all, icon: 'tabler-shirt', iconColor: 'primary', change: 0, desc: 'Total semua club' },
-      { title: 'Active', value: totals.active, icon: 'tabler-shirt', iconColor: 'success', change: 0, desc: 'Club aktif' },
-      { title: 'Non Active', value: totals.in_active, icon: 'tabler-shirt', iconColor: 'error', change: 0, desc: 'Club tidak aktif' },
+      { title: 'All', value: totals.all, icon: 'tabler-building-stadium', iconColor: 'primary', change: 0, desc: 'Total semua stadium' },
+      { title: 'Active', value: totals.active, icon: 'tabler-building-stadium', iconColor: 'success', change: 0, desc: 'Stadium aktif' },
+      { title: 'Non Active', value: totals.in_active, icon: 'tabler-building-stadium', iconColor: 'error', change: 0, desc: 'Stadium tidak aktif' },
     ]
 
   } catch (err: any) {
@@ -92,14 +92,14 @@ async function fetchClub() {
   }
 }
 
-function editClub(club: any) {
-  router.push({ name: 'dashboards-club-edit-id', params: { id: club.id } })
+function editStadium(stadium: any) {
+  router.push({ name: 'dashboards-stadium-edit-id', params: { id: stadium.id } })
 }
 
-async function deleteClub(club: any) {
+async function deleteStadium(stadium: any) {
   const confirm = await Swal.fire({
     title: 'Apakah kamu yakin?',
-    text: `Data club dengan nama ${club.name} akan dihapus.`,
+    text: `Data stadium dengan nama ${stadium.name} akan dihapus.`,
     icon: 'warning',
     showCancelButton: true,
     confirmButtonText: 'Ya, hapus!',
@@ -114,17 +114,17 @@ async function deleteClub(club: any) {
     try {
       loading.value = true
 
-      await $api(`club/${club.id}`, {
+      await $api(`stadium/${stadium.id}`, {
         method: 'DELETE',
       })
 
-      await fetchClub()
+      await fetchStadium()
 
-      snackbarMessage.value = 'Club berhasil dihapus'
+      snackbarMessage.value = 'Stadium berhasil dihapus'
       snackbarColor.value = 'success'
       isSnackbarVisible.value = true
     } catch (err: any) {
-      snackbarMessage.value = err?.response?.data?.message || 'Gagal menghapus club'
+      snackbarMessage.value = err?.response?.data?.message || 'Gagal menghapus stadium'
       snackbarColor.value = 'error'
       isSnackbarVisible.value = true
     } finally {
@@ -133,10 +133,10 @@ async function deleteClub(club: any) {
   }
 }
 
-async function activateClub(club: any) {
+async function activateStadium(stadium: any) {
   const confirm = await Swal.fire({
-    title: 'Aktifkan Club?',
-    text: `Club ${club.name} akan diaktifkan kembali.`,
+    title: 'Aktifkan Stadium?',
+    text: `Stadium ${stadium.name} akan diaktifkan kembali.`,
     icon: 'question',
     showCancelButton: true,
     confirmButtonText: 'Ya, aktifkan!',
@@ -151,17 +151,17 @@ async function activateClub(club: any) {
     try {
       loading.value = true
 
-      await $api(`club/${club.id}/active`, {
+      await $api(`stadium/${stadium.id}/active`, {
         method: 'PUT',
       })
 
-      await fetchClub()
+      await fetchStadium()
 
-      snackbarMessage.value = 'Club berhasil diaktifkan kembali'
+      snackbarMessage.value = 'Stadium berhasil diaktifkan kembali'
       snackbarColor.value = 'success'
       isSnackbarVisible.value = true
     } catch (err: any) {
-      snackbarMessage.value = err?.response?.data?.message || 'Gagal mengaktifkan club'
+      snackbarMessage.value = err?.response?.data?.message || 'Gagal mengaktifkan stadium'
       snackbarColor.value = 'error'
       isSnackbarVisible.value = true
     } finally {
@@ -179,7 +179,7 @@ onMounted(() => {
   selectedStatus.value = getQueryParam(route.query.status)
   selectedSort.value = getQueryParam(route.query.sort)
 
-  fetchClub()
+  fetchStadium()
 })
 
 watch([searchQuery, selectedStatus, selectedSort], () => {
@@ -192,7 +192,7 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
     },
   })
 
-  fetchClub()
+  fetchStadium()
 })
 </script>
 
@@ -247,7 +247,7 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
 
       <VCard class="mb-6">
         <VCardItem class="pb-4">
-          <VCardTitle>Clubs</VCardTitle>
+          <VCardTitle>Stadiums</VCardTitle>
         </VCardItem>
 
         <VCardText>
@@ -258,7 +258,7 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
             >
              <AppTextField
                 v-model="searchQuery"
-                placeholder="Search Club"
+                placeholder="Search Stadium"
               />
             </VCol>
 
@@ -304,9 +304,9 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
           <div class="app-user-search-filter d-flex align-center flex-wrap gap-4">
             <VBtn
               prepend-icon="tabler-plus"
-              :to="{ name: 'dashboards-club-add' }"
+              :to="{ name: 'dashboards-stadium-add' }"
             >
-              Add New Club
+              Add New Stadium
             </VBtn>
           </div>
           </VRow>
@@ -316,7 +316,7 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
 
         <VDataTable
           :headers="headers"
-          :items="paginatedClubs"
+          :items="stadiums"
           :loading="loading"
           class="text-no-wrap"
           :items-per-page="itemsPerPage"
@@ -341,7 +341,7 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
                 icon
                 size="small"
                 color="primary"
-                @click="editClub(item)"
+                @click="editStadium(item)"
                 title="Edit"
               >
                 <VIcon icon="tabler-pencil" />
@@ -352,7 +352,7 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
                 icon
                 size="small"
                 color="error"
-                @click="deleteClub(item)"
+                @click="deleteStadium(item)"
                 title="Delete"
               >
                 <VIcon icon="tabler-trash" />
@@ -363,7 +363,7 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
                 icon
                 size="small"
                 color="success"
-                @click="activateClub(item)"
+                @click="activateStadium(item)"
                 title="Activate"
               >
                 <VIcon icon="tabler-check" />

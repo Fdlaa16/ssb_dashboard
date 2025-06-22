@@ -340,8 +340,8 @@ watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort]
                 :items="[
                   { title: 'Pilih Status', value: '' },
                   { title: 'Semua', value: 'all' },
-                  { title: 'Aktif', value: 1 },
-                  { title: 'Tidak Aktif', value: 0 }
+                  { title: 'Aktif', value: 'active' },
+                  { title: 'Tidak Aktif', value: 'in_active' }
                 ]"
               />
             </VCol>

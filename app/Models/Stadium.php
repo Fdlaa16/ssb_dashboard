@@ -14,8 +14,7 @@ class Stadium extends Model
     protected $fillable = [
         'code',
         'name',
-        'location',
-        'status',
+        'area',
     ];
 
     public static $code_prefix = "STD";

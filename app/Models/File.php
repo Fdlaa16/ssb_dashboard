@@ -43,6 +43,7 @@ class File extends Model
         'birth_certificate' => 'birth_certificate/',
         'report_grades' => 'report_grades/',
         'profile_club' => 'profile_club/',
+        'document_media' => 'document_media/',
     ];
 
     public function getDirectory($type)

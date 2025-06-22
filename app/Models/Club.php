@@ -12,8 +12,6 @@ class Club extends Model
     protected $fillable = [
         'code',
         'name',
-        'status',
-        'description',
     ];
 
     public static $code_prefix = "CLB";
@@ -44,9 +42,9 @@ class Club extends Model
         return (string) self::$code_prefix . '-' . str_pad($next_number, 5, 0, STR_PAD_LEFT);
     }
 
-    public function clubPlayer()
+    public function clubPlayers()
     {
-        return $this->belongsTo(ClubPlayer::class, 'club_id', 'id');
+        return $this->hasMany(ClubPlayer::class, 'club_id', 'id');
     }
 
     public function players()

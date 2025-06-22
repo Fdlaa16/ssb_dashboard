@@ -60,6 +60,7 @@ Route::get('stadium/{id}', [StadiumController::class, 'show'])->name('stadium.sh
 Route::get('stadium/{id}/edit', [StadiumController::class, 'edit'])->name('stadium.edit');
 Route::put('stadium/{id}', [StadiumController::class, 'update'])->name('stadium.update');
 Route::delete('stadium/{id}', [StadiumController::class, 'destroy'])->name('stadium.destroy');
+Route::put('stadium/{id}/active', [StadiumController::class, 'active'])->name('stadium.active');
 
 Route::get('schedule-match', [ScheduleMatchController::class, 'index'])->name('schedule-match.index');
 Route::get('schedule-match/create', [ScheduleMatchController::class, 'create'])->name('schedule-match.create');

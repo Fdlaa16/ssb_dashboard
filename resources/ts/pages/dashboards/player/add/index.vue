@@ -32,6 +32,7 @@ const playerData = ref<PlayerData>({
     position: '',
     is_captain: false,   
     status: false,
+    category: '',
   },
 })
 
@@ -45,6 +46,7 @@ const handleSubmit = async () => {
   formData.append('club_id', playerData.value.club_player.club_id.toString())
   formData.append('back_number', playerData.value.club_player.back_number)
   formData.append('position', playerData.value.club_player.position)
+  formData.append('category', playerData.value.club_player.category);
 
   if (playerData.value.avatar instanceof File)
     formData.append('avatar', playerData.value.avatar);

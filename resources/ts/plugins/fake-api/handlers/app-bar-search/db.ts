@@ -112,6 +112,16 @@ export const db: DB = {
           icon: 'tabler-shirt',
           title: 'Media',
         },
+        {
+          url: { name: 'dashboards-stadium-list' },
+          icon: 'tabler-shirt',
+          title: 'Stadium',
+        },
+        {
+          url: { name: 'dashboards-stadium-edit-id' },
+          icon: 'tabler-shirt',
+          title: 'Stadium',
+        },
       ]
     },
     {

@@ -55,8 +55,10 @@ class PlayerController extends Controller
                     ->orWhereHas('user', function ($user) use ($request) {
                         $user->where('email', 'like', '%' . $request->search . '%');
                     })
-                    ->orWhereHas('clubs', function ($club) use ($request) {
-                        $club->where('name', 'like', '%' . $request->search . '%');
+                    ->orWhereHas('club_players', function ($clubPlayers) use ($request) {
+                        $clubPlayers->orWhereHas('clubs', function ($club) use ($request) {
+                            $club->where('name', 'like', '%' . $request->search . '%');
+                        });
                     })
                     ->orWhereHas('sports', function ($sport) use ($request) {
                         $sport->where('name', 'like', '%' . $request->search . '%');
@@ -83,7 +85,7 @@ class PlayerController extends Controller
 
         $playersQuery->when($request->club_id, function ($query) use ($request) {
             $query->whereHas('clubs', function ($q) use ($request) {
-                $q->where('id', $request->club_id);
+                $q->where('clubs.id', $request->club_id);
             });
         });
 
@@ -164,6 +166,7 @@ class PlayerController extends Controller
                 'height'    => 'required',
                 'weight'    => 'required',
                 'club_id'   => 'required',
+                'category'  => 'required',
             ];
 
             $messages = [
@@ -177,6 +180,7 @@ class PlayerController extends Controller
                 'weight.required'    => 'Berat badan harus diisi',
                 'club_id.required'   => 'Club harus diisi',
                 'club_id.exists'     => 'Club tidak ditemukan',
+                'category.required'  => 'Kategori harus diisi',
             ];
 
             $validator = Validator::make($postData, $rules, $messages);
@@ -222,6 +226,7 @@ class PlayerController extends Controller
                     'player_id' => $player->id,
                     'position' => $request->position,
                     'back_number' => $request->back_number,
+                    'category' => $request->category,
                 ]);
 
                 DB::commit();
@@ -359,6 +364,7 @@ class PlayerController extends Controller
                     'club_id' => $request->club_id,
                     'position' => $request->position,
                     'back_number' => $request->back_number,
+                    'category' => $request->category,
                 ]);
 
                 DB::commit();

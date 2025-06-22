@@ -20,7 +20,6 @@ return new class extends Migration
             $table->time('schedule_start_at')->nullable();
             $table->time('schedule_end_at')->nullable();
             $table->string('score')->nullable();
-            $table->boolean('status')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

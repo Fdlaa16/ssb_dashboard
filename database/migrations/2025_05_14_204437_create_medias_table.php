@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('media', function (Blueprint $table) {
+        Schema::create('medias', function (Blueprint $table) {
             $table->id();
             $table->string('code')->nullable();
             $table->string('name')->nullable();
@@ -19,9 +19,8 @@ return new class extends Migration
             $table->string('hashtag')->nullable();
             $table->text('description')->nullable();
             $table->string('link')->nullable();
-            $table->string('thumbnail')->nullable();
-            $table->string('digital_platform')->nullable();
-            $table->boolean('status')->nullable();
+            $table->string('start_date')->nullable();
+            $table->string('end_date')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -32,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('media');
+        Schema::dropIfExists('medias');
     }
 };

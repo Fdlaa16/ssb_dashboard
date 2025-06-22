@@ -90,6 +90,18 @@ onMounted(async () => {
   getClubs()
 })
 
+const categories = [
+  { title: 'Pilih Kategori', value: '' },
+  { title: 'U-6', value: 'u6' },
+  { title: 'U-8', value: 'u8' },
+  { title: 'U-10', value: 'u10' },
+  { title: 'U-12', value: 'u12' },
+  { title: 'U-14', value: 'u14' },
+  { title: 'U-16', value: 'u16' },
+  { title: 'U-18', value: 'u18' },
+  { title: 'U-20', value: 'u20' },
+]
+
 watch(localData, (newVal, oldVal) => {
   if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
     emit('update:data', newVal)
@@ -268,21 +280,35 @@ onBeforeUnmount(() => {
                     clearable
                     clear-icon="tabler-x"
                     single-line
+                    class="mb-4"
                   />
                   
-                  <AppTextField
-                    v-model="localData.club_player.back_number"
-                    label="Nomor Punggung"
-                    placeholder="Contoh: 07"
-                    class="mb-4"
-                    maxlength="3"
-                  />
+                  <VRow class="mb-4">
+                    <VCol cols="6">
+                      <AppTextField
+                        v-model="localData.club_player.back_number"
+                        label="Nomor Punggung"
+                        placeholder="Contoh: 07"
+                        maxlength="3"
+                      />
+                    </VCol>
+
+                    <VCol cols="6">
+                      <AppSelect
+                        label="Kategori"
+                        v-model="localData.club_player.category"
+                        :items="categories"
+                        clearable
+                        clear-icon="tabler-x"
+                        single-line
+                      />
+                    </VCol>
+                  </VRow>
                   
                   <AppSelect
                     label="Position"
                     v-model="localData.club_player.position"
                     :items="positions"
-                    placeholder="Pilih Club"
                     clearable
                     clear-icon="tabler-x"
                     single-line

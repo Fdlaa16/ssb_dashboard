@@ -52,16 +52,13 @@ class ScheduleMatchController extends Controller
                 });
         });
 
-        $scheduleMatchQuery->when($request->status ?? null, function ($query, $status) {
+        $scheduleMatchQuery->when($request->status, function ($query, $status) {
             switch ($status) {
-                case 'in_confirm':
-                    $query->where('status', 0);
+                case 'in_active':
+                    $query->onlyTrashed();
                     break;
                 case 'active':
-                    $query->where('status', 1);
-                    break;
-                case 'in_active':
-                    $query->where('status', 2);
+                    $query->whereNull('deleted_at');
                     break;
                 case 'all':
                 default:
@@ -92,8 +89,8 @@ class ScheduleMatchController extends Controller
         $statusCounts = DB::table('schedule_matches')
             ->selectRaw('
                 COUNT(*) as total,
-                SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) as active,
-                SUM(CASE WHEN status = 0 THEN 1 ELSE 0 END) as in_active
+                SUM(CASE WHEN deleted_at IS NULL THEN 1 ELSE 0 END) as active,
+                SUM(CASE WHEN deleted_at IS NOT NULL THEN 1 ELSE 0 END) as in_active
             ')
             ->when($request->filled('from_date'), function ($q) use ($request) {
                 $q->where('created_at', '>=', Helper::formatDate($request->from_date, 'Y-m-d') . ' 00:00:00');
@@ -143,7 +140,6 @@ class ScheduleMatchController extends Controller
                 'schedule_start_at' => 'required',
                 'schedule_end_at'   => 'required',
                 'score'             => 'nullable',
-                'status'            => 'nullable',
             ];
 
             $messages = [
@@ -168,7 +164,6 @@ class ScheduleMatchController extends Controller
                     'schedule_start_at' => Carbon::parse($request->schedule_start_at)->format('H:i:s'),
                     'schedule_end_at'   => Carbon::parse($request->schedule_end_at)->format('H:i:s'),
                     'score'             => $request->score,
-                    'status'            => $request->status ?? 0,
                 ]);
 
                 DB::commit();
@@ -239,7 +234,6 @@ class ScheduleMatchController extends Controller
                 'schedule_start_at' => 'required',
                 'schedule_end_at'   => 'required',
                 'score'             => 'nullable',
-                'status'            => 'nullable',
             ];
 
             $messages = [
@@ -267,7 +261,6 @@ class ScheduleMatchController extends Controller
                 'schedule_start_at' => \Carbon\Carbon::parse($request->schedule_start_at)->format('H:i:s'),
                 'schedule_end_at'   => \Carbon\Carbon::parse($request->schedule_end_at)->format('H:i:s'),
                 'score'             => $request->score,
-                'status'            => $request->status ?? 0,
             ]);
 
             DB::commit();

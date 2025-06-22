@@ -6,7 +6,8 @@ export interface MediaData {
   hashtag: string;
   description: string;
   link: string;
-  status: boolean;
+  start_date: string;
+  end_date: string;
   document_media?: File; 
 }
 

@@ -15,8 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('code')->nullable();
             $table->string('name')->nullable();
-            $table->string('location')->nullable();
-            $table->boolean('status')->nullable();
+            $table->string('area')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

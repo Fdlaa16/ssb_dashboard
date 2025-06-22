@@ -18,9 +18,9 @@ const mediaData = ref<MediaData>({
   hashtag: '',
   description: '',
   link: '',
-  thumbnail: '',
-  digital_platform: '',
-  status: false,
+  start_date: '',
+  end_date: '',
+  document_media: null,
 })
 
 const handleSubmit = async () => {
@@ -30,7 +30,8 @@ const handleSubmit = async () => {
   formData.append('hashtag', mediaData.value.hashtag);
   formData.append('description', mediaData.value.description);
   formData.append('link', mediaData.value.link);
-  formData.append('status', mediaData.value.status);
+  formData.append('start_date', mediaData.value.start_date);
+  formData.append('end_date', mediaData.value.end_date);
 
   if (mediaData.value.document_media instanceof File)
     formData.append('document_media', mediaData.value.document_media);

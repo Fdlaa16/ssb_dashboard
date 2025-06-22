@@ -19,6 +19,10 @@ export default [
             title: 'Media',
             to: 'dashboards-media-list',
           },
+          {
+            title: 'Stadium',
+            to: 'dashboards-stadium-list',
+          },
         ],
       },
     ],
