@@ -4,7 +4,7 @@ export default [
     icon: { icon: 'tabler-layout-grid-add' },
     children: [
       {
-        title: 'Schedule Player',
+        title: 'Schedule',
         icon: { icon: 'tabler-shopping-cart-plus' },
         children: [
           {
@@ -14,6 +14,10 @@ export default [
           {
             title: 'Schedule Training',
             to: 'dashboards-schedule-training-list',
+          },
+          {
+            title: 'Standings',
+            to: 'dashboards-standing-list',
           },
         ],
       },

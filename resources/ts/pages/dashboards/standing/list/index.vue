@@ -13,7 +13,7 @@ const selectedStadium = ref('')
 const selectedStatus = ref('')
 const selectedSort = ref('')
 
-const scheduleMatchs = ref<any[]>([])
+const standings = ref<any[]>([])
 const clubs = ref<{ title: string; value: string | number }[]>([])
 const stadiums = ref<{ title: string; value: string | number }[]>([])
 
@@ -37,7 +37,7 @@ onMounted(() => {
 })
 
 const totalPages = computed(() => {
-  return Math.ceil(scheduleMatchs.value.length / itemsPerPage)
+  return Math.ceil(standings.value.length / itemsPerPage)
 })
 
 const widgetData = ref([
@@ -48,11 +48,15 @@ const widgetData = ref([
 
 const headers = [
   { title: 'ID', key: 'id' },
-  { title: 'Club 1', key: 'first_club.name' },
-  { title: 'Club 2', key: 'secound_club.name' },
-  { title: 'Stadium', key: 'stadium.name' },
-  { title: 'Schedule Date', key: 'schedule_date' },
-  { title: 'Schedule Start At', key: 'schedule_start_at' },
+  { title: 'Club', key: 'club.name' },
+  { title: 'Total', key: 'total' },
+  { title: 'Win', key: 'win' },
+  { title: 'Draw', key: 'draw' },
+  { title: 'Lose', key: 'lose' },
+  { title: 'Goal In', key: 'goal_in' },
+  { title: 'Goal Conceded', key: 'goal_conceded' },
+  { title: 'Goal Difference', key: 'goal_difference' },
+  { title: 'Point', key: 'points' },
   { title: 'Action', key: 'action', sortable: false },
 ]
 
@@ -61,34 +65,33 @@ const statusColorMap = {
   0: { label: 'Non Active', color: 'error' },
 }
 
-const paginatedScheduleMatchs = computed(() => {
+const paginatedStandings = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage
-  return scheduleMatchs.value.slice(start, start + itemsPerPage)
+  return standings.value.slice(start, start + itemsPerPage)
 })
 
-async function fetchScheduleMatch() {
+async function fetchStanding() {
   loading.value = true
   error.value = null
 
   try {
-    const response = await $api('schedule-match', {
+    const response = await $api('standing', {
       method: 'GET',
       params: {
         search: searchQuery.value,
         club_id: selectedClub.value,
-        stadium_id: selectedStadium.value,
         status: selectedStatus.value,
         sort: selectedSort.value,
       },
     })
 
-    scheduleMatchs.value = response.data 
+    standings.value = response.data 
     const totals = response.totals
 
     widgetData.value = [
-      { title: 'All', value: totals.all, icon: 'tabler-calendar-check', iconColor: 'primary', change: 0, desc: 'Total semua scheduleMatch' },
-      { title: 'Active', value: totals.active, icon: 'tabler-calendar-check', iconColor: 'success', change: 0, desc: 'Schedule Match aktif' },
-      { title: 'Non Active', value: totals.in_active, icon: 'tabler-calendar-check', iconColor: 'error', change: 0, desc: 'Schedule Match tidak aktif' },
+      { title: 'All', value: totals.all, icon: 'tabler-calendar-check', iconColor: 'primary', change: 0, desc: 'Total semua klasemen' },
+      { title: 'Active', value: totals.active, icon: 'tabler-calendar-check', iconColor: 'success', change: 0, desc: 'Klasemen aktif' },
+      { title: 'Non Active', value: totals.in_active, icon: 'tabler-calendar-check', iconColor: 'error', change: 0, desc: 'Klasemen tidak aktif' },
     ]
 
   } catch (err: any) {
@@ -115,31 +118,14 @@ async function fetchClubs() {
   }
 }
 
-async function fetchStadiums() {
-  try {
-    const response = await $api('stadium', {
-      method: 'GET',
-    })
-
-    const stadiumData = response.data.map((stadium: any) => ({
-      title: stadium.name,
-      value: stadium.id,
-    }))
-
-    stadiums.value = [{ title: 'Pilih Stadium', value: '' }, ...stadiumData]
-  } catch (error) {
-    console.error('Gagal memuat stadiums', error)
-  }
+function editStanding(standing: any) {
+  router.push({ name: 'dashboards-standing-edit-id', params: { id: standing.id } })
 }
 
-function editScheduleMatch(scheduleMatch: any) {
-  router.push({ name: 'dashboards-schedule-match-edit-id', params: { id: scheduleMatch.id } })
-}
-
-async function deleteScheduleMatch(scheduleMatch: any) {
+async function deleteStanding(standing: any) {
   const confirm = await Swal.fire({
     title: 'Apakah kamu yakin?',
-    text: `Data Schedule Match ${scheduleMatch.first_club.name} melawan ${scheduleMatch.secound_club.name} pada tanggal ${scheduleMatch.schedule_date} pukul ${scheduleMatch.schedule_start_at} akan dihapus.`,
+    text: `Data klasemen club ${standing.club.name} akan dihapus.`,
     icon: 'warning',
     showCancelButton: true,
     confirmButtonText: 'Ya, hapus!',
@@ -154,17 +140,17 @@ async function deleteScheduleMatch(scheduleMatch: any) {
     try {
       loading.value = true
 
-      await $api(`schedule-match/${scheduleMatch.id}`, {
+      await $api(`standing/${standing.id}`, {
         method: 'DELETE',
       })
 
-      await fetchScheduleMatch()
+      await fetchStanding()
 
-      snackbarMessage.value = 'Schedule Match berhasil dihapus'
+      snackbarMessage.value = 'Klasemen berhasil dihapus'
       snackbarColor.value = 'success'
       isSnackbarVisible.value = true
     } catch (err: any) {
-      snackbarMessage.value = err?.response?.data?.message || 'Gagal menghapus schedule match'
+      snackbarMessage.value = err?.response?.data?.message || 'Gagal menghapus klasemen'
       snackbarColor.value = 'error'
       isSnackbarVisible.value = true
     } finally {
@@ -173,10 +159,10 @@ async function deleteScheduleMatch(scheduleMatch: any) {
   }
 }
 
-async function activateScheduleMatch(scheduleMatch: any) {
+async function activateStanding(standing: any) {
   const confirm = await Swal.fire({
-    title: 'Aktifkan Schedule Match?',
-    text: `Schedule Match ${scheduleMatch.first_club.name} melawan ${scheduleMatch.secound_club.name} pada tanggal ${scheduleMatch.schedule_date} pukul ${scheduleMatch.schedule_start_at} akan diaktifkan kembali.`,
+    title: 'Aktifkan Klasemen?',
+    text: `Data klasemen club ${standing.club.name} akan diaktifkan kembali.`,
     icon: 'question',
     showCancelButton: true,
     confirmButtonText: 'Ya, aktifkan!',
@@ -191,17 +177,17 @@ async function activateScheduleMatch(scheduleMatch: any) {
     try {
       loading.value = true
 
-      await $api(`schedule-match/${scheduleMatch.id}/active`, {
+      await $api(`standing/${standing.id}/active`, {
         method: 'PUT',
       })
 
-      await fetchScheduleMatch()
+      await fetchStanding()
 
-      snackbarMessage.value = 'Schedule Match berhasil diaktifkan kembali'
+      snackbarMessage.value = 'Klasemen berhasil diaktifkan kembali'
       snackbarColor.value = 'success'
       isSnackbarVisible.value = true
     } catch (err: any) {
-      snackbarMessage.value = err?.response?.data?.message || 'Gagal mengaktifkan Schedule Match'
+      snackbarMessage.value = err?.response?.data?.message || 'Gagal mengaktifkan klasemen'
       snackbarColor.value = 'error'
       isSnackbarVisible.value = true
     } finally {
@@ -217,13 +203,11 @@ function getQueryParam(param: LocationQueryValue | LocationQueryValue[] | undefi
 onMounted(() => {
   searchQuery.value = getQueryParam(route.query.search)
   selectedClub.value = getQueryParam(route.query.club_id)
-  selectedStadium.value = getQueryParam(route.query.stadium_id)
   selectedStatus.value = getQueryParam(route.query.status)
   selectedSort.value = getQueryParam(route.query.sort)
 
-  fetchScheduleMatch()
+  fetchStanding()
   fetchClubs()
-  fetchStadiums()
 })
 
 watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort], () => {
@@ -238,7 +222,7 @@ watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort]
     },
   })
 
-  fetchScheduleMatch()
+  fetchStanding()
 })
 </script>
 
@@ -293,14 +277,14 @@ watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort]
 
       <VCard class="mb-6">
         <VCardItem class="pb-4">
-          <VCardTitle>Schedule Matchs</VCardTitle>
+          <VCardTitle>Standings</VCardTitle>
         </VCardItem>
 
         <VCardText>
           <VRow>
             <VCol
               cols="12"
-              sm="3"
+              sm="6"
             >
               <AppSelect
                 v-model="selectedClub"
@@ -314,21 +298,7 @@ watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort]
 
             <VCol
               cols="12"
-              sm="3"
-            >
-              <AppSelect
-                v-model="selectedStadium"
-                placeholder="Stadium"
-                clearable
-                clear-icon="tabler-x"
-                single-line
-                :items="stadiums"
-              />
-            </VCol>
-
-            <VCol
-              cols="12"
-              sm="3"
+              sm="6"
             >
               <AppSelect
                 v-model="selectedStatus"
@@ -344,24 +314,6 @@ watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort]
                 ]"
               />
             </VCol>
-
-            <VCol
-              cols="12"
-              sm="3"
-            >
-              <AppSelect
-                v-model="selectedSort"
-                placeholder="Z-A"
-                clearable
-                clear-icon="tabler-x"
-                single-line
-                :items="[
-                  { title: 'Pilih Sort', value: '' },
-                  { title: 'A-Z', value: 'asc' },
-                  { title: 'Z-A', value: 'desc' },
-                ]"
-              />
-            </VCol>
           </VRow>
         </VCardText>
 
@@ -371,7 +323,7 @@ watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort]
           <div style="inline-size: 15.625rem;">
             <AppTextField
                 v-model="searchQuery"
-                placeholder="Search Schedule Match"
+                placeholder="Search Standing"
             />
           </div>
           <VSpacer />
@@ -384,13 +336,6 @@ watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort]
             >
               Export
             </VBtn>
-
-            <VBtn
-              prepend-icon="tabler-plus"
-              :to="{ name: 'dashboards-schedule-match-add' }"
-            >
-              Add New Schedule Match
-            </VBtn>
           </div>
         </VCardText>
 
@@ -398,7 +343,7 @@ watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort]
 
         <VDataTable
           :headers="headers"
-          :items="paginatedScheduleMatchs"
+          :items="paginatedStandings"
           :loading="loading"
           class="text-no-wrap"
           :items-per-page="itemsPerPage"
@@ -409,44 +354,37 @@ watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort]
           </template>
 
           <template #item.first_club.name="{ item }">
-            <div class="text-body-1">{{ item.first_club.name }}</div>
+            <div class="text-body-1">{{ item.club.name }}</div>
           </template>
 
-          <template #item.secound_club.name="{ item }">
-            <div class="text-body-1">{{ item.secound_club.name }}</div>
+          <template #item.total="{ item }">
+            <div class="text-body-1">{{ item.total }}</div>
           </template>
 
-          <template #item.stadium.name="{ item }">
-            <div class="text-body-1">{{ item.stadium.name }}</div>
+          <template #item.win="{ item }">
+            <div class="text-body-1">{{ item.win }}</div>
           </template>
 
-          <template #item.schedule_date="{ item }">
-            <div class="text-body-1">{{ item.schedule_date }}</div>
+          <template #item.draw="{ item }">
+            <div class="text-body-1">{{ item.draw }}</div>
           </template>
 
-          <template #item.schedule_start_at="{ item }">
-            <div class="text-body-1">{{ item.schedule_start_at }}</div>
+          <template #item.lose="{ item }">
+            <div class="text-body-1">{{ item.lose }}</div>
+          </template>
+
+          <template #item.points="{ item }">
+            <div class="text-body-1">{{ item.points }}</div>
           </template>
 
           <template #item.action="{ item }">
             <div class="d-flex gap-x-2">
-              <VBtn
-                v-if="!item.deleted_at"
-                icon
-                size="small"
-                color="primary"
-                @click="editScheduleMatch(item)"
-                title="Edit"
-              >
-                <VIcon icon="tabler-pencil" />
-              </VBtn>
-
               <VBtn  
                 v-if="!item.deleted_at"
                 icon
                 size="small"
                 color="error"
-                @click="deleteScheduleMatch(item)"
+                @click="deleteStanding(item)"
                 title="Delete"
               >
                 <VIcon icon="tabler-trash" />
@@ -457,7 +395,7 @@ watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort]
                 icon
                 size="small"
                 color="success"
-                @click="activateScheduleMatch(item)"
+                @click="activateStanding(item)"
                 title="Activate"
               >
                 <VIcon icon="tabler-check" />

@@ -41,7 +41,6 @@ class ScheduleMatchController extends Controller
                 ->orWhere('schedule_date', 'like', '%' . $request->search . '%')
                 ->orWhere('schedule_start_at', 'like', '%' . $request->search . '%')
                 ->orWhere('schedule_end_at', 'like', '%' . $request->search . '%')
-                ->orWhere('score', 'like', '%' . $request->search . '%')
                 ->orWhereHas('firstClub', function ($user) use ($request) {
                     $user->where('name', 'like', '%' . $request->search . '%');
                 })
@@ -140,7 +139,6 @@ class ScheduleMatchController extends Controller
                 'schedule_date'     => 'required',
                 'schedule_start_at' => 'required',
                 'schedule_end_at'   => 'required',
-                'score'             => 'nullable',
             ];
 
             $messages = [
@@ -158,13 +156,12 @@ class ScheduleMatchController extends Controller
                 return response()->json(array('errors' => $validator->messages()->toArray()), 422);
             } else {
                 $scheduleMatch = ScheduleMatch::create([
-                    'first_club_id'     => $request->first_club_id,
-                    'secound_club_id'   => $request->secound_club_id,
-                    'stadium_id'        => $request->stadium_id,
-                    'schedule_date'     => Carbon::parse($request->schedule_date)->format('Y-m-d'),
-                    'schedule_start_at' => Carbon::parse($request->schedule_start_at)->format('H:i:s'),
-                    'schedule_end_at'   => Carbon::parse($request->schedule_end_at)->format('H:i:s'),
-                    'score'             => $request->score,
+                    'first_club_id'     => $request->first_club_id ?? '',
+                    'secound_club_id'   => $request->secound_club_id ?? '',
+                    'stadium_id'        => $request->stadium_id ?? '',
+                    'schedule_date'     => $request->schedule_date ? Carbon::parse($request->schedule_date)->format('Y-m-d') : null,
+                    'schedule_start_at' => $request->schedule_start_at ? Carbon::parse($request->schedule_start_at)->format('H:i:s') : null,
+                    'schedule_end_at'   => $request->schedule_end_at ? Carbon::parse($request->schedule_end_at)->format('H:i:s') : null,
                 ]);
 
                 DB::commit();
@@ -257,12 +254,14 @@ class ScheduleMatchController extends Controller
                 $scheduleMatch = ScheduleMatch::findOrFail($id);
 
                 $scheduleMatch->update([
-                    'first_club_id'     => $request->first_club_id,
-                    'secound_club_id'   => $request->secound_club_id,
-                    'stadium_id'        => $request->stadium_id,
+                    'first_club_id'     => $request->first_club_id ?? '',
+                    'secound_club_id'   => $request->secound_club_id ?? '',
+                    'stadium_id'        => $request->stadium_id ?? '',
                     'schedule_date'     => Carbon::parse($request->schedule_date)->format('Y-m-d'),
                     'schedule_start_at' => Carbon::parse($request->schedule_start_at)->format('H:i:s'),
                     'schedule_end_at'   => Carbon::parse($request->schedule_end_at)->format('H:i:s'),
+                    'first_club_score' => $request->first_club_score ?? '',
+                    'secound_club_score' => $request->secound_club_score ?? '',
                 ]);
 
                 $firstScore  = (int) $request->first_club_score;

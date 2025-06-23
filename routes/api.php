@@ -80,11 +80,11 @@ Route::put('schedule-training/{id}', [ScheduleTrainingController::class, 'update
 Route::delete('schedule-training/{id}', [ScheduleTrainingController::class, 'destroy'])->name('schedule-training.destroy');
 Route::put('schedule-training/{id}/active', [ScheduleTrainingController::class, 'active'])->name('schedule-training.active');
 
-Route::get('standing-match', [StandingController::class, 'indexStandingMatch'])->name('standing.indexStandingMatch');
-Route::get('standing-training', [StandingController::class, 'indexStandingTraining'])->name('standing.indexStandingTraining');
+Route::get('standing', [StandingController::class, 'index'])->name('standing.index');
 Route::get('standing/create', [StandingController::class, 'create'])->name('standing.create');
 Route::post('standing/store', [StandingController::class, 'store'])->name('standing.store');
 Route::get('standing/{id}', [StandingController::class, 'show'])->name('standing.show');
 Route::get('standing/{id}/edit', [StandingController::class, 'edit'])->name('standing.edit');
 Route::put('standing/{id}', [StandingController::class, 'update'])->name('standing.update');
 Route::delete('standing/{id}', [StandingController::class, 'destroy'])->name('standing.destroy');
+Route::put('standing/{id}/active', [StandingController::class, 'active'])->name('standing.active');

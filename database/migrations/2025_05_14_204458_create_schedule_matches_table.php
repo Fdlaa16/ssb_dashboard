@@ -19,7 +19,8 @@ return new class extends Migration
             $table->date('schedule_date')->nullable();
             $table->time('schedule_start_at')->nullable();
             $table->time('schedule_end_at')->nullable();
-            $table->string('score')->nullable();
+            $table->string('first_club_score')->nullable();
+            $table->string('secound_club_score')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

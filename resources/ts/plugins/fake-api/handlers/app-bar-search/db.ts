@@ -79,7 +79,7 @@ export const db: DB = {
       ],
     },
     {
-      title: 'Player & Club',
+      title: 'Master Data',
       category: 'playerClub',
       children: [
         {
@@ -125,28 +125,38 @@ export const db: DB = {
       ]
     },
     {
-      title: 'Schedule Player',
+      title: 'Schedule',
       category: 'schedulePlayer',
       children: [
         {
           url: { name: 'dashboards-schedule-match-list' },
           icon: 'tabler-user',
-          title: 'Player',
+          title: 'Schedule Match',
         },
         {
           url: { name: 'dashboards-schedule-match-edit-id' },
           icon: 'tabler-user',
-          title: 'Player',
+          title: 'Schedule Match',
         },
         {
           url: { name: 'dashboards-schedule-training-list' },
           icon: 'tabler-user',
-          title: 'Player',
+          title: 'Schedule Training',
         },
         {
           url: { name: 'dashboards-schedule-training-edit-id' },
           icon: 'tabler-user',
-          title: 'Player',
+          title: 'Schedule Training',
+        },
+        {
+          url: { name: 'dashboards-standing-list' },
+          icon: 'tabler-user',
+          title: 'Standings',
+        },
+        {
+          url: { name: 'dashboards-standing-edit-id' },
+          icon: 'tabler-user',
+          title: 'Standings',
         },
       ]
     },

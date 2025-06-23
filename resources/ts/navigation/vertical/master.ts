@@ -1,7 +1,7 @@
 export default [
 { heading: 'Master' },
   {
-    title: 'Player & Club',
+    title: 'Master Data',
     icon: { icon: 'tabler-logs' },
     children: [
       { title: 'Player', to: 'dashboards-player-list', },

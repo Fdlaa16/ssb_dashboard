@@ -41,9 +41,9 @@ const totalPages = computed(() => {
 })
 
 const widgetData = ref([
-  { title: 'All', value: 24, icon: 'tabler-calendar-check' },
-  { title: 'Active', value: 24, icon: 'tabler-calendar-check' },
-  { title: 'Non Active', value: 24, icon: 'tabler-calendar-check' },
+  { title: 'All', value: 0, icon: 'tabler-calendar-check' },
+  { title: 'Active', value: 0, icon: 'tabler-calendar-check' },
+  { title: 'Non Active', value: 0, icon: 'tabler-calendar-check' },
 ])
 
 const headers = [

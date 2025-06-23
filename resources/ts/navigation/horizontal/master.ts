@@ -4,7 +4,7 @@ export default [
     icon: { icon: 'tabler-layout-grid-add' },
     children: [
       {
-        title: 'Player & Club',
+        title: 'Master Data',
         icon: { icon: 'tabler-logs' },
         children: [
           {
