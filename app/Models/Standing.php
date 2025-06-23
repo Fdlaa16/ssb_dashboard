@@ -11,12 +11,12 @@ class Standing extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'schedule_match_id',
-        'schedule_training_id',
+        'club_id',
+        'total',
         'win',
         'draw',
         'lose',
-        'goals_scored',
+        'goals_in',
         'goals_conceded',
         'goal_difference',
         'points',

@@ -7,7 +7,9 @@ export interface ScheduleMatchData {
   schedule_start_at: string;
   schedule_end_at: string;
   score: string;
-  status: boolean;
+  first_club_score: string;
+  secound_club_score: string;
+  status: string;
 }
 
 export interface Club {

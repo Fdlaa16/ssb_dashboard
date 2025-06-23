@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('standings', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('schedule_match_id')->nullable();
-            $table->unsignedBigInteger('schedule_training_id')->nullable();
+            $table->unsignedBigInteger('club_id')->nullable();
+            $table->string('total')->nullable();
             $table->string('win')->nullable();
             $table->string('draw')->nullable();
             $table->string('lose')->nullable();
-            $table->string('goals_scored')->nullable();
-            $table->string('goals_conceded')->nullable();
+            $table->string('goal_in')->nullable();
+            $table->string('goal_conceded')->nullable();
             $table->string('goal_difference')->nullable();
             $table->string('points')->nullable();
             $table->timestamps();

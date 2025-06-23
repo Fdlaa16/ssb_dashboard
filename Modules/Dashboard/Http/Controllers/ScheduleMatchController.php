@@ -5,6 +5,7 @@ namespace Modules\Dashboard\Http\Controllers;
 use App\Helpers\Helper;
 use App\Http\Resources\ScheduleMatchResource;
 use App\Models\ScheduleMatch;
+use App\Models\Standing;
 use Carbon\Carbon;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
@@ -227,13 +228,15 @@ class ScheduleMatchController extends Controller
         try {
             $postData = $request->all();
             $rules = [
-                'first_club_id'     => 'required',
-                'secound_club_id'   => 'required',
-                'stadium_id'        => 'required',
-                'schedule_date'     => 'required',
-                'schedule_start_at' => 'required',
-                'schedule_end_at'   => 'required',
-                'score'             => 'nullable',
+                'first_club_id'         => 'required',
+                'secound_club_id'       => 'required',
+                'stadium_id'            => 'required',
+                'schedule_date'         => 'required',
+                'schedule_start_at'     => 'required',
+                'schedule_end_at'       => 'required',
+                'first_club_score'      => 'nullable',
+                'secound_club_score'    => 'nullable',
+                'status'                => 'nullable',
             ];
 
             $messages = [
@@ -249,26 +252,92 @@ class ScheduleMatchController extends Controller
 
             if ($validator->fails()) {
                 return response()->json(['errors' => $validator->messages()], 422);
+            } else {
+
+                $scheduleMatch = ScheduleMatch::findOrFail($id);
+
+                $scheduleMatch->update([
+                    'first_club_id'     => $request->first_club_id,
+                    'secound_club_id'   => $request->secound_club_id,
+                    'stadium_id'        => $request->stadium_id,
+                    'schedule_date'     => Carbon::parse($request->schedule_date)->format('Y-m-d'),
+                    'schedule_start_at' => Carbon::parse($request->schedule_start_at)->format('H:i:s'),
+                    'schedule_end_at'   => Carbon::parse($request->schedule_end_at)->format('H:i:s'),
+                ]);
+
+                $firstScore  = (int) $request->first_club_score;
+                $secondScore = (int) $request->secound_club_score;
+
+                if (!is_null($firstScore) && !is_null($secondScore)) {
+                    $firstStanding = Standing::firstOrCreate(
+                        ['club_id' => $request->first_club_id],
+                        [
+                            'total' => 0,
+                            'win' => 0,
+                            'draw' => 0,
+                            'lose' => 0,
+                            'goal_in' => 0,
+                            'goal_conceded' => 0,
+                            'goal_difference' => 0,
+                            'points' => 0
+                        ]
+                    );
+
+                    $secondStanding = Standing::firstOrCreate(
+                        ['club_id' => $request->secound_club_id],
+                        [
+                            'total' => 0,
+                            'win' => 0,
+                            'draw' => 0,
+                            'lose' => 0,
+                            'goal_in' => 0,
+                            'goal_conceded' => 0,
+                            'goal_difference' => 0,
+                            'points' => 0
+                        ]
+                    );
+
+                    $firstStanding->total += 1;
+                    $secondStanding->total += 1;
+
+                    $firstStanding->goal_in += $firstScore;
+                    $firstStanding->goal_conceded += $secondScore;
+
+                    $secondStanding->goal_in += $secondScore;
+                    $secondStanding->goal_conceded += $firstScore;
+
+                    $firstStanding->goal_difference = $firstStanding->goal_in - $firstStanding->goal_conceded;
+                    $secondStanding->goal_difference = $secondStanding->goal_in - $secondStanding->goal_conceded;
+
+                    if ($firstScore > $secondScore) {
+                        $firstStanding->win += 1;
+                        $firstStanding->points += 3;
+
+                        $secondStanding->lose += 1;
+                    } elseif ($firstScore < $secondScore) {
+                        $secondStanding->win += 1;
+                        $secondStanding->points += 3;
+
+                        $firstStanding->lose += 1;
+                    } else {
+                        $firstStanding->draw += 1;
+                        $firstStanding->points += 1;
+
+                        $secondStanding->draw += 1;
+                        $secondStanding->points += 1;
+                    }
+
+                    $firstStanding->save();
+                    $secondStanding->save();
+                }
+
+                DB::commit();
+
+                return response()->json([
+                    'message' => 'Schedule Match updated successfully.',
+                    'data' => $scheduleMatch,
+                ], 200);
             }
-
-            $scheduleMatch = ScheduleMatch::findOrFail($id);
-
-            $scheduleMatch->update([
-                'first_club_id'     => $request->first_club_id,
-                'secound_club_id'   => $request->secound_club_id,
-                'stadium_id'        => $request->stadium_id,
-                'schedule_date'     => \Carbon\Carbon::parse($request->schedule_date)->format('Y-m-d'),
-                'schedule_start_at' => \Carbon\Carbon::parse($request->schedule_start_at)->format('H:i:s'),
-                'schedule_end_at'   => \Carbon\Carbon::parse($request->schedule_end_at)->format('H:i:s'),
-                'score'             => $request->score,
-            ]);
-
-            DB::commit();
-
-            return response()->json([
-                'message' => 'Schedule Match updated successfully.',
-                'data' => $scheduleMatch,
-            ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([

@@ -49,6 +49,12 @@ async function getStadiums() {
   }
 }
 
+const statuses = ref([
+  { title: 'Belum Dimulai', value: 'not_started' },
+  { title: 'Sedang Berlangsung', value: 'in_progress' },
+  { title: 'Selesai', value: 'finished' },
+])
+
 onMounted(async () => {
   getClubs()
   getStadiums()
@@ -139,15 +145,40 @@ const submitForm = () => {
                     single-line
                     :items="stadiums"
                   />
-                      
-                  <AppTextField
-                    v-model="localData.score"
-                    label="Skor"
-                    placeholder="Contoh: 2 - 1"
-                    :rules="[value => /^\d+\s*-\s*\d+$/.test(value) || 'Format harus 2 - 1']"
-                    class="mt-5"
-                  />
 
+                  <template v-if="localData.id">
+                    <h6 class="text-h6 mb-1 mt-5">Status</h6>
+                    <AppSelect
+                      v-model="localData.status"
+                      :items="statuses"
+                      placeholder="Status"
+                      clearable
+                      clear-icon="tabler-x"
+                      single-line
+                    />
+
+                    <template v-if="localData.id && localData.status === 'finished'">
+                      <VRow>
+                        <VCol cols="6">
+                          <AppTextField
+                            v-model="localData.first_club_score"
+                            label="Skor Club Pertama"
+                            placeholder="Contoh: 3"
+                            class="mt-5"
+                          />
+                        </VCol>  
+
+                        <VCol cols="6">
+                          <AppTextField
+                            v-model="localData.secound_club_score"
+                            label="Skor Club Kedua"
+                            placeholder="Contoh: 3"
+                            class="mt-5"
+                          />
+                        </VCol>
+                      </VRow>
+                    </template>
+                  </template> 
                 </VCol>
               </VRow>
             </VWindowItem>
