@@ -21,6 +21,7 @@ return new class extends Migration
             $table->time('schedule_end_at')->nullable();
             $table->string('first_club_score')->nullable();
             $table->string('secound_club_score')->nullable();
+            $table->string('status')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

@@ -30,6 +30,16 @@ const brandLogo3 = useGenerateImageVariant(logo3light, logo3dark)
 const brandLogo4 = useGenerateImageVariant(logo4light, logo4dark)
 const brandLogo5 = useGenerateImageVariant(logo5light, logo5dark)
 
+const loading = ref(true)
+const error = ref<string | null>(null)
+const medias = ref<any[]>([])
+
+const searchQuery = ref('')
+const selectedClub = ref('')
+const selectedStadium = ref('')
+const selectedStatus = ref('')
+const selectedSort = ref('')
+
 // Customer Review Data
 const reviewData = [
   {
@@ -114,6 +124,34 @@ const reviewData = [
   },
 ]
 
+const getMediaQuery = async () => {
+  loading.value = true
+  error.value = null
+
+  try {
+    const response = await $api('media', {
+      method: 'GET',
+      params: {
+        search: searchQuery.value,
+        club_id: selectedClub.value,
+        stadium_id: selectedStadium.value,
+        status: selectedStatus.value,
+        sort: selectedSort.value,
+      },
+    })
+
+    console.log('Media response:', response);
+    
+    medias.value = response.data 
+    const totals = response.totals
+
+  } catch (err: any) {
+    error.value = err.message || 'Gagal memuat data'
+  } finally {
+    loading.value = false
+  }
+}
+
 const customerReviewSwiper = ref(null)
 
 const slide = (dir: string) => {
@@ -124,6 +162,10 @@ const slide = (dir: string) => {
 
   swiper.slideNext()
 }
+
+onMounted(() => {
+  getMediaQuery()
+})
 </script>
 
 <template>
@@ -153,7 +195,7 @@ const slide = (dir: string) => {
               </VChip>
               <div class="position-relative mb-1 me-2">
                 <div class="section-title">
-                  What people say
+                  Media Publishing
                 </div>
               </div>
               <p class="text-body-1 mb-12">
@@ -234,39 +276,19 @@ const slide = (dir: string) => {
                 }"
               >
                 <swiper-slide
-                  v-for="(data, index) in reviewData"
+                  v-for="(data, index) in medias"
                   :key="index"
                 >
                   <VCard class="d-flex h-100 align-stretch">
                     <VCardText class="pa-6 d-flex flex-column justify-space-between align-start">
-                      <img
-                        :src="data.img"
-                        style="block-size: 1.375rem;"
-                        class="mb-3"
-                      >
-                      <p class="text-body-1">
-                        {{ data.desc }}
-                      </p>
-
-                      <VRating
-                        :model-value="data.rating"
-                        color="warning"
-                        density="compact"
-                        class="mb-4"
-                        readonly
-                      />
                       <div class="d-flex align-center gap-x-3">
-                        <VAvatar
-                          :image="data.avatar"
-                          size="32"
-                        />
                         <div>
                           <h6 class="text-h6">
-                            {{ data.name }}
+                            {{ data.title }}
                           </h6>
 
                           <div class="text-body-2 text-disabled">
-                            {{ data.position }}
+                            {{ data.description }}
                           </div>
                         </div>
                       </div>

@@ -22,7 +22,9 @@ const scheduleTrainingData = ref<ScheduleTrainingData>({
   schedule_date: '',
   schedule_start_at: '',
   schedule_end_at: '',
-  score: '',
+  first_club_score: '',
+  secound_club_score: '',
+  status: '',
 });
 
 
@@ -65,7 +67,9 @@ const handleSubmit = async () => {
     formData.append('schedule_date', scheduleTrainingData.value.schedule_date); 
     formData.append('schedule_start_at', scheduleTrainingData.value.schedule_start_at);
     formData.append('schedule_end_at', scheduleTrainingData.value.schedule_end_at);
-    formData.append('score', scheduleTrainingData.value.score ?? '');
+    formData.append('first_club_score', scheduleTrainingData.value.first_club_score ?? '');
+    formData.append('secound_club_score', scheduleTrainingData.value.secound_club_score ?? '');
+    formData.append('status', scheduleTrainingData.value.status ?? '');
     
     const res = await $api(`schedule-training/${scheduleTrainingId}`, {
       method: 'POST',

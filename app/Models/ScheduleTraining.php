@@ -16,7 +16,9 @@ class ScheduleTraining extends Model
         'schedule_date',
         'schedule_start_at',
         'schedule_end_at',
-        'score',
+        'first_club_score',
+        'secound_club_score',
+        'status'
     ];
 
     public function stadium()

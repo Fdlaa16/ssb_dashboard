@@ -53,7 +53,6 @@ const headers = [
   { title: 'Stadium', key: 'stadium.name' },
   { title: 'Schedule Date', key: 'schedule_date' },
   { title: 'Schedule Start At', key: 'schedule_start_at' },
-  { title: 'Status', key: 'status' },
   { title: 'Action', key: 'action', sortable: false },
 ]
 
@@ -405,65 +404,28 @@ watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort]
           :items-per-page="itemsPerPage"
           hide-default-footer
         >
-          <template #item.name="{ item }">
-            <div class="d-flex gap-x-3 align-center">
-              <!-- <VAvatar
-                size="34"
-                :image="item.productImage"
-                :rounded="0"
-              /> -->
-
-              <div class="text-body-1">
-                {{ item.name }}
-              </div>
-            </div>
+          <template #item.id="{ item }">
+            <div class="text-body-1">{{ item.id }}</div>
           </template>
 
           <template #item.first_club.name="{ item }">
             <div class="text-body-1">{{ item.first_club.name }}</div>
           </template>
 
-          <template #item.height="{ item }">
-            <div class="text-body-1">{{ item.height }}</div>
+          <template #item.secound_club.name="{ item }">
+            <div class="text-body-1">{{ item.secound_club.name }}</div>
           </template>
 
-          <template #item.weight="{ item }">
-            <div class="text-body-1">{{ item.weight }}</div>
+          <template #item.stadium.name="{ item }">
+            <div class="text-body-1">{{ item.stadium.name }}</div>
           </template>
 
-          <template #item.stadiums="{ item }">
-            <div class="text-body-1">
-              <span
-                v-for="(stadium, index) in item.stadiums"
-                :key="stadium.id"
-              >
-                {{ stadium.name }}<span v-if="index < item.stadiums.length - 1">, </span>
-              </span>
-            </div>
+          <template #item.schedule_date="{ item }">
+            <div class="text-body-1">{{ item.schedule_date }}</div>
           </template>
 
-          <!-- <template #item.clubs="{ item }">
-            <div class="text-body-1">
-              <span
-                v-for="(club, index) in item.clubs"
-                :key="club.id"
-              >
-                {{ club.name }}<span v-if="index < item.clubs.length - 1">, </span>
-              </span>
-            </div>
-          </template> -->
-
-          <template #item.status="{ item }">
-            <VChip
-              label
-              class="text-body-1 font-weight-medium"
-              :color="statusColorMap[item.status]?.color"
-              :text-color="statusColorMap[item.status]?.textColor || 'white'"
-              variant="tonal"
-              size="small"
-            >
-              {{ statusColorMap[item.status]?.label || 'Unknown' }}
-            </VChip>
+          <template #item.schedule_start_at="{ item }">
+            <div class="text-body-1">{{ item.schedule_start_at }}</div>
           </template>
 
           <template #item.action="{ item }">

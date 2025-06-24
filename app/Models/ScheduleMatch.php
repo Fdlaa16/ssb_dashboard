@@ -18,6 +18,7 @@ class ScheduleMatch extends Model
         'schedule_end_at',
         'first_club_score',
         'secound_club_score',
+        'status'
     ];
 
     public function stadium()

@@ -28,6 +28,9 @@ class MediaController extends Controller
         }
 
         $mediasQuery = Media::query()
+            ->with([
+                'document_media',
+            ])
             ->withTrashed();
 
         $mediasQuery->when(!empty($request->search), function ($q) use ($request) {
