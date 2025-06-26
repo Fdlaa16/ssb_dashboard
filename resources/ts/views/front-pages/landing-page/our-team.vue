@@ -4,12 +4,52 @@ import teamPerson2 from '@images/front-pages/landing-page/team-member-2.png'
 import teamPerson3 from '@images/front-pages/landing-page/team-member-3.png'
 import teamPerson4 from '@images/front-pages/landing-page/team-member-4.png'
 
-const teamData = ref([
-  { name: 'Sophie Gilbert', position: 'Project Manager', image: teamPerson1, backgroundColor: 'rgba(144, 85, 253, 0.16)', borderColor: 'rgba(144, 85, 253,0.16)', isHover: false },
-  { name: 'Paul Miles', position: 'UI Designer', image: teamPerson2, backgroundColor: 'rgba(22, 177, 255, 0.16)', borderColor: 'rgba(22, 177, 255,0.16)', isHover: false },
-  { name: 'Nannie Ford', position: 'Development Lead', image: teamPerson3, backgroundColor: 'rgba(255, 76, 81, 0.16)', borderColor: 'rgba(255, 76, 81,0.16)', isHover: false },
-  { name: 'Chris Watkins', position: 'Marketing Manager', image: teamPerson4, backgroundColor: 'rgba(86, 202, 0, 0.16)', borderColor: 'rgba(86, 202, 0,0.16)', isHover: false },
+const logisticData = ref([
+  { icon: 'tabler-truck', color: 'primary', title: 'On route vehicles', value: 42, change: 18.2, isHover: false },
 ])
+
+const loading = ref(true)
+const error = ref<string | null>(null)
+const medias = ref<any[]>([])
+
+const searchQuery = ref('')
+const selectedClub = ref('')
+const selectedStadium = ref('')
+const selectedStatus = ref('')
+const selectedSort = ref('')
+
+const getScheduleMatchQuery = async () => {
+  loading.value = true
+  error.value = null
+
+  try {
+    const response = await $api('company/schedule-match', {
+      method: 'GET',
+      params: {
+        search: searchQuery.value,
+        club_id: selectedClub.value,
+        stadium_id: selectedStadium.value,
+        status: selectedStatus.value,
+        sort: selectedSort.value,
+      },
+    })
+
+    console.log('Media response:', response);
+    
+    medias.value = response.data 
+    const totals = response.totals
+
+  } catch (err: any) {
+    error.value = err.message || 'Gagal memuat data'
+  } finally {
+    loading.value = false
+  }
+}
+
+
+onMounted(() => {
+  getScheduleMatchQuery()
+})
 </script>
 
 <template>
@@ -41,36 +81,49 @@ const teamData = ref([
 
       <VRow>
         <VCol
-          v-for="(data, index) in teamData"
+          v-for="(data, index) in logisticData"
           :key="index"
           cols="12"
-          lg="3"
+          md="12"
           sm="6"
         >
-          <VCard
-            flat
-            min-width="267"
-            class="position-relative overflow-visible team-card mb-lg-0 mb-12"
-          >
-            <div :style="{ maxHeight: '185px', minHeight: '185px', borderRadius: '90px 20px 0 0', backgroundColor: `${data.backgroundColor}`, border: `1px solid ${data.borderColor}`, borderBottom: 'none' }">
-              <VImg
-                :src="data.image"
-                height="240"
-                class="team-image"
-              />
-            </div>
-            <VCardText
-              class="text-center pa-4"
-              :style="{ border: `1px solid ${data.borderColor}`, borderBlockStart: 'none', borderRadius: '0 0 6px 6px', boxSizing: 'border-box' }"
+          <div>
+            <VCard
+              class="logistics-card-statistics cursor-pointer"
+              :style="data.isHover ? `border-block-end-color: rgb(var(--v-theme-${data.color}))` : `border-block-end-color: rgba(var(--v-theme-${data.color}),0.38)`"
+              @mouseenter="data.isHover = true"
+              @mouseleave="data.isHover = false"
             >
-              <h5 class="text-h5">
-                {{ data.name }}
-              </h5>
-              <p class="text-body-1 text-disabled mb-0">
-                {{ data.position }}
-              </p>
-            </VCardText>
-          </VCard>
+              <VCardText>
+                <div class="d-flex align-center gap-x-4 mb-1">
+                  <VAvatar
+                    variant="tonal"
+                    :color="data.color"
+                    rounded
+                  >
+                    <VIcon
+                      :icon="data.icon"
+                      size="28"
+                    />
+                  </VAvatar>
+                  <h4 class="text-h4">
+                    {{ data.value }}
+                  </h4>
+                </div>
+                <div class="text-body-1 mb-1">
+                  {{ data.title }}
+                </div>
+                <div class="d-flex gap-x-2 align-center">
+                  <h6 class="text-h6">
+                    {{ (data.change > 0) ? '+' : '' }} {{ data.change }}%
+                  </h6>
+                  <div class="text-disabled">
+                    than last week
+                  </div>
+                </div>
+              </VCardText>
+            </VCard>
+          </div>
         </VCol>
       </VRow>
     </div>
@@ -78,6 +131,8 @@ const teamData = ref([
 </template>
 
 <style lang="scss" scoped>
+@use "@core-scss/base/mixins" as mixins;
+
 .team-image {
   position: absolute;
   inset-block-start: -3.4rem;
@@ -118,5 +173,31 @@ const teamData = ref([
   inline-size: 120%;
   inset-block-end: 12%;
   inset-inline-start: -12%;
+}
+
+.logistics-card-statistics {
+  border-block-end-style: solid;
+  border-block-end-width: 2px;
+
+  &:hover {
+    border-block-end-width: 3px;
+    margin-block-end: -1px;
+
+    @include mixins.elevation(8);
+
+    transition: all 0.1s ease-out;
+  }
+}
+
+.skin--bordered {
+  .logistics-card-statistics {
+    border-block-end-width: 2px;
+
+    &:hover {
+      border-block-end-width: 3px;
+      margin-block-end: -2px;
+      transition: all 0.1s ease-out;
+    }
+  }
 }
 </style>

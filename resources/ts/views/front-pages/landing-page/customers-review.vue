@@ -22,6 +22,8 @@ import avatar3 from '@images/avatars/avatar-3.png'
 import avatar4 from '@images/avatars/avatar-4.png'
 import avatar5 from '@images/avatars/avatar-5.png'
 
+import pages1 from '@images/pages/1.png'
+
 register()
 
 const brandLogo1 = useGenerateImageVariant(logo1light, logo1dark)
@@ -129,7 +131,7 @@ const getMediaQuery = async () => {
   error.value = null
 
   try {
-    const response = await $api('media', {
+    const response = await $api('company/media', {
       method: 'GET',
       params: {
         search: searchQuery.value,
@@ -161,6 +163,15 @@ const slide = (dir: string) => {
     swiper.slidePrev()
 
   swiper.slideNext()
+}
+
+function formatTanggalIndonesia(dateString: string): string {
+  const date = new Date(dateString)
+  return new Intl.DateTimeFormat('id-ID', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  }).format(date)
 }
 
 onMounted(() => {
@@ -279,22 +290,29 @@ onMounted(() => {
                   v-for="(data, index) in medias"
                   :key="index"
                 >
-                  <VCard class="d-flex h-100 align-stretch">
-                    <VCardText class="pa-6 d-flex flex-column justify-space-between align-start">
-                      <div class="d-flex align-center gap-x-3">
-                        <div>
-                          <h6 class="text-h6">
-                            {{ data.title }}
-                          </h6>
-
-                          <div class="text-body-2 text-disabled">
-                            {{ data.description }}
-                          </div>
-                        </div>
-                      </div>
+                  <VCard>
+                    <VImg
+                      :src="data.document_media.url"
+                      cover
+                      class="media-img"
+                    />
+  
+                    <VCardItem>
+                      <VCardTitle>{{ data.title }}</VCardTitle>
+                    </VCardItem>
+  
+                    <VCardText>
+                      <p class="line-clamp">
+                        {{ data.description }}
+                      </p>
+                      <span class="text-caption text-disabled">
+                        {{ formatTanggalIndonesia(data.start_date) }}
+                      </span>
                     </VCardText>
                   </VCard>
                 </swiper-slide>
+
+
               </swiper-container>
             </div>
           </VCol>
@@ -371,6 +389,23 @@ swiper-container::part(bullet) {
     block-size: auto;
     opacity: 1;
   }
+}
+
+.media-img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.line-clamp {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2; // Tampilkan 2 baris
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4rem; // Sesuaikan line-height
+  max-height: 2.8rem;  // line-height * line-clamp
+  margin: 0;
 }
 </style>
 
