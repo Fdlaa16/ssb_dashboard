@@ -46,6 +46,8 @@ const menuItems: MenuItem[] = [
     navItems: [
       { name: 'History', to: { name: 'front-pages-history' }},
       { name: 'About', to: { name: 'front-pages-about' }},
+      { name: 'Schedule Match', to: { name: 'front-pages-schedule-match' } },
+      { name: 'Media', to: { name: 'front-pages-media' } },
       { name: 'Pricing', to: { name: 'front-pages-pricing' } },
       { name: 'Payment', to: { name: 'front-pages-payment' } },
       { name: 'Checkout', to: { name: 'front-pages-checkout' } },
@@ -339,14 +341,13 @@ const isPageActive = computed(() => menuItems.some(item => item.navItems.some(li
 
           <VBtn
             v-if="$vuetify.display.lgAndUp"
-            prepend-icon="tabler-shopping-cart"
             variant="elevated"
             color="primary"
             href="https://1.envato.market/vuexy_admin"
             target="_blank"
             rel="noopener noreferrer"
           >
-            Purchase Now
+            Resgister Now
           </VBtn>
 
           <VBtn

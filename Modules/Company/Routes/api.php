@@ -44,6 +44,9 @@ Route::prefix('company')->group(function () {
     Route::put('media/{id}/approve', [MediaController::class, 'approve'])->name('media.approve');
     Route::put('media/{id}/reject', [MediaController::class, 'reject'])->name('media.reject');
 
+    Route::get('nearest-matches', [ScheduleMatchController::class, 'nearestMatches'])->name('nearest-matches.index');
+    Route::get('list-matches', [ScheduleMatchController::class, 'listMatches'])->name('list-matches.index');
+
     Route::get('schedule-match', [ScheduleMatchController::class, 'index'])->name('schedule-match.index');
     Route::get('schedule-match/create', [ScheduleMatchController::class, 'create'])->name('schedule-match.create');
     Route::post('schedule-match/store', [ScheduleMatchController::class, 'store'])->name('schedule-match.store');

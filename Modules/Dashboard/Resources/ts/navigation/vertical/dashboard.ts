@@ -66,6 +66,16 @@ export default [
         to: 'front-pages-about',
         target: '_blank',
       },
+      {
+        title: 'Schedule Match',
+        to: 'front-pages-schedule-match',
+        target: '_blank',
+      },
+      {
+        title: 'Media',
+        to: 'front-pages-media',
+        target: '_blank',
+      },
     ],
   },
 ]

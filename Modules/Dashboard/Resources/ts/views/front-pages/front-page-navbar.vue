@@ -46,6 +46,8 @@ const menuItems: MenuItem[] = [
     navItems: [
       { name: 'History', to: { name: 'front-pages-history' } },
       { name: 'About', to: { name: 'front-pages-about' } },
+      { name: 'Schedule Match', to: { name: 'front-pages-schedule-match' } },
+      { name: 'Media', to: { name: 'front-pages-media' } },
       { name: 'Pricing', to: { name: 'front-pages-pricing' } },
       { name: 'Payment', to: { name: 'front-pages-payment' } },
       { name: 'Checkout', to: { name: 'front-pages-checkout' } },

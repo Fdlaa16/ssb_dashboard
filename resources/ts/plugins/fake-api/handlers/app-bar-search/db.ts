@@ -76,6 +76,16 @@ export const db: DB = {
           icon: 'tabler-file-description',
           title: 'About',
         },
+        {
+          url: { name: 'front-pages-schedule-match' },
+          icon: 'tabler-file-description',
+          title: 'Schedule Match',
+        },
+        {
+          url: { name: 'front-pages-media' },
+          icon: 'tabler-file-description',
+          title: 'Media',
+        },
       ],
     },
     {

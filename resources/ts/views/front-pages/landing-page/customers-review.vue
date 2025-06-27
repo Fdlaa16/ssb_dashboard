@@ -25,6 +25,7 @@ import avatar5 from '@images/avatars/avatar-5.png'
 import pages1 from '@images/pages/1.png'
 
 register()
+const router = useRouter()
 
 const brandLogo1 = useGenerateImageVariant(logo1light, logo1dark)
 const brandLogo2 = useGenerateImageVariant(logo2light, logo2dark)
@@ -41,90 +42,6 @@ const selectedClub = ref('')
 const selectedStadium = ref('')
 const selectedStatus = ref('')
 const selectedSort = ref('')
-
-// Customer Review Data
-const reviewData = [
-  {
-    desc: 'I\'ve never used a theme as versatile and flexible as Vuexy. It\'s my go to for building dashboard sites on almost any project.',
-    img: logo1,
-    rating: 5,
-    name: 'Eugenia Moore',
-    position: 'Founder of Hubspot',
-    avatar: avatar1,
-  },
-  {
-    desc: 'This template is really clean & well documented. The docs are really easy to understand and it\'s always easy to find a screenshot from their website.',
-    img: logo2,
-    rating: 5,
-    name: 'Curtis Fletcher',
-    position: 'Design Lead at Dribbble',
-    avatar: avatar2,
-  },
-  {
-    desc: 'This template is superior in so many ways. The code, the design, the regular updates, the support.. It\'s the whole package. Excellent Work.',
-    img: logo3,
-    rating: 4,
-    name: 'Eugenia Moore',
-    position: 'CTO of Airbnb',
-    avatar: avatar3,
-  },
-  {
-    desc: 'All the requirements for developers have been taken into consideration, so I\'m able to build any beautiful interface I want.',
-    img: logo4,
-    rating: 5,
-    name: 'Sara Smith',
-    position: 'Founder of Continental',
-    avatar: avatar4,
-  },
-  {
-    desc: 'Vuexy is awesome, and I particularly enjoy knowing that if I get stuck on something, there is always a helpful community to assist me.',
-    img: logo3,
-    rating: 5,
-    name: 'Tommy haffman',
-    position: 'Founder of Levis',
-    avatar: avatar5,
-  },
-  {
-    desc: 'I\'ve never used a theme as versatile and flexible as Vuexy. It\'s my go to for building dashboard sites on almost any project.',
-    img: logo1,
-    rating: 5,
-    name: 'Eugenia Moore',
-    position: 'Founder of Hubspot',
-    avatar: avatar1,
-  },
-  {
-    desc: 'Vuexy is awesome, and I particularly enjoy knowing that if I get stuck on something, there is always a helpful community to assist me.',
-    img: logo2,
-    rating: 5,
-    name: 'Tommy haffman',
-    position: 'Founder of Levis',
-    avatar: avatar2,
-  },
-  {
-    desc: 'This template is superior in so many ways. The code, the design, the regular updates, the support.. It\'s the whole package. Excellent Work.',
-    img: logo3,
-    rating: 4,
-    name: 'Eugenia Moore',
-    position: 'CTO of Airbnb',
-    avatar: avatar3,
-  },
-  {
-    desc: 'All the requirements for developers have been taken into consideration, so I\'m able to build any beautiful interface I want.',
-    img: logo4,
-    rating: 4,
-    name: 'Sara Smith',
-    position: 'Founder of Continental',
-    avatar: avatar4,
-  },
-  {
-    desc: 'This template is really clean & well documented. The docs are really easy to understand and it\'s always easy to find a screenshot from their website.',
-    img: logo2,
-    rating: 5,
-    name: 'Curtis Fletcher',
-    position: 'Design Lead at Dribbble',
-    avatar: avatar5,
-  },
-]
 
 const getMediaQuery = async () => {
   loading.value = true
@@ -174,6 +91,10 @@ function formatTanggalIndonesia(dateString: string): string {
   }).format(date)
 }
 
+const goToMedias = () => {
+  router.push({ name: 'front-pages-media' }) 
+}
+
 onMounted(() => {
   getMediaQuery()
 })
@@ -202,15 +123,15 @@ onMounted(() => {
                 class="mb-4"
                 size="small"
               >
-                Real Customers Reviews
+                Media Center
               </VChip>
               <div class="position-relative mb-1 me-2">
                 <div class="section-title">
-                  Media Publishing
+                  Official Highlights
                 </div>
               </div>
               <p class="text-body-1 mb-12">
-                See what our customers have to say about their experience.
+                Catch a glimpse of our latest matchday coverage, club moments, and more.
               </p>
               <div class="position-relative">
                 <IconBtn
@@ -314,44 +235,15 @@ onMounted(() => {
 
 
               </swiper-container>
+
+              <div class="d-flex justify-end mt-4">
+                <VBtn color="primary" @click="goToMedias">
+                  Show More
+                </VBtn>
+              </div>
             </div>
           </VCol>
         </VRow>
-      </VContainer>
-
-      <VDivider class="w-100 swiper-divider" />
-
-      <VContainer>
-        <!-- 👉 Brand-logo Swiper  -->
-        <div class="swiper-brands-carousel">
-          <swiper-container
-            slides-per-view="2"
-            :space-between="10"
-            events-prefix="swiper-"
-            :autoplay="{
-              delay: 3000,
-              disableOnInteraction: true,
-            }"
-            :breakpoints="{
-              992: {
-                slidesPerView: 5,
-              },
-              768: {
-                slidesPerView: 3,
-              },
-            }"
-          >
-            <swiper-slide
-              v-for="(img, index) in [brandLogo1, brandLogo2, brandLogo3, brandLogo4, brandLogo5]"
-              :key="index"
-            >
-              <VImg
-                :src="img"
-                height="38"
-              />
-            </swiper-slide>
-          </swiper-container>
-        </div>
       </VContainer>
     </div>
   </div>
