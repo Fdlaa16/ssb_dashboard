@@ -2,9 +2,11 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Company\Http\Controllers\ClubController;
 use Modules\Company\Http\Controllers\MediaController;
 use Modules\Company\Http\Controllers\PlayerController;
 use Modules\Company\Http\Controllers\ScheduleMatchController;
+use Modules\Company\Http\Controllers\ScheduleTrainingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,6 +35,17 @@ Route::prefix('company')->group(function () {
     Route::put('player/{id}/approve', [PlayerController::class, 'approve'])->name('player.approve');
     Route::put('player/{id}/reject', [PlayerController::class, 'reject'])->name('player.reject');
 
+    Route::get('club', [ClubController::class, 'index'])->name('club.index');
+    Route::get('club/create', [ClubController::class, 'create'])->name('club.create');
+    Route::post('club/store', [ClubController::class, 'store'])->name('club.store');
+    Route::get('club/{id}', [ClubController::class, 'show'])->name('club.show');
+    Route::get('club/{id}/edit', [ClubController::class, 'edit'])->name('club.edit');
+    Route::put('club/{id}', [ClubController::class, 'update'])->name('club.update');
+    Route::delete('club/{id}', [ClubController::class, 'destroy'])->name('club.destroy');
+    Route::put('club/{id}/active', [ClubController::class, 'active'])->name('club.active');
+    Route::put('club/{id}/approve', [ClubController::class, 'approve'])->name('club.approve');
+    Route::put('club/{id}/reject', [ClubController::class, 'reject'])->name('club.reject');
+
     Route::get('media', [MediaController::class, 'index'])->name('media.index');
     Route::get('media/create', [MediaController::class, 'create'])->name('media.create');
     Route::post('media/store', [MediaController::class, 'store'])->name('media.store');
@@ -46,6 +59,9 @@ Route::prefix('company')->group(function () {
 
     Route::get('nearest-matches', [ScheduleMatchController::class, 'nearestMatches'])->name('nearest-matches.index');
     Route::get('list-matches', [ScheduleMatchController::class, 'listMatches'])->name('list-matches.index');
+
+    Route::get('nearest-trainings', [ScheduleTrainingController::class, 'nearestTrainings'])->name('nearest-trainings.index');
+    Route::get('list-trainings', [ScheduleTrainingController::class, 'listTrainings'])->name('list-trainings.index');
 
     Route::get('schedule-match', [ScheduleMatchController::class, 'index'])->name('schedule-match.index');
     Route::get('schedule-match/create', [ScheduleMatchController::class, 'create'])->name('schedule-match.create');

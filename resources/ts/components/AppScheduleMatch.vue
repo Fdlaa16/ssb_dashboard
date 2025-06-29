@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import authV1BottomShape from '@images/svg/auth-v1-bottom-shape.svg?raw'
-import authV1TopShape from '@images/svg/auth-v1-top-shape.svg?raw'
-import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 
 const isFlatSnackbarVisible = ref(false)
 const snackbarMessage = ref('')
@@ -54,7 +51,6 @@ const getScheduleMatchQuery = async () => {
 
     scheduleMatchs.value = matches
 
-    // ✅ Show success snackbar
     snackbarMessage.value = 'Data berhasil dimuat!'
     snackbarColor.value = 'success'
     isFlatSnackbarVisible.value = true
@@ -62,7 +58,6 @@ const getScheduleMatchQuery = async () => {
   } catch (err: any) {
     error.value = err.message || 'Gagal memuat data'
 
-    // ❌ Show error snackbar
     snackbarMessage.value = error.value
     snackbarColor.value = 'error'
     isFlatSnackbarVisible.value = true
@@ -119,84 +114,83 @@ watch(selectedMatch, () => {
       </VRow>
 
       <VRow>
-  <!-- Tampilkan jika ada data -->
-  <template v-if="logisticData.length > 0">
-    <VCol
-      v-for="(data, index) in logisticData"
-      :key="index"
-      cols="12"
-      md="12"
-      sm="6"
-    >
-      <!-- CARD PERTANDINGAN -->
-      <VCard
-        class="logistics-card-statistics cursor-pointer"
-        :style="data.isHover ? `border-block-end-color: rgb(var(--v-theme-${data.color}))` : `border-block-end-color: rgba(var(--v-theme-${data.color}),0.38)`"
-        @mouseenter="data.isHover = true"
-        @mouseleave="data.isHover = false"
-      >
-        <VCardText>
-          <VRow class="align-center justify-space-between">
-            <VCol class="text-center" cols="4">
-              <VAvatar size="80" variant="flat" rounded="lg" class="mb-2">
-                <img
-                  :src="data.first_club.profile_club.url"
-                  alt="Club A"
-                  style="width: 100%; height: 100%; object-fit: contain"
-                />
-              </VAvatar>
-              <h5 class="text-h6 font-weight-bold">
-                {{ data.first_club.name }}
-              </h5>
-            </VCol>
+        <!-- Tampilkan jika ada data -->
+        <template v-if="logisticData.length > 0">
+          <VCol
+            v-for="(data, index) in logisticData"
+            :key="index"
+            cols="12"
+            md="12"
+            sm="6"
+          >
+            <!-- CARD PERTANDINGAN -->
+            <VCard
+              class="logistics-card-statistics cursor-pointer"
+              :style="data.isHover ? `border-block-end-color: rgb(var(--v-theme-${data.color}))` : `border-block-end-color: rgba(var(--v-theme-${data.color}),0.38)`"
+              @mouseenter="data.isHover = true"
+              @mouseleave="data.isHover = false"
+            >
+              <VCardText>
+                <VRow class="align-center justify-space-between">
+                  <VCol class="text-center" cols="4">
+                    <VAvatar size="80" variant="flat" rounded="lg" class="mb-2">
+                      <img
+                        :src="data.first_club.profile_club.url"
+                        alt="Club A"
+                        style="width: 100%; height: 100%; object-fit: contain"
+                      />
+                    </VAvatar>
+                    <h5 class="text-h6 font-weight-bold">
+                      {{ data.first_club.name }}
+                    </h5>
+                  </VCol>
 
-            <VCol class="text-center" cols="4">
-              <div class="text-h4 font-weight-bold">
-                {{ data.first_club_score ?? '0' }} : {{ data.secound_club_score ?? '0' }}
-              </div>
-              <VChip
-                color="grey-lighten-2"
-                size="small"
-                class="mt-1"
-                v-if="data.first_club_score !== null && data.secound_club_score !== null"
-              >
-                FT
-              </VChip>
-            </VCol>
+                  <VCol class="text-center" cols="4">
+                    <div class="text-h4 font-weight-bold">
+                      {{ data.first_club_score ?? '0' }} : {{ data.secound_club_score ?? '0' }}
+                    </div>
+                    <VChip
+                      color="grey-lighten-2"
+                      size="small"
+                      class="mt-1"
+                      v-if="data.first_club_score !== null && data.secound_club_score !== null"
+                    >
+                      FT
+                    </VChip>
+                  </VCol>
 
-            <VCol class="text-center" cols="4">
-              <VAvatar size="80" variant="flat" rounded="lg" class="mb-2">
-                <img
-                  :src="data.secound_club.profile_club.url"
-                  alt="Club B"
-                  style="width: 100%; height: 100%; object-fit: contain"
-                />
-              </VAvatar>
-              <h5 class="text-h6 font-weight-bold">
-                {{ data.secound_club.name }}
-              </h5>
-            </VCol>
-          </VRow>
+                  <VCol class="text-center" cols="4">
+                    <VAvatar size="80" variant="flat" rounded="lg" class="mb-2">
+                      <img
+                        :src="data.secound_club.profile_club.url"
+                        alt="Club B"
+                        style="width: 100%; height: 100%; object-fit: contain"
+                      />
+                    </VAvatar>
+                    <h5 class="text-h6 font-weight-bold">
+                      {{ data.secound_club.name }}
+                    </h5>
+                  </VCol>
+                </VRow>
 
-          <div class="text-center text-caption mt-2 text-grey">
-            📍 {{ data.stadium.name }} • 🗓️ {{ data.schedule_date }} • ⏰ {{ data.schedule_start_at }}
-          </div>
-        </VCardText>
-      </VCard>
-    </VCol>
-  </template>
+                <div class="text-center text-caption mt-2 text-grey">
+                  📍 {{ data.stadium.name }} • 🗓️ {{ data.schedule_date }} • ⏰ {{ data.schedule_start_at }}
+                </div>
+              </VCardText>
+            </VCard>
+          </VCol>
+        </template>
 
-  <!-- Tampilkan jika data kosong -->
-  <template v-else>
-    <VCol cols="12" class="text-center py-10">
-      <VIcon size="64" color="grey-lighten-1">tabler-calendar-x</VIcon>
-      <p class="text-body-1 mt-2 text-grey">
-        Belum ada jadwal pertandingan ditemukan.
-      </p>
-    </VCol>
-  </template>
-</VRow>
-
+        <!-- Tampilkan jika data kosong -->
+        <template v-else>
+          <VCol cols="12" class="text-center py-10">
+            <VIcon size="64" color="grey-lighten-1">tabler-calendar-x</VIcon>
+            <p class="text-body-1 mt-2 text-grey">
+              Belum ada jadwal pertandingan ditemukan.
+            </p>
+          </VCol>
+        </template>
+      </VRow>
     </div>    
   </VContainer>
   

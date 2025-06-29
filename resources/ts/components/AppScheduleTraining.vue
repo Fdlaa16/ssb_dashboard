@@ -1,0 +1,299 @@
+<script setup lang="ts">
+import authV1BottomShape from '@images/svg/auth-v1-bottom-shape.svg?raw'
+import authV1TopShape from '@images/svg/auth-v1-top-shape.svg?raw'
+import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
+
+const isFlatSnackbarVisible = ref(false)
+const snackbarMessage = ref('')
+const snackbarColor = ref<'success' | 'error'>('success')
+
+interface Pricing {
+  title?: string
+  xs?: number | string
+  sm?: number | string
+  md?: string | number
+  lg?: string | number
+  xl?: string | number
+}
+
+const router = useRouter()
+
+const logisticData = ref<any[]>([])
+
+const loading = ref(true)
+const error = ref<string | null>(null)
+const scheduleTranings = ref<any[]>([])
+
+const selectedTraining = ref('upcoming')
+
+const getScheduleTrainingQuery = async () => {
+  loading.value = true
+  error.value = null
+
+  console.log('Fetching trainings with status:', selectedTraining.value)
+
+  try {
+    const response = await $api('company/list-trainings', {
+      method: 'GET',
+      params: {
+        status: selectedTraining.value || 'upcoming',
+      }
+    })
+
+    const trainings = response.data
+
+    logisticData.value = trainings.map((item: any) => ({
+      icon: 'tabler-calendar-event',
+      color: 'primary',
+      title: `${item.first_club.name} vs ${item.secound_club.name}`,
+      value: formatTrainingTime(item.schedule_date, item.schedule_start_at),
+      change: 0,
+      isHover: false,
+      ...item
+    }))
+
+    scheduleTranings.value = trainings
+
+    snackbarMessage.value = 'Data berhasil dimuat!'
+    snackbarColor.value = 'success'
+    isFlatSnackbarVisible.value = true
+
+  } catch (err: any) {
+    error.value = err.message || 'Gagal memuat data'
+
+    snackbarMessage.value = error.value
+    snackbarColor.value = 'error'
+    isFlatSnackbarVisible.value = true
+  } finally {
+    loading.value = false
+  }
+}
+
+const formatTrainingTime = (date: string, time: string) => {
+  const d = new Date(`${date}T${time}`)
+  return d.toLocaleDateString('id-ID', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }) + ' • ' + time.slice(0, 5) + ' WIB'
+}
+
+onMounted(() => {
+  if (!selectedTraining.value) selectedTraining.value = 'upcoming'
+  
+  getScheduleTrainingQuery()
+})
+
+watch(selectedTraining, () => {
+  getScheduleTrainingQuery()
+})
+</script>
+
+<template>
+  <VContainer id="team">
+    <div class="our-team pa-">
+      <VRow class="align-center my-6">
+        <VCol>
+          <VChip label color="primary" size="small">Nearest trainings</VChip>
+          <h4 v-if="selectedTraining == 'upcoming'" class="text-h4 mt-2 mb-1">Upcoming Football Schedules</h4>
+          <h4 v-else class="text-h4 mt-2 mb-1">Previous Football Schedule</h4>
+          <p class="text-body-1 mb-0">Check out the closest football trainings and results!</p>
+        </VCol>
+
+        <VCol class="text-end" cols="12" sm="4" md="3">
+          <AppSelect
+            v-model="selectedTraining"
+            placeholder="Status"
+            clearable
+            clear-icon="tabler-x"
+            single-line
+            class="w-100"
+            :items="[
+              { title: 'Upcoming Trainings', value: 'upcoming' },
+              { title: 'Previous Taining', value: 'previous' },
+            ]"
+          />
+        </VCol>
+      </VRow>
+
+      <VRow>
+  <!-- Tampilkan jika ada data -->
+  <template v-if="logisticData.length > 0">
+    <VCol
+      v-for="(data, index) in logisticData"
+      :key="index"
+      cols="12"
+      md="12"
+      sm="6"
+    >
+      <!-- CARD latihan -->
+      <VCard
+        class="logistics-card-statistics cursor-pointer"
+        :style="data.isHover ? `border-block-end-color: rgb(var(--v-theme-${data.color}))` : `border-block-end-color: rgba(var(--v-theme-${data.color}),0.38)`"
+        @mouseenter="data.isHover = true"
+        @mouseleave="data.isHover = false"
+      >
+        <VCardText>
+          <VRow class="align-center justify-space-between">
+            <VCol class="text-center" cols="4">
+              <VAvatar size="80" variant="flat" rounded="lg" class="mb-2">
+                <img
+                  :src="data.first_club.profile_club.url"
+                  alt="Club A"
+                  style="width: 100%; height: 100%; object-fit: contain"
+                />
+              </VAvatar>
+              <h5 class="text-h6 font-weight-bold">
+                {{ data.first_club.name }}
+              </h5>
+            </VCol>
+
+            <VCol class="text-center" cols="4">
+              <div class="text-h4 font-weight-bold">
+                {{ data.first_club_score ?? '0' }} : {{ data.secound_club_score ?? '0' }}
+              </div>
+              <VChip
+                color="grey-lighten-2"
+                size="small"
+                class="mt-1"
+                v-if="data.first_club_score !== null && data.secound_club_score !== null"
+              >
+                FT
+              </VChip>
+            </VCol>
+
+            <VCol class="text-center" cols="4">
+              <VAvatar size="80" variant="flat" rounded="lg" class="mb-2">
+                <img
+                  :src="data.secound_club.profile_club.url"
+                  alt="Club B"
+                  style="width: 100%; height: 100%; object-fit: contain"
+                />
+              </VAvatar>
+              <h5 class="text-h6 font-weight-bold">
+                {{ data.secound_club.name }}
+              </h5>
+            </VCol>
+          </VRow>
+
+          <div class="text-center text-caption mt-2 text-grey">
+            📍 {{ data.stadium.name }} • 🗓️ {{ data.schedule_date }} • ⏰ {{ data.schedule_start_at }}
+          </div>
+        </VCardText>
+      </VCard>
+    </VCol>
+  </template>
+
+  <!-- Tampilkan jika data kosong -->
+  <template v-else>
+    <VCol cols="12" class="text-center py-10">
+      <VIcon size="64" color="grey-lighten-1">tabler-calendar-x</VIcon>
+      <p class="text-body-1 mt-2 text-grey">
+        Belum ada jadwal latihan ditemukan.
+      </p>
+    </VCol>
+  </template>
+</VRow>
+
+    </div>    
+  </VContainer>
+  
+  <VSnackbar
+    v-model="isFlatSnackbarVisible"
+    :color="snackbarColor"
+    location="bottom start"
+    variant="flat"
+    timeout="3000"
+  >
+    {{ snackbarMessage }}
+  </VSnackbar>
+</template>
+
+
+<style lang="scss" scoped>
+@use "@core-scss/base/mixins" as mixins;
+
+.team-image {
+  position: absolute;
+  inset-block-start: -3.4rem;
+  inset-inline: 0;
+}
+
+.headers {
+  margin-block-end: 7.4375rem;
+}
+
+.our-team {
+  margin-block: 5.25rem;
+}
+
+@media (max-width: 1264px) {
+  .our-team {
+    margin-block-end: 1rem;
+  }
+}
+
+.team-card {
+  border-radius: 90px 20px 6px 6px;
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 36px;
+}
+
+.section-title::after {
+  position: absolute;
+  background: url("../../../assets/images/front-pages/icons/section-title-icon.png") no-repeat left bottom;
+  background-size: contain;
+  block-size: 100%;
+  content: "";
+  font-weight: 800;
+  inline-size: 120%;
+  inset-block-end: 12%;
+  inset-inline-start: -12%;
+}
+
+.logistics-card-statistics {
+  border-block-end-style: solid;
+  border-block-end-width: 2px;
+
+  &:hover {
+    border-block-end-width: 3px;
+    margin-block-end: -1px;
+
+    @include mixins.elevation(8);
+
+    transition: all 0.1s ease-out;
+  }
+}
+
+.skin--bordered {
+  .logistics-card-statistics {
+    border-block-end-width: 2px;
+
+    &:hover {
+      border-block-end-width: 3px;
+      margin-block-end: -2px;
+      transition: all 0.1s ease-out;
+    }
+  }
+}
+
+.taining-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.taining-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.taining-card li {
+  margin-bottom: 4px;
+}
+</style>
+

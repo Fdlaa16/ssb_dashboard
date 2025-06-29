@@ -25,18 +25,15 @@ class PlayerController extends Controller
         }
 
         $playersQuery = Player::query()
-            ->where('status', '==', 1)
+            ->where('status', 1)
             ->with([
                 'user',
                 'clubPlayers' => function ($query) {
                     $query->whereNotNull('category')
                         ->with('club');
                 },
-                'sports' => function ($query) {
-                    $query->whereNull('deleted_at');
-                },
-            ])
-            ->withTrashed();
+                'avatar'
+            ]);
 
         $playersQuery->when(!empty($request->search), function ($q) use ($request) {
             $q->where(function ($q) use ($request) {
@@ -56,6 +53,18 @@ class PlayerController extends Controller
                     ->orWhereHas('sports', function ($sport) use ($request) {
                         $sport->where('name', 'like', '%' . $request->search . '%');
                     });
+            });
+        });
+
+        $playersQuery->when($request->position, function ($query) use ($request) {
+            $query->whereHas('clubPlayers', function ($q) use ($request) {
+                $q->where('position', $request->position);
+            });
+        });
+
+        $playersQuery->when($request->category, function ($query, $category) {
+            $query->whereHas('clubPlayers', function ($q) use ($category) {
+                $q->where('category', $category);
             });
         });
 

@@ -93,12 +93,19 @@ onMounted(async () => {
 const categories = [
   { title: 'Pilih Kategori', value: '' },
   { title: 'U-6', value: 'u6' },
+  { title: 'U-7', value: 'u7' },
   { title: 'U-8', value: 'u8' },
+  { title: 'U-9', value: 'u9' },
   { title: 'U-10', value: 'u10' },
+  { title: 'U-11', value: 'u11' },
   { title: 'U-12', value: 'u12' },
+  { title: 'U-13', value: 'u13' },
   { title: 'U-14', value: 'u14' },
+  { title: 'U-15', value: 'u15' },
   { title: 'U-16', value: 'u16' },
+  { title: 'U-17', value: 'u17' },
   { title: 'U-18', value: 'u18' },
+  { title: 'U-19', value: 'u19' },
   { title: 'U-20', value: 'u20' },
 ]
 

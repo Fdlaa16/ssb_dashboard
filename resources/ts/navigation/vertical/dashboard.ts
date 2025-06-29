@@ -67,8 +67,25 @@ export default [
         target: '_blank',
       },
       {
+        title: 'Player',
+        to: 'front-pages-player',
+        target: '_blank',
+
+      },
+        {
+        title: 'Club',
+        to: 'front-pages-club',
+        target: '_blank',
+
+      },
+      {
         title: 'Schedule Match',
         to: 'front-pages-schedule-match',
+        target: '_blank',
+      },
+      {
+        title: 'Schedule Training',
+        to: 'front-pages-schedule-training',
         target: '_blank',
       },
       {

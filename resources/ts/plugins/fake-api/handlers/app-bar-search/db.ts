@@ -77,9 +77,24 @@ export const db: DB = {
           title: 'About',
         },
         {
+          url: { name: 'front-pages-player' },
+          icon: 'tabler-file-description',
+          title: 'Player',
+        },
+        {
+          url: { name: 'front-pages-club' },
+          icon: 'tabler-file-description',
+          title: 'Club',
+        },
+        {
           url: { name: 'front-pages-schedule-match' },
           icon: 'tabler-file-description',
           title: 'Schedule Match',
+        },
+        {
+          url: { name: 'front-pages-schedule-training' },
+          icon: 'tabler-file-description',
+          title: 'Schedule Training',
         },
         {
           url: { name: 'front-pages-media' },

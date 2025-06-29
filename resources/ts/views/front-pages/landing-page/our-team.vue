@@ -7,11 +7,13 @@ import teamPerson4 from '@images/front-pages/landing-page/team-member-4.png'
 
 const router = useRouter()
 
-const logisticData = ref<any[]>([])
+const logisticDataMatch = ref<any[]>([])
+const logisticDataTraining = ref<any[]>([])
 
 const loading = ref(true)
 const error = ref<string | null>(null)
 const scheduleMatchs = ref<any[]>([])
+const scheduleTrainings = ref<any[]>([])
 
 const searchQuery = ref('')
 const selectedClub = ref('')
@@ -37,7 +39,7 @@ const getScheduleMatchQuery = async () => {
 
     const matches = response.data
 
-    logisticData.value = matches.map((item: any) => ({
+    logisticDataMatch.value = matches.map((item: any) => ({
       icon: 'tabler-calendar-event',
       color: 'primary',
       title: `${item.first_club.name} vs ${item.secound_club.name}`,
@@ -49,6 +51,44 @@ const getScheduleMatchQuery = async () => {
     }))
 
     scheduleMatchs.value = matches
+
+  } catch (err: any) {
+    error.value = err.message || 'Gagal memuat data'
+  } finally {
+    loading.value = false
+  }
+}
+
+const getScheduleTrainingQuery = async () => {
+  loading.value = true
+  error.value = null
+
+  try {
+    const response = await $api('company/nearest-trainings', {
+      method: 'GET',
+      params: {
+        search: searchQuery.value,
+        club_id: selectedClub.value,
+        stadium_id: selectedStadium.value,
+        status: selectedStatus.value,
+        sort: selectedSort.value,
+      },
+    })
+
+    const trainings = response.data
+
+    logisticDataTraining.value = trainings.map((item: any) => ({
+      icon: 'tabler-calendar-event',
+      color: 'primary',
+      title: `${item.first_club.name} vs ${item.secound_club.name}`,
+      value: formatMatchTime(item.schedule_date, item.schedule_start_at),
+      change: 0,
+      isHover: false,
+
+      ...item
+    }))
+
+    scheduleTrainings.value = trainings
 
   } catch (err: any) {
     error.value = err.message || 'Gagal memuat data'
@@ -70,8 +110,13 @@ const goToAllMatches = () => {
   router.push({ name: 'front-pages-schedule-match' }) 
 }
 
+const goToAllTrainings = () => {
+  router.push({ name: 'front-pages-schedule-training' }) 
+}
+
 onMounted(() => {
   getScheduleMatchQuery()
+  getScheduleTrainingQuery()
 })
 </script>
 
@@ -98,7 +143,95 @@ onMounted(() => {
 
       <VRow>
         <VCol
-          v-for="(data, index) in logisticData"
+          v-for="(data, index) in logisticDataMatch"
+          :key="index"
+          cols="12"
+          md="12"
+          sm="6"
+        >
+          <div>
+            <VCard
+              class="logistics-card-statistics cursor-pointer"
+              :style="data.isHover ? `border-block-end-color: rgb(var(--v-theme-${data.color}))` : `border-block-end-color: rgba(var(--v-theme-${data.color}),0.38)`"
+              @mouseenter="data.isHover = true"
+              @mouseleave="data.isHover = false"
+            >
+              <VCardText>
+                <VRow class="align-center justify-space-between">
+                  <!-- Team 1 -->
+                  <VCol class="text-center" cols="4">
+                    <VAvatar size="80" variant="flat" rounded="lg" class="mb-2">
+                      <img
+                        :src="data.first_club.profile_club.url"
+                        alt="Club A"
+                        style="width: 100%; height: 100%; object-fit: contain"
+                      />
+                    </VAvatar>
+                    <h5 class="text-h6 font-weight-bold">
+                      {{ data.first_club.name }}
+                    </h5>
+                  </VCol>
+
+                  <VCol class="text-center" cols="4">
+                    <div class="text-h4 font-weight-bold">
+                      {{ data.first_club_score ?? '0' }} : {{ data.secound_club_score ?? '0' }}
+                    </div>
+                    <VChip
+                      color="grey-lighten-2"
+                      size="small"
+                      class="mt-1"
+                      v-if="data.first_club_score !== null && data.secound_club_score !== null"
+                    >
+                      FT
+                    </VChip>
+                  </VCol>
+
+                  <VCol class="text-center" cols="4">
+                    <VAvatar size="80" variant="flat" rounded="lg" class="mb-2">
+                      <img
+                        :src="data.secound_club.profile_club.url"
+                        alt="Club B"
+                        style="width: 100%; height: 100%; object-fit: contain"
+                      />
+                    </VAvatar>
+                    <h5 class="text-h6 font-weight-bold">
+                      {{ data.secound_club.name }}
+                    </h5>
+                  </VCol>
+                </VRow>
+
+                <div class="text-center text-caption mt-2 text-grey">
+                  📍 {{ data.stadium.name }} • 🗓️ {{ data.schedule_date }} • ⏰ {{ data.schedule_start_at }}
+                </div>
+              </VCardText>
+            </VCard>
+          </div>
+        </VCol>
+      </VRow>
+    </div>
+
+    <div class="our-team pa-">
+      <div class="d-flex justify-space-between align-center my-6">
+        <div>
+          <VChip label color="primary" size="small">
+            Nearest Training
+          </VChip>
+          <h4 class="d-flex align-center text-h4 mt-2 mb-1 flex-wrap">
+            Upcoming Football Schedules
+          </h4>
+          <p class="text-body-1 mb-0">
+            Check out the closest football tranings and results!
+          </p>
+        </div>
+
+        <VBtn color="primary" @click="goToAllTrainings">
+          show more
+        </VBtn>
+      </div>
+
+      <VRow>
+        <VCol
+          v-for="(data, index) in logisticDataTraining"
           :key="index"
           cols="12"
           md="12"
