@@ -84,10 +84,7 @@ async function fetchPlayer() {
       },
     })
 
-    players.value = response.data     
-
-    console.log('Fetched players:', players.value);
-    
+    players.value = response.data         
     const totals = response.totals
 
     widgetData.value = [

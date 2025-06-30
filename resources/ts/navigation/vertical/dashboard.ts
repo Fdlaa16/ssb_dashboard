@@ -89,6 +89,11 @@ export default [
         target: '_blank',
       },
       {
+        title: 'Standing',
+        to: 'front-pages-standing',
+        target: '_blank',
+      },
+      {
         title: 'Media',
         to: 'front-pages-media',
         target: '_blank',

@@ -48,8 +48,6 @@ const getMediaQuery = async () => {
         sort: selectedSort.value,
       },
     })
-
-    console.log('Media response:', response);
     
     medias.value = response.data 
     const totals = response.totals

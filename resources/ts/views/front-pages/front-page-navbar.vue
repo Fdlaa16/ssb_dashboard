@@ -50,6 +50,7 @@ const menuItems: MenuItem[] = [
       { name: 'Club', to: { name: 'front-pages-club' } },
       { name: 'Schedule Match', to: { name: 'front-pages-schedule-match' } },
       { name: 'Schedule Training', to: { name: 'front-pages-schedule-training' } },
+      { name: 'Standing', to: { name: 'front-pages-standing' } },
       { name: 'Media', to: { name: 'front-pages-media' } },
       { name: 'Pricing', to: { name: 'front-pages-pricing' } },
       { name: 'Payment', to: { name: 'front-pages-payment' } },
@@ -225,12 +226,26 @@ const isPageActive = computed(() => menuItems.some(item => item.navItems.some(li
               class="d-flex gap-x-4"
               :class="$vuetify.display.mdAndUp ? 'd-none' : 'd-block'"
             >
-              <div class="app-logo">
-                <VNodeRenderer :nodes="themeConfig.app.logo" />
-                <h1 class="app-logo-title">
-                  {{ themeConfig.app.title }}
-                </h1>
+              <div class="app-logo d-flex align-center d-md-none">
+                <img
+                  src="/storage/logo/LOGOSSB.png"
+                  alt="Logo SSB"
+                  style="height: 40px;"
+                />
               </div>
+
+              <div class="app-logo d-none d-md-flex align-center">
+                <img
+                  src="/storage/logo/LOGOSSB.png"
+                  alt="Logo SSB"
+                  style="height: 40px;"
+                  class="me-2"
+                />
+                <h3 class="app-logo-title mb-0">
+                  PUTRA MUDA BALARAJA
+                </h3>
+              </div>
+
             </RouterLink>
           </VAppBarTitle>
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { computed } from 'vue'
 
 const isFlatSnackbarVisible = ref(false)
 const snackbarMessage = ref('')
@@ -33,10 +34,10 @@ const getScheduleMatchQuery = async () => {
       method: 'GET',
       params: {
         position: selectedPosition.value.value || '',
-        category: category.value.value || '', // Ambil value dari object
+        category: category.value.value || '', 
       },
     })
-
+    
     scheduleMatchs.value = response.data
     snackbarMessage.value = 'Data berhasil dimuat!'
     snackbarColor.value = 'success'
@@ -51,6 +52,20 @@ const getScheduleMatchQuery = async () => {
     loading.value = false
   }
 }
+
+const groupedByPosition = computed(() => {
+  const groups: Record<string, any[]> = {}
+
+  for (const player of scheduleMatchs.value) {
+    const position = player.club_players[0]?.position ?? 'unknown'
+    if (!groups[position]) {
+      groups[position] = []
+    }
+    groups[position].push(player)
+  }
+
+  return groups
+})
 
 const formatMatchTime = (date: string, time: string) => {
   const d = new Date(`${date}T${time}`)
@@ -124,25 +139,17 @@ watch([category, selectedPosition], () => {
 
           <h4 class="text-h4 mt-2 mb-1">
             {{
-              category?.value && selectedPosition?.value
-                ? `Players in ${category.title} Category as ${selectedPosition.title}`
-                : category?.value
-                  ? `Players in ${category.title} Category`
-                  : selectedPosition?.value
-                    ? `Players in Position: ${selectedPosition.title}`
-                    : 'All Player Categories'
+              category?.value
+                ? `Players in ${category.title} Category`
+                  : 'All Player Categories'
             }}
           </h4>
 
           <p class="text-body-1 mb-0">
             {{
-              category?.value && selectedPosition?.value
-                ? `Here are the players in the ${category.title} category playing as ${selectedPosition.title}.`
-                : category?.value
+              category?.value
                   ? `Check out the list of players in the ${category.title} category.`
-                  : selectedPosition?.value
-                    ? `Check out the list of players playing as ${selectedPosition.title}.`
-                    : 'Explore players from all age categories and positions.'
+                  : 'Explore players from all age categories.'
             }}
           </p>
         </VCol>
@@ -162,28 +169,18 @@ watch([category, selectedPosition], () => {
             @update:modelValue="val => category = val ?? categories[0]"
           />
         </VCol>
-
-        <VCol class="text-end" cols="12" sm="4" md="3">
-          <AppSelect
-            v-model="selectedPosition"
-            :items="positions"
-            item-title="title"
-            item-value="value"
-            return-object
-            placeholder="Pilih Posisi"
-            clearable
-            clear-icon="tabler-x"
-            single-line
-            class="w-100"
-            @update:modelValue="val => selectedPosition = val ?? positions[0]"
-          />
-        </VCol>
       </VRow>
 
-      <VRow>
-        <template v-if="scheduleMatchs.length > 0">
+      <VRow v-if="Object.keys(groupedByPosition).length > 0">
+        <template v-for="(players, positionKey) in groupedByPosition" :key="positionKey">
+          <VCol cols="12">
+            <h5 class="text-h5 font-weight-bold mb-3 mt-6">
+              {{ getPositionTitle(positionKey) }}
+            </h5>
+          </VCol>
+
           <VCol
-            v-for="(data, index) in scheduleMatchs"
+            v-for="(data, index) in players"
             :key="index"
             cols="12"
             sm="6"
@@ -215,18 +212,17 @@ watch([category, selectedPosition], () => {
               </VCardText>
             </VCard>
           </VCol>
-
-        </template>
-
-        <template v-else>
-          <VCol cols="12" class="text-center py-10">
-            <VIcon size="64" color="grey-lighten-1">tabler-calendar-x</VIcon>
-            <p class="text-body-1 mt-2 text-grey">
-              Belum ada media berita ditemukan.
-            </p>
-          </VCol>
         </template>
       </VRow>
+
+      <template v-else>
+        <VCol cols="12" class="text-center py-10">
+          <VIcon size="64" color="grey-lighten-1">tabler-calendar-x</VIcon>
+          <p class="text-body-1 mt-2 text-grey">
+            Belum ada pemain ditemukan.
+          </p>
+        </VCol>
+      </template>
     </div>    
   </VContainer>
   

@@ -27,8 +27,6 @@ const getScheduleMatchQuery = async () => {
   loading.value = true
   error.value = null
 
-  console.log('Fetching matches with status:', selectedMatch.value)
-
   try {
     const response = await $api('company/club', {
       method: 'GET',

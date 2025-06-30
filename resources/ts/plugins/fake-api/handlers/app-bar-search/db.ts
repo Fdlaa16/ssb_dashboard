@@ -97,6 +97,11 @@ export const db: DB = {
           title: 'Schedule Training',
         },
         {
+          url: { name: 'front-pages-standing' },
+          icon: 'tabler-file-description',
+          title: 'Standing',
+        },
+        {
           url: { name: 'front-pages-media' },
           icon: 'tabler-file-description',
           title: 'Media',

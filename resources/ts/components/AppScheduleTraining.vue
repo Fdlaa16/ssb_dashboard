@@ -27,8 +27,6 @@ const getScheduleTrainingQuery = async () => {
   loading.value = true
   error.value = null
 
-  console.log('Fetching trainings with status:', selectedTraining.value)
-
   try {
     const response = await $api('company/list-trainings', {
       method: 'GET',

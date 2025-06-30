@@ -34,8 +34,6 @@ const fetchMedia = async () => {
     const res = await $api(`media/${mediaId}/edit`);
    
     mediaData.value = res.data 
-
-    console.log('Fetched media data:', mediaData.value);
     
   } catch (err: any) {
     error.value = err.message || 'Gagal mengambil data media';
@@ -49,10 +47,7 @@ onMounted(async () => {
 });
 
 const handleSubmit = async () => {
-  try {    
-
-    console.log('Submitting media data:', mediaData.value);
-    
+  try {        
     const formData = new FormData();
     formData.append('_method', 'PUT'); 
 

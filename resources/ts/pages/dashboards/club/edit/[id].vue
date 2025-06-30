@@ -27,8 +27,6 @@ const fetchClub = async () => {
     const res = await $api(`club/${clubId}/edit`);
 
     clubData.value = res.data
-
-    console.log('Fetched club data:', clubData.value);
     
   } catch (err: any) {
     error.value = err.message || 'Gagal mengambil data club';
@@ -42,10 +40,7 @@ onMounted(async () => {
 });
 
 const handleSubmit = async () => {
-  try {    
-
-    console.log('Submitting club data:', clubData.value);
-    
+  try {        
     const formData = new FormData();
     formData.append('_method', 'PUT'); 
 

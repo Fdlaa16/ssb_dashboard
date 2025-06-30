@@ -30,6 +30,7 @@ declare module 'vue' {
     AppScheduleTraining: typeof import('./resources/ts/components/AppScheduleTraining.vue')['default']
     AppSearchHeader: typeof import('./resources/ts/components/AppSearchHeader.vue')['default']
     AppSelect: typeof import('./resources/ts/@core/components/app-form-elements/AppSelect.vue')['default']
+    AppStanding: typeof import('./resources/ts/components/AppStanding.vue')['default']
     AppStepper: typeof import('./resources/ts/@core/components/AppStepper.vue')['default']
     AppTextarea: typeof import('./resources/ts/@core/components/app-form-elements/AppTextarea.vue')['default']
     AppTextField: typeof import('./resources/ts/@core/components/app-form-elements/AppTextField.vue')['default']

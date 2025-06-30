@@ -16,9 +16,7 @@ const clubData = ref<ClubData>({
   profile_club: null,
 })
 
-const handleSubmit = async () => {
-  console.log('Submitting club data:', clubData.value);
-  
+const handleSubmit = async () => {  
   const formData = new FormData();
   formData.append('name', clubData.value.name);
   

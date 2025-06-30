@@ -1,8 +1,8 @@
 <script setup lang="ts">
 
-// const isFlatSnackbarVisible = ref(false)
-// const snackbarMessage = ref('')
-// const snackbarColor = ref<'success' | 'error'>('success')
+const isFlatSnackbarVisible = ref(false)
+const snackbarMessage = ref('')
+const snackbarColor = ref<'success' | 'error'>('success')
 
 interface Pricing {
   title?: string
@@ -19,27 +19,40 @@ const logisticData = ref<any[]>([])
 
 const loading = ref(true)
 const error = ref<string | null>(null)
-const scheduleMatchs = ref<any[]>([])
+const clubs = ref<any[]>([])
 
 const selectedMatch = ref('')
+
+const headers = [
+  { title: 'Nama Klub', key: 'club.name' },
+  { title: 'Main', key: 'total' },
+  { title: 'Menang', key: 'win' },
+  { title: 'Seri', key: 'draw' },
+  { title: 'Kalah', key: 'lose' },
+  { title: 'GM', key: 'goal_in' },
+  { title: 'GK', key: 'goal_conceded' },
+  { title: 'Selisih', key: 'goal_difference' },
+  { title: 'Poin', key: 'points' },
+]
+
 
 const getScheduleMatchQuery = async () => {
   loading.value = true
   error.value = null
 
   try {
-    const response = await $api('company/media', {
+    const response = await $api('company/standing', {
       method: 'GET',
       params: {
         status: selectedMatch.value || 'upcoming',
       }
     })
+    
+    clubs.value = response.data
 
-    scheduleMatchs.value = response.data
-
-    // snackbarMessage.value = 'Data berhasil dimuat!'
-    // snackbarColor.value = 'success'
-    // isFlatSnackbarVisible.value = true
+    snackbarMessage.value = 'Data berhasil dimuat!'
+    snackbarColor.value = 'success'
+    isFlatSnackbarVisible.value = true
 
   } catch (err: any) {
     error.value = err.message || 'Gagal memuat data'
@@ -79,66 +92,91 @@ function formatTanggalIndonesia(dateString: string): string {
 watch(selectedMatch, () => {
   getScheduleMatchQuery()
 })
+
+const currentPage = ref(1)
+const itemsPerPage = 10
+
+const paginatedClubs = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  return clubs.value.slice(start, start + itemsPerPage)
+})
+
+const totalPages = computed(() =>
+  Math.ceil(clubs.value.length / itemsPerPage)
+)
 </script>
 
 <template>
-  <VContainer id="team">
+  <VContainer id="club">
     <div class="our-team pa-">
       <VRow class="align-center my-6">
         <VCol>
-          <VChip label color="primary" size="small">Latest Football Media</VChip>
-          <h4  class="text-h4 mt-2 mb-1">Latest Football Highlights & Reports</h4>
-          <p class="text-body-1 mb-0">Stay informed with the most recent football news, match highlights, exclusive interviews, and expert analysis from around the field. </p>
+          <VChip label color="primary" size="small">Latest Standings</VChip>
+          <h4 class="text-h4 mt-2 mb-1">Current Football League Table & Rankings</h4>
+          <p class="text-body-1 mb-0">
+            Explore the latest football standings with updated team rankings, match results, and points. Track your favorite club’s performance and stay ahead with real-time league updates, win/loss records, goal differences, and more.
+          </p>
         </VCol>
       </VRow>
 
-      <VRow>
-        <!-- Tampilkan jika ada data -->
-        <template v-if="scheduleMatchs.length > 0">
-          <VCol
-            v-for="(data, index) in scheduleMatchs"
-            :key="index"
-            cols="12"
-            sm="6"
-            md="4"
-          >
-            <VCard>
-              <VImg
-                :src="data.document_media.url"
-                cover
-                class="media-img"
-              />
+      <VCard>
+        <VDataTable
+          :headers="headers"
+          :items="paginatedClubs"
+          :loading="loading"
+          class="text-no-wrap mb-2"
+          :items-per-page="itemsPerPage"
+          hide-default-footer
+        >
+          <!-- Templating data -->
+          <template #item["club.name"]="{ item }">
+            <div>{{ item.club?.name || '-' }}</div>
+          </template>
 
-              <VCardItem>
-                <VCardTitle>{{ data.title }}</VCardTitle>
-              </VCardItem>
+          <template #item.total="{ item }">
+            <div>{{ item.total }}</div>
+          </template>
 
-              <VCardText>
-                <p class="line-clamp">
-                  {{ data.description }}
-                </p>
-                <span class="text-caption text-disabled">
-                  {{ formatTanggalIndonesia(data.start_date) }}
-                </span>
-              </VCardText>
-            </VCard>
-          </VCol>
-        </template>
+          <template #item.win="{ item }">
+            <div>{{ item.win }}</div>
+          </template>
 
-        <!-- Tampilkan jika data kosong -->
-        <template v-else>
-          <VCol cols="12" class="text-center py-10">
-            <VIcon size="64" color="grey-lighten-1">tabler-calendar-x</VIcon>
-            <p class="text-body-1 mt-2 text-grey">
-              Belum ada media berita ditemukan.
-            </p>
-          </VCol>
-        </template>
-      </VRow>
-    </div>    
+          <template #item.draw="{ item }">
+            <div>{{ item.draw }}</div>
+          </template>
+
+          <template #item.lose="{ item }">
+            <div>{{ item.lose }}</div>
+          </template>
+
+          <template #item.goal_in="{ item }">
+            <div>{{ item.goal_in }}</div>
+          </template>
+
+          <template #item.goal_conceded="{ item }">
+            <div>{{ item.goal_conceded }}</div>
+          </template>
+
+          <template #item.goal_difference="{ item }">
+            <div>{{ item.goal_difference }}</div>
+          </template>
+
+          <template #item.points="{ item }">
+            <strong>{{ item.points }}</strong>
+          </template>
+
+          <!-- Tampilkan pesan saat data kosong -->
+          <template #no-data>
+            <div class="text-center pa-4 text-medium-emphasis">
+              {{ loading ? 'Memuat data...' : 'Tidak ada data yang tersedia' }}
+            </div>
+          </template>
+        </VDataTable>
+      </VCard>
+    </div>
   </VContainer>
-  
-  <!-- <VSnackbar
+
+  <VSnackbar
     v-model="isFlatSnackbarVisible"
     :color="snackbarColor"
     location="bottom start"
@@ -146,8 +184,9 @@ watch(selectedMatch, () => {
     timeout="3000"
   >
     {{ snackbarMessage }}
-  </VSnackbar> -->
+  </VSnackbar>
 </template>
+
 
 
 <style lang="scss" scoped>

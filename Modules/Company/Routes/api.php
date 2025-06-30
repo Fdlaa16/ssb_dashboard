@@ -7,6 +7,7 @@ use Modules\Company\Http\Controllers\MediaController;
 use Modules\Company\Http\Controllers\PlayerController;
 use Modules\Company\Http\Controllers\ScheduleMatchController;
 use Modules\Company\Http\Controllers\ScheduleTrainingController;
+use Modules\Company\Http\Controllers\StandingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -73,4 +74,15 @@ Route::prefix('company')->group(function () {
     Route::put('schedule-match/{id}/active', [ScheduleMatchController::class, 'active'])->name('schedule-match.active');
     Route::put('schedule-match/{id}/approve', [ScheduleMatchController::class, 'approve'])->name('schedule-match.approve');
     Route::put('schedule-match/{id}/reject', [ScheduleMatchController::class, 'reject'])->name('schedule-match.reject');
+
+    Route::get('standing', [StandingController::class, 'index'])->name('standing.index');
+    Route::get('standing/create', [StandingController::class, 'create'])->name('standing.create');
+    Route::post('standing/store', [StandingController::class, 'store'])->name('standing.store');
+    Route::get('standing/{id}', [StandingController::class, 'show'])->name('standing.show');
+    Route::get('standing/{id}/edit', [StandingController::class, 'edit'])->name('standing.edit');
+    Route::put('standing/{id}', [StandingController::class, 'update'])->name('standing.update');
+    Route::delete('standing/{id}', [StandingController::class, 'destroy'])->name('standing.destroy');
+    Route::put('standing/{id}/active', [StandingController::class, 'active'])->name('standing.active');
+    Route::put('standing/{id}/approve', [StandingController::class, 'approve'])->name('standing.approve');
+    Route::put('standing/{id}/reject', [StandingController::class, 'reject'])->name('standing.reject');
 });

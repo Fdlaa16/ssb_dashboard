@@ -23,6 +23,7 @@ const pagesList: Menu[] = [
   { name: 'Club', to: { name: 'front-pages-club' } },
   { name: 'Schedule Match', to: { name: 'front-pages-schedule-match' } },
   { name: 'Schedule Training', to: { name: 'front-pages-schedule-training' } },
+  { name: 'Standing', to: { name: 'front-pages-standing' } },
   { name: 'Pricing', to: { name: 'front-pages-pricing' } },
   { name: 'Payment', to: { name: 'front-pages-payment' }, isNew: true },
   { name: 'Checkout', to: { name: 'front-pages-checkout' } },
