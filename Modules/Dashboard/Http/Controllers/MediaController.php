@@ -6,6 +6,7 @@ use App\Helpers\Helper;
 use App\Http\Resources\MediaResource;
 use App\Models\File;
 use App\Models\Media;
+use Carbon\Carbon;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -139,13 +140,13 @@ class MediaController extends Controller
                 return response()->json(array('errors' => $validator->messages()->toArray()), 422);
             } else {
                 $media = Media::create([
-                    'name' => $request->name,
-                    'title' => $request->title,
-                    'hashtag' => $request->hashtag,
-                    'description' => $request->description,
-                    'link' => $request->link,
-                    'start_date' => Helper::formatDate($request->start_date, 'Y-m-d'),
-                    'end_date' => Helper::formatDate($request->end_date, 'Y-m-d'),
+                    'name'          => $request->name,
+                    'title'         => $request->title,
+                    'hashtag'       => $request->hashtag,
+                    'description'   => $request->description,
+                    'link'          => $request->link,
+                    'start_date'      => Carbon::parse($request->start_date)->format('Y-m-d'),
+                    'end_date'        => Carbon::parse($request->end_date)->format('Y-m-d'),
                 ]);
 
                 $types = ['document_media'];
@@ -261,13 +262,13 @@ class MediaController extends Controller
             } else {
 
                 $media->update([
-                    'name'   => $request->name,
-                    'title' => $request->title,
-                    'hashtag' => $request->hashtag,
-                    'description' => $request->description,
-                    'link' => $request->link,
-                    'start_date' => Helper::formatDate($request->start_date, 'Y-m-d'),
-                    'end_date' => Helper::formatDate($request->end_date, 'Y-m-d'),
+                    'name'          => $request->name,
+                    'title'         => $request->title,
+                    'hashtag'       => $request->hashtag,
+                    'description'   => $request->description,
+                    'link'          => $request->link,
+                    'start_date'    => Carbon::parse($request->start_date)->format('Y-m-d'),
+                    'end_date'      => Carbon::parse($request->end_date)->format('Y-m-d'),
                 ]);
 
                 $types = ['document_media'];

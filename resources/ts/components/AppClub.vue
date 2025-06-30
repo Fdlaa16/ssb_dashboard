@@ -84,7 +84,7 @@ watch(selectedMatch, () => {
 </script>
 
 <template>
-  <VContainer id="team">
+  <VContainer id=club>
     <div class="our-team pa-">
       <VRow class="align-center my-6">
         <VCol>
@@ -106,7 +106,7 @@ watch(selectedMatch, () => {
           >
             <VCard>
               <VImg
-                :src="data.profile_club.url"
+                :src="data.profile_club?.url"
                 cover
                 class="media-img"
               />

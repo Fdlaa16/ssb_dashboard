@@ -1,8 +1,4 @@
 <script setup lang="ts">
-import teamPerson1 from '@images/front-pages/landing-page/team-member-1.png'
-import teamPerson2 from '@images/front-pages/landing-page/team-member-2.png'
-import teamPerson3 from '@images/front-pages/landing-page/team-member-3.png'
-import teamPerson4 from '@images/front-pages/landing-page/team-member-4.png'
 
 
 const router = useRouter()
@@ -121,7 +117,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <VContainer id="team">
+  <VContainer id="schedule">
     <div class="our-team pa-">
       <div class="d-flex justify-space-between align-center my-6">
         <div>
@@ -162,7 +158,7 @@ onMounted(() => {
                   <VCol class="text-center" cols="4">
                     <VAvatar size="80" variant="flat" rounded="lg" class="mb-2">
                       <img
-                        :src="data.first_club.profile_club.url"
+                        :src="data.first_club.profile_club?.url"
                         alt="Club A"
                         style="width: 100%; height: 100%; object-fit: contain"
                       />
@@ -189,7 +185,7 @@ onMounted(() => {
                   <VCol class="text-center" cols="4">
                     <VAvatar size="80" variant="flat" rounded="lg" class="mb-2">
                       <img
-                        :src="data.secound_club.profile_club.url"
+                        :src="data.secound_club.profile_club?.url"
                         alt="Club B"
                         style="width: 100%; height: 100%; object-fit: contain"
                       />
@@ -250,7 +246,7 @@ onMounted(() => {
                   <VCol class="text-center" cols="4">
                     <VAvatar size="80" variant="flat" rounded="lg" class="mb-2">
                       <img
-                        :src="data.first_club.profile_club.url"
+                        :src="data.first_club.profile_club?.url"
                         alt="Club A"
                         style="width: 100%; height: 100%; object-fit: contain"
                       />
@@ -277,7 +273,7 @@ onMounted(() => {
                   <VCol class="text-center" cols="4">
                     <VAvatar size="80" variant="flat" rounded="lg" class="mb-2">
                       <img
-                        :src="data.secound_club.profile_club.url"
+                        :src="data.secound_club.profile_club?.url"
                         alt="Club B"
                         style="width: 100%; height: 100%; object-fit: contain"
                       />
