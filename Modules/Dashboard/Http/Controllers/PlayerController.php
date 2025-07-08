@@ -265,7 +265,7 @@ class PlayerController extends Controller
         $players = Player::query()
             ->with([
                 'user',
-                'clubPlayers.club',
+                'clubPlayers.club.profile_club',
                 'avatar',
                 'birth_certificate',
                 'family_card',

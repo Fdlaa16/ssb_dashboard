@@ -11,6 +11,7 @@ use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class MediaController extends Controller
@@ -111,72 +112,88 @@ class MediaController extends Controller
     public function store(Request $request)
     {
         DB::beginTransaction();
-
         try {
             $postData = $request->all();
             $rules = [
                 'start_date' => 'required',
                 'end_date' => 'required',
-                'name'     => 'required',
+                'name' => 'required',
                 'title' => 'required',
                 'hashtag' => 'required',
                 'description' => 'required',
                 'link' => 'required',
+                'document_media.*' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
             ];
 
             $messages = [
                 'start_date.required' => 'Tanggal mulai harus diisi',
                 'end_date.required' => 'Tanggal akhir harus diisi',
-                'name.required'     => 'Nama harus diisi',
-                'title.required'    => 'Judul harus diisi',
-                'hashtag.required'  => 'Hashtag harus diisi',
+                'name.required' => 'Nama harus diisi',
+                'title.required' => 'Judul harus diisi',
+                'hashtag.required' => 'Hashtag harus diisi',
                 'description.required' => 'Deskripsi harus diisi',
-                'link.required'     => 'Link harus diisi',
+                'link.required' => 'Link harus diisi',
+                'document_media.*.image' => 'File harus berupa gambar',
+                'document_media.*.mimes' => 'Format gambar harus jpeg, png, jpg, atau bmp',
+                'document_media.*.max' => 'Ukuran gambar maksimal 2MB',
             ];
 
             $validator = Validator::make($postData, $rules, $messages);
 
+            if ($request->hasFile('document_media')) {
+                $files = $request->file('document_media');
+                if (is_array($files) && count($files) > 5) {
+                    return response()->json([
+                        'errors' => ['document_media' => ['Maksimal 5 gambar yang dapat diupload']]
+                    ], 422);
+                }
+            }
+
             if ($validator->fails()) {
-                return response()->json(array('errors' => $validator->messages()->toArray()), 422);
+                return response()->json(['errors' => $validator->messages()->toArray()], 422);
             } else {
                 $media = Media::create([
-                    'name'          => $request->name,
-                    'title'         => $request->title,
-                    'hashtag'       => $request->hashtag,
-                    'description'   => $request->description,
-                    'link'          => $request->link,
-                    'start_date'      => Carbon::parse($request->start_date)->format('Y-m-d'),
-                    'end_date'        => Carbon::parse($request->end_date)->format('Y-m-d'),
+                    'name' => $request->name,
+                    'title' => $request->title,
+                    'hashtag' => $request->hashtag,
+                    'description' => $request->description,
+                    'link' => $request->link,
+                    'start_date' => Carbon::parse($request->start_date)->format('Y-m-d'),
+                    'end_date' => Carbon::parse($request->end_date)->format('Y-m-d'),
                 ]);
 
-                $types = ['document_media'];
-                $fileObj = new File();
+                // Handle multiple file uploads
+                if ($request->hasFile('document_media')) {
+                    $files = $request->file('document_media');
+                    $fileObj = new File();
 
-                foreach ($types as $type) {
-                    if ($request->hasFile($type)) {
-                        $file = $request->file($type);
-                        $fileDir = $fileObj->getDirectory($type);
-                        $fileName = $fileObj->getFileName($type, $media->id, $file);
+                    // Jika hanya 1 file, konversi ke array
+                    if (!is_array($files)) {
+                        $files = [$files];
+                    }
 
-                        $file->storeAs($fileDir, $fileName, 'public');
+                    foreach ($files as $index => $file) {
+                        if ($file && $file->isValid()) {
+                            $fileDir = $fileObj->getDirectory('document_media');
+                            $fileName = $fileObj->getFileName('document_media', $media->id, $file, $index);
+                            $file->storeAs($fileDir, $fileName, 'public');
 
-                        $media->files()->where('type', $type)->delete();
-
-                        $media->files()->create([
-                            'type' => $type,
-                            'name' => $fileName,
-                            'original_name' => $file->getClientOriginalName(),
-                            'extension' => $file->getClientOriginalExtension(),
-                            'path' => "$fileDir$fileName",
-                        ]);
+                            $media->files()->create([
+                                'type' => 'document_media',
+                                'name' => $fileName,
+                                'original_name' => $file->getClientOriginalName(),
+                                'extension' => $file->getClientOriginalExtension(),
+                                'path' => "$fileDir$fileName",
+                                'sort_order' => $index, // Untuk mengurutkan gambar
+                            ]);
+                        }
                     }
                 }
 
                 DB::commit();
-
                 return response()->json([
                     'message' => 'Media created successfully.',
-                    'data' => $media
+                    'data' => $media->load('files') // Load relasi files
                 ], 201);
             }
         } catch (\Exception $e) {
@@ -205,17 +222,20 @@ class MediaController extends Controller
      */
     public function edit($id)
     {
-        $medias = Media::query()
+        $media = Media::query()
             ->with([
-                'document_media',
+                'files' => function ($query) {
+                    $query->where('type', 'document_media')
+                        ->orderBy('created_at', 'asc');
+                }
             ])
             ->find($id);
 
         $data = [
-            'data' => $medias,
+            'data' => $media,
         ];
 
-        return $data;
+        return response()->json($data);
     }
     /**
      * Update the specified resource in storage.
@@ -226,85 +246,100 @@ class MediaController extends Controller
     public function update(Request $request, $id)
     {
         DB::beginTransaction();
-
-        $media = Media::find($id);
-
-        if (!$media) {
-            return response()->json(['message' => 'Media tidak ditemukan'], 404);
-        }
-
         try {
-            // Validasi data
+            $media = Media::findOrFail($id);
+            $postData = $request->all();
+
             $rules = [
                 'start_date' => 'required',
                 'end_date' => 'required',
-                'name'     => 'required',
+                'name' => 'required',
                 'title' => 'required',
                 'hashtag' => 'required',
                 'description' => 'required',
                 'link' => 'required',
+                'document_media.*' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
             ];
 
             $messages = [
                 'start_date.required' => 'Tanggal mulai harus diisi',
                 'end_date.required' => 'Tanggal akhir harus diisi',
-                'name.required'     => 'Nama harus diisi',
-                'title.required'    => 'Judul harus diisi',
-                'hashtag.required'  => 'Hashtag harus diisi',
+                'name.required' => 'Nama harus diisi',
+                'title.required' => 'Judul harus diisi',
+                'hashtag.required' => 'Hashtag harus diisi',
                 'description.required' => 'Deskripsi harus diisi',
-                'link.required'     => 'Link harus diisi',
+                'link.required' => 'Link harus diisi',
+                'document_media.*.image' => 'File harus berupa gambar',
+                'document_media.*.mimes' => 'Format gambar harus jpeg, png, jpg, atau bmp',
+                'document_media.*.max' => 'Ukuran gambar maksimal 2MB',
             ];
 
-            $validator = Validator::make($request->all(), $rules, $messages);
+            $validator = Validator::make($postData, $rules, $messages);
+
+            if ($request->hasFile('document_media')) {
+                $files = $request->file('document_media');
+                if (is_array($files) && count($files) > 5) {
+                    return response()->json([
+                        'errors' => ['document_media' => ['Maksimal 5 gambar yang dapat diupload']]
+                    ], 422);
+                }
+            }
 
             if ($validator->fails()) {
-                return response()->json(array('errors' => $validator->messages()->toArray()), 422);
-            } else {
+                return response()->json(['errors' => $validator->messages()->toArray()], 422);
+            }
 
-                $media->update([
-                    'name'          => $request->name,
-                    'title'         => $request->title,
-                    'hashtag'       => $request->hashtag,
-                    'description'   => $request->description,
-                    'link'          => $request->link,
-                    'start_date'    => Carbon::parse($request->start_date)->format('Y-m-d'),
-                    'end_date'      => Carbon::parse($request->end_date)->format('Y-m-d'),
-                ]);
+            $media->update([
+                'name' => $request->name,
+                'title' => $request->title,
+                'hashtag' => $request->hashtag,
+                'description' => $request->description,
+                'link' => $request->link,
+                'start_date' => Carbon::parse($request->start_date)->format('Y-m-d'),
+                'end_date' => Carbon::parse($request->end_date)->format('Y-m-d'),
+            ]);
 
-                $types = ['document_media'];
+            if ($request->hasFile('document_media')) {
+                $files = $request->file('document_media');
                 $fileObj = new File();
 
-                foreach ($types as $type) {
-                    if ($request->hasFile($type)) {
-                        $file = $request->file($type);
-                        $fileDir = $fileObj->getDirectory($type);
-                        $fileName = $fileObj->getFileName($type, $media->id, $file);
+                $oldFiles = $media->files()->where('type', 'document_media')->get();
+                foreach ($oldFiles as $oldFile) {
+                    Storage::disk('public')->delete($oldFile->path);
+                    $oldFile->delete();
+                }
 
+                if (!is_array($files)) {
+                    $files = [$files];
+                }
+
+                foreach ($files as $index => $file) {
+                    if ($file && $file->isValid()) {
+                        $fileDir = $fileObj->getDirectory('document_media');
+                        $fileName = $fileObj->getFileName('document_media', $media->id, $file, $index);
                         $file->storeAs($fileDir, $fileName, 'public');
-                        $media->files()->where('type', $type)->delete();
 
                         $media->files()->create([
-                            'type'           => $type,
-                            'name'           => $fileName,
-                            'original_name'  => $file->getClientOriginalName(),
-                            'extension'      => $file->getClientOriginalExtension(),
-                            'path'           => $fileDir . $fileName,
+                            'type' => 'document_media',
+                            'name' => $fileName,
+                            'original_name' => $file->getClientOriginalName(),
+                            'extension' => $file->getClientOriginalExtension(),
+                            'path' => "$fileDir$fileName",
+                            'sort_order' => $index,
                         ]);
                     }
                 }
-
-                DB::commit();
-
-                return response()->json([
-                    'message' => 'Media updated successfully.',
-                    'data' => $media,
-                ]);
             }
+
+            DB::commit();
+            return response()->json([
+                'message' => 'Media updated successfully.',
+                'data' => $media->load('files')
+            ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-
             return response()->json([
-                'message' => 'Terjadi kesalahan saat memperbarui media.',
+                'message' => 'Something went wrong',
                 'error' => $e->getMessage()
             ], 500);
         }

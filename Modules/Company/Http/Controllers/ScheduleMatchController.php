@@ -17,14 +17,15 @@ class ScheduleMatchController extends Controller
      */
     public function nearestMatches(Request $request)
     {
-        $orderByColumn = 'created_at';
-        $orderByDirection = 'desc';
+        $orderByColumn = 'schedule_date';
+        $orderByDirection = 'asc';
 
         if ($request->has('sort')) {
             $orderByDirection = $request->input('sort') === 'asc' ? 'asc' : 'desc';
         }
 
-        $now = now();
+        $jakartaTime = now()->setTimezone('Asia/Jakarta');
+
         $scheduleMatchQuery = ScheduleMatch::query()
             ->with([
                 'firstClub.profile_club',
@@ -32,31 +33,27 @@ class ScheduleMatchController extends Controller
                 'stadium'
             ])
             ->whereNull('deleted_at')
-            ->where(function ($query) use ($now) {
-                $query->where('schedule_date', '>=', $now->toDateString())
-                    ->orWhere(function ($q) use ($now) {
-                        $q->where('schedule_date', '=', $now->toDateString())
-                            ->where('schedule_start_at', '>=', $now->toTimeString());
-                    });
-            })
-            ->orderBy('schedule_date')
-            ->orderBy('schedule_start_at')
+            ->whereRaw("CONCAT(schedule_date, ' ', schedule_start_at) > ?", [$jakartaTime->format('Y-m-d H:i:s')])
+            ->orderBy('schedule_date', 'asc')
+            ->orderBy('schedule_start_at', 'asc')
             ->limit(3);
 
         $scheduleMatchQuery->when(!empty($request->search), function ($q) use ($request) {
-            $q->where('created_at', 'like', '%' . $request->search . '%')
-                ->orWhere('schedule_date', 'like', '%' . $request->search . '%')
-                ->orWhere('schedule_start_at', 'like', '%' . $request->search . '%')
-                ->orWhere('schedule_end_at', 'like', '%' . $request->search . '%')
-                ->orWhereHas('firstClub', function ($user) use ($request) {
-                    $user->where('name', 'like', '%' . $request->search . '%');
-                })
-                ->orWhereHas('secoundClub', function ($user) use ($request) {
-                    $user->where('name', 'like', '%' . $request->search . '%');
-                })
-                ->orWhereHas('stadium', function ($user) use ($request) {
-                    $user->where('name', 'like', '%' . $request->search . '%');
-                });
+            $q->where(function ($query) use ($request) {
+                $query->where('created_at', 'like', '%' . $request->search . '%')
+                    ->orWhere('schedule_date', 'like', '%' . $request->search . '%')
+                    ->orWhere('schedule_start_at', 'like', '%' . $request->search . '%')
+                    ->orWhere('schedule_end_at', 'like', '%' . $request->search . '%')
+                    ->orWhereHas('firstClub', function ($user) use ($request) {
+                        $user->where('name', 'like', '%' . $request->search . '%');
+                    })
+                    ->orWhereHas('secoundClub', function ($user) use ($request) {
+                        $user->where('name', 'like', '%' . $request->search . '%');
+                    })
+                    ->orWhereHas('stadium', function ($user) use ($request) {
+                        $user->where('name', 'like', '%' . $request->search . '%');
+                    });
+            });
         });
 
         $scheduleMatchQuery->when($request->status, function ($query, $status) {
@@ -89,16 +86,29 @@ class ScheduleMatchController extends Controller
             });
         });
 
-        $scheduleMatchQuery->orderBy($orderByColumn, $orderByDirection);
+        if (!$request->has('sort')) {
+            $scheduleMatchQuery->orderBy('schedule_date', 'asc')
+                ->orderBy('schedule_start_at', 'asc');
+        } else {
+            $scheduleMatchQuery->orderBy($orderByColumn, $orderByDirection);
+        }
 
         $scheduleMatch = $scheduleMatchQuery->get();
 
         $statusCounts = DB::table('schedule_matches')
             ->selectRaw('
-                COUNT(*) as total,
-                SUM(CASE WHEN deleted_at IS NULL THEN 1 ELSE 0 END) as active,
-                SUM(CASE WHEN deleted_at IS NOT NULL THEN 1 ELSE 0 END) as in_active
-            ')
+            COUNT(*) as total,
+            SUM(CASE WHEN deleted_at IS NULL THEN 1 ELSE 0 END) as active,
+            SUM(CASE WHEN deleted_at IS NOT NULL THEN 1 ELSE 0 END) as in_active,
+            SUM(CASE 
+                WHEN deleted_at IS NULL AND CONCAT(schedule_date, " ", schedule_start_at) > ? 
+                THEN 1 ELSE 0 
+            END) as upcoming,
+            SUM(CASE 
+                WHEN deleted_at IS NULL AND CONCAT(schedule_date, " ", schedule_start_at) <= ? 
+                THEN 1 ELSE 0 
+            END) as previous
+        ', [$jakartaTime->format('Y-m-d H:i:s'), $jakartaTime->format('Y-m-d H:i:s')])
             ->when($request->filled('from_date'), function ($q) use ($request) {
                 $q->where('created_at', '>=', Helper::formatDate($request->from_date, 'Y-m-d') . ' 00:00:00');
             })
@@ -111,6 +121,8 @@ class ScheduleMatchController extends Controller
             'all' => (int) $statusCounts->total,
             'active' => (int) $statusCounts->active,
             'in_active' => (int) $statusCounts->in_active,
+            'upcoming' => (int) $statusCounts->upcoming,
+            'previous' => (int) $statusCounts->previous,
         ];
 
         return response()->json([
@@ -130,13 +142,16 @@ class ScheduleMatchController extends Controller
 
         $scheduleMatchQuery = ScheduleMatch::query();
 
+        $jakartaTime = now()->setTimezone('Asia/Jakarta');
+
         if ($request->status === 'upcoming') {
-            $scheduleMatchQuery->where(function ($query) {
-                $query->whereNull('status')
-                    ->orWhere('status', '!=', 'finished');
+            $scheduleMatchQuery->where(function ($query) use ($jakartaTime) {
+                $query->whereRaw("CONCAT(schedule_date, ' ', schedule_start_at) > ?", [$jakartaTime->format('Y-m-d H:i:s')]);
             });
         } elseif ($request->status === 'previous') {
-            $scheduleMatchQuery->where('status', 'finished');
+            $scheduleMatchQuery->where(function ($query) use ($jakartaTime) {
+                $query->whereRaw("CONCAT(schedule_date, ' ', schedule_start_at) <= ?", [$jakartaTime->format('Y-m-d H:i:s')]);
+            });
         }
 
         $scheduleMatchQuery->with([
@@ -197,10 +212,18 @@ class ScheduleMatchController extends Controller
 
         $statusCounts = DB::table('schedule_matches')
             ->selectRaw('
-                COUNT(*) as total,
-                SUM(CASE WHEN deleted_at IS NULL THEN 1 ELSE 0 END) as active,
-                SUM(CASE WHEN deleted_at IS NOT NULL THEN 1 ELSE 0 END) as in_active
-            ')
+            COUNT(*) as total,
+            SUM(CASE WHEN deleted_at IS NULL THEN 1 ELSE 0 END) as active,
+            SUM(CASE WHEN deleted_at IS NOT NULL THEN 1 ELSE 0 END) as in_active,
+            SUM(CASE 
+                WHEN deleted_at IS NULL AND CONCAT(schedule_date, " ", schedule_start_at) > ? 
+                THEN 1 ELSE 0 
+            END) as upcoming,
+            SUM(CASE 
+                WHEN deleted_at IS NULL AND CONCAT(schedule_date, " ", schedule_start_at) <= ? 
+                THEN 1 ELSE 0 
+            END) as previous
+        ', [$jakartaTime->format('Y-m-d H:i:s'), $jakartaTime->format('Y-m-d H:i:s')])
             ->when($request->filled('from_date'), function ($q) use ($request) {
                 $q->where('created_at', '>=', Helper::formatDate($request->from_date, 'Y-m-d') . ' 00:00:00');
             })
@@ -213,6 +236,8 @@ class ScheduleMatchController extends Controller
             'all' => (int) $statusCounts->total,
             'active' => (int) $statusCounts->active,
             'in_active' => (int) $statusCounts->in_active,
+            'upcoming' => (int) $statusCounts->upcoming,
+            'previous' => (int) $statusCounts->previous,
         ];
 
         return response()->json([

@@ -8,16 +8,21 @@ export interface Club {
   id: number;
   code: string;
   name: string;
+  profile_club?: {
+    id: number;
+    url: string;
+    name: string;
+  };
 }
 
 export interface ClubPlayer {
-  club_id: number;
+  club_id: number | string; 
   player_id: number;
   back_number: string;   
   position: string;
+  category: string; 
   is_captain: boolean;   
   status: boolean;
-  category: string; 
 }
 
 export interface Sport {
@@ -43,9 +48,8 @@ export interface PlayerData {
   club_player: ClubPlayer;
   sports?: Sport[];
   sport_players?: SportPlayer[];
-  family_card?: File;
-  report_grades?: File;
-  birth_certificate?: File;
-  avatar?: File; 
+  family_card?: File | { url: string; name: string };
+  report_grades?: File | { url: string; name: string };
+  birth_certificate?: File | { url: string; name: string };
+  avatar?: File | { url: string; name: string }; 
 }
-

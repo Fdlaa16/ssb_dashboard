@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 const isFlatSnackbarVisible = ref(false)
 const snackbarMessage = ref('')
@@ -77,7 +76,9 @@ const formatMatchTime = (date: string, time: string) => {
 }
 
 const categories = [
-  { title: 'Pilih Kategori', value: '' },
+  { title: 'Semua Kategori', value: '' },
+  { title: 'Tim Utama', value: 'main' },
+  { title: 'Putri', value: 'female' },
   { title: 'U-6', value: 'u6' },
   { title: 'U-7', value: 'u7' },
   { title: 'U-8', value: 'u8' },
@@ -97,7 +98,7 @@ const categories = [
 const category = ref(categories[0])
 
 const positions = [
-  { title: 'Pilih Posisi', value: '' },
+  { title: 'Semua Posisi', value: '' },
   { title: 'Penjaga Gawang', value: 'goalkeeper' },
   { title: 'Bek', value: 'defender' },
   { title: 'Gelandang', value: 'midfielder' },
@@ -140,16 +141,16 @@ watch([category, selectedPosition], () => {
           <h4 class="text-h4 mt-2 mb-1">
             {{
               category?.value
-                ? `Players in ${category.title} Category`
-                  : 'All Player Categories'
+                ? `Pemain di Kategori ${category.title}`
+                  : 'Semua Kategori Pemain'
             }}
           </h4>
 
           <p class="text-body-1 mb-0">
             {{
               category?.value
-                  ? `Check out the list of players in the ${category.title} category.`
-                  : 'Explore players from all age categories.'
+                  ? `Lihat daftar pemain dalam kategori ${category.title}.`
+                  : 'Jelajahi pemain dari semua kategori umur.'
             }}
           </p>
         </VCol>
@@ -186,31 +187,33 @@ watch([category, selectedPosition], () => {
             sm="6"
             md="4"
           >
-            <VCard>
-              <VImg
-                :src="data.avatar.url"
-                cover
-                class="media-img"
-              />
+            <router-link :to="{ name: 'front-pages-player-id', params: { id: String(data.id) } }">
+              <VCard>
+                <VImg
+                  :src="data.avatar.url"
+                  cover
+                  class="media-img"
+                />
 
-              <VCardItem class="py-1"> 
-                <div class="d-flex align-center justify-space-between">
-                  <VCardTitle class="text-subtitle-1 font-weight-bold pa-0">
-                    {{ data.name }}
-                  </VCardTitle>
-                  <div class="d-flex align-center">
-                    <VIcon icon="tabler-shirt" size="18" class="mr-1" />
-                    <span class="text-subtitle-1">{{ data.club_players[0].back_number }}</span>
+                <VCardItem class="py-1"> 
+                  <div class="d-flex align-center justify-space-between">
+                    <VCardTitle class="text-subtitle-1 font-weight-bold pa-0">
+                      {{ data.name }}
+                    </VCardTitle>
+                    <div class="d-flex align-center">
+                      <VIcon icon="tabler-shirt" size="18" class="mr-1" />
+                      <span class="text-subtitle-1">{{ data.club_players[0].back_number }}</span>
+                    </div>
                   </div>
-                </div>
-              </VCardItem>
+                </VCardItem>
 
-              <VCardText class="pt-1 pb-2"> 
-                <div class="d-flex justify-space-between text-caption text-grey-darken-1">
-                  <span>{{ getPositionTitle(data.club_players[0].position) }}</span>
-                </div>
-              </VCardText>
-            </VCard>
+                <VCardText class="pt-1 pb-2"> 
+                  <div class="d-flex justify-space-between text-caption text-grey-darken-1">
+                    <span>{{ getPositionTitle(data.club_players[0].position) }}</span>
+                  </div>
+                </VCardText>
+              </VCard>
+            </router-link>  
           </VCol>
         </template>
       </VRow>

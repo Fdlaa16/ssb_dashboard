@@ -8,6 +8,6 @@ export interface MediaData {
   link: string;
   start_date: string;
   end_date: string;
-  document_media?: File; 
+  document_media?: File[] | string[];
 }
 

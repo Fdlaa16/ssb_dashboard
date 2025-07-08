@@ -111,10 +111,10 @@ const totalPages = computed(() =>
     <div class="our-team pa-">
       <VRow class="align-center my-6">
         <VCol>
-          <VChip label color="primary" size="small">Latest Standings</VChip>
-          <h4 class="text-h4 mt-2 mb-1">Current Football League Table & Rankings</h4>
+          <VChip label color="primary" size="small">Klasemen Terbaru</VChip>
+          <h4 class="text-h4 mt-2 mb-1">Klasemen dan Peringkat Liga Sepak Bola Saat Ini</h4>
           <p class="text-body-1 mb-0">
-            Explore the latest football standings with updated team rankings, match results, and points. Track your favorite club’s performance and stay ahead with real-time league updates, win/loss records, goal differences, and more.
+            Jelajahi klasemen sepak bola terkini dengan peringkat tim terkini, hasil pertandingan, dan poin. Lacak performa klub favorit Anda dan tetaplah unggul dengan pembaruan liga terkini, catatan menang/kalah, selisih gol, dan banyak lagi.
           </p>
         </VCol>
       </VRow>

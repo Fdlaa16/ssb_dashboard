@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
-import { themeConfig } from '@themeConfig'
 import type { Club, PlayerData } from './types'
 
 const currentTab = ref('biodata')
@@ -11,13 +9,6 @@ const rulesNisn = {
   required: (value: string) => !!value || 'Harus diisi.',
   exactLength: (value: string) => value.length === 10 || 'Harus tepat 10 karakter',
 };
-
-const rules = [
-  (file: File | null) => {
-    if (!file) return true
-    return file.size < 1000000 || 'Ukuran gambar maksimal 1 MB!'
-  },
-]
 
 const props = defineProps<{ data: PlayerData }>()
 const emit = defineEmits(['submit', 'update:data'])
@@ -92,6 +83,8 @@ onMounted(async () => {
 
 const categories = [
   { title: 'Pilih Kategori', value: '' },
+  { title: 'Tim Utama', value: 'main' },
+  { title: 'Putri', value: 'female' },
   { title: 'U-6', value: 'u6' },
   { title: 'U-7', value: 'u7' },
   { title: 'U-8', value: 'u8' },
@@ -210,11 +203,21 @@ onBeforeUnmount(() => {
           <VWindow v-model="currentTab">
             <!-- Tab Biodata -->
             <VWindowItem value="biodata">
-              <div class="d-flex justify-end flex-column rounded bg-var-theme-background flex-sm-row gap-6 pa-6 mb-6">
-                <div class="d-flex align-end app-logo">
-                  <VNodeRenderer :nodes="themeConfig.app.logo" />
-                  <h6 class="app-logo-title">SSB Balaraja</h6>
-                </div>
+              <div
+                  v-if="localData.club_player?.club?.profile_club"
+                  class="d-flex justify-end flex-column rounded bg-var-theme-background flex-sm-row gap-6 pa-6 mb-6"
+                  >
+                  <div class="d-flex align-center app-logo gap-4">
+                      <img
+                        v-if="localData.club_player?.club?.profile_club?.url"
+                        :src="getImageUrl(localData.club_player.club.profile_club.url)"
+                        alt="Logo Club"
+                        style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover;"
+                      />
+                      <h6 class="app-logo-title mb-0">
+                      {{ localData.club_player?.club?.name }}
+                      </h6>
+                  </div>
               </div>
 
               <VRow>
@@ -224,12 +227,11 @@ onBeforeUnmount(() => {
                       v-if="avatarPreview"
                       :src="avatarPreview"
                       alt="Preview Avatar"
-                      style="width: 100%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); margin-bottom: 1rem;"
+                      style="width: 100%; border-radius: 8px; margin-bottom: 1rem;"
                     />
 
                     <VFileInput
                       v-model="localData.avatar"
-                      :rules="rules"
                       label="Ganti Foto"
                       accept="image/png, image/jpeg, image/bmp"
                       density="comfortable"
@@ -334,12 +336,11 @@ onBeforeUnmount(() => {
                       v-if="familyCardPreview"
                       :src="familyCardPreview"
                       alt="Preview Family Card"
-                      style="width: 30%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); margin-bottom: 1rem;"
+                      style="width: 30%; border-radius: 8px; margin-bottom: 1rem;"
                     />
 
                     <VFileInput
                       v-model="localData.family_card"
-                      :rules="rules"
                       label="Ganti Foto"
                       accept="image/png, image/jpeg, image/bmp"
                       density="comfortable"
@@ -352,12 +353,11 @@ onBeforeUnmount(() => {
                       v-if="reportGradesPreview"
                       :src="reportGradesPreview"
                       alt="Preview Report Grades"
-                      style="width: 30%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); margin-bottom: 1rem;"
+                      style="width: 30%; border-radius: 8px; margin-bottom: 1rem;"
                     />
 
                     <VFileInput
                       v-model="localData.report_grades"
-                      :rules="rules"
                       label="Ganti Foto"
                       accept="image/png, image/jpeg, image/bmp"
                       density="comfortable"
@@ -370,12 +370,11 @@ onBeforeUnmount(() => {
                       v-if="birthCertificatePreview"
                       :src="birthCertificatePreview"
                       alt="Preview Birth Certificate"
-                      style="width: 30%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); margin-bottom: 1rem;"
+                      style="width: 30%; border-radius: 8px; margin-bottom: 1rem;"
                     />
 
                     <VFileInput
                       v-model="localData.birth_certificate"
-                      :rules="rules"
                       label="Ganti Foto"
                       accept="image/png, image/jpeg, image/bmp"
                       density="comfortable"

@@ -20,7 +20,7 @@ const mediaData = ref<MediaData>({
   link: '',
   start_date: '',
   end_date: '',
-  document_media: null,
+  document_media: [], 
 })
 
 const handleSubmit = async () => {
@@ -33,8 +33,13 @@ const handleSubmit = async () => {
   formData.append('start_date', mediaData.value.start_date);
   formData.append('end_date', mediaData.value.end_date);
 
-  if (mediaData.value.document_media instanceof File)
-    formData.append('document_media', mediaData.value.document_media);
+  if (mediaData.value.document_media && Array.isArray(mediaData.value.document_media)) {
+    mediaData.value.document_media.forEach((file, index) => {
+      if (file instanceof File) {
+        formData.append(`document_media[${index}]`, file);
+      }
+    });
+  }
 
   try {
     const response = await $api('media/store', {

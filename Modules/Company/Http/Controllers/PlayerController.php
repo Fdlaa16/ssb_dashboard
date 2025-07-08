@@ -252,7 +252,22 @@ class PlayerController extends Controller
      */
     public function show($id)
     {
-        return view('company::show');
+        $players = Player::query()
+            ->with([
+                'user',
+                'clubPlayers.club.profile_club',
+                'avatar',
+                'birth_certificate',
+                'family_card',
+                'report_grades',
+            ])
+            ->find($id);
+
+        $data = [
+            'data' => $players,
+        ];
+
+        return $data;
     }
 
     /**
@@ -262,7 +277,22 @@ class PlayerController extends Controller
      */
     public function edit($id)
     {
-        return view('company::edit');
+        $players = Player::query()
+            ->with([
+                'user',
+                'clubPlayers.club.profile_club',
+                'avatar',
+                'birth_certificate',
+                'family_card',
+                'report_grades',
+            ])
+            ->find($id);
+
+        $data = [
+            'data' => $players,
+        ];
+
+        return $data;
     }
 
     /**

@@ -1,20 +1,18 @@
 <script setup lang="ts">
 import Footer from '@/views/front-pages/front-page-footer.vue'
 import Navbar from '@/views/front-pages/front-page-navbar.vue'
-
+import { useConfigStore } from '@core/stores/config'
+import type { CustomInputContent } from '@core/types'
 import paypalDark from '@images/icons/payments/img/paypal-dark.png'
 import paypalLight from '@images/icons/payments/img/paypal-light.png'
 import visaDark from '@images/icons/payments/img/visa-dark.png'
 import visaLight from '@images/icons/payments/img/visa-light.png'
 
-import { useConfigStore } from '@core/stores/config'
-import type { CustomInputContent } from '@core/types'
-
 const visa = useGenerateImageVariant(visaLight, visaDark)
 const paypal = useGenerateImageVariant(paypalLight, paypalDark)
 const store = useConfigStore()
-
 store.skin = 'default'
+
 definePage({
   meta: {
     layout: 'blank',
@@ -42,40 +40,54 @@ const isPricingPlanDialogVisible = ref(false)
 
 <template>
   <!-- eslint-disable vue/attribute-hyphenation -->
-
   <div class="payment-page">
     <!-- 👉 Navbar -->
     <Navbar />
-
-    <!-- 👉 Payment card  -->
-    <VContainer>
-      <div class="d-flex justify-center align-center">
-        <!-- <VCard width="100%"> -->
+    
+    <!-- 👉 Main content wrapper -->
+    <div class="main-content">
+      <!-- 👉 Payment card -->
+      <VContainer>
+        <div class="d-flex justify-center align-center">
+          <!-- <VCard width="100%"> -->
           <AppPlayer />
-        <!-- </VCard> -->
-      </div>
-    </VContainer>
-
+          <!-- </VCard> -->
+        </div>
+      </VContainer>
+    </div>
+    
     <!-- 👉 Footer -->
     <Footer />
-
+    
     <PricingPlanDialog v-model:is-dialog-visible="isPricingPlanDialogVisible" />
   </div>
 </template>
 
 <style lang="scss" scoped>
-.footer {
-  position: static !important;
-  inline-size: 100%;
-  inset-block-end: 0;
+.payment-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  
+  .main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: calc(100vh - 64px - 100px); 
+  }
+  
+  :deep(.footer) {
+    margin-top: auto;
+  }
 }
 
 .payment-card {
   margin-block: 10.5rem 5.25rem;
 }
 
-.payment-page {
-  @media (min-width: 600px) and (max-width: 960px) {
+@media (min-width: 600px) and (max-width: 960px) {
+  .payment-page {
     .v-container {
       padding-inline: 2rem !important;
     }

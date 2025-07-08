@@ -89,10 +89,10 @@ watch(selectedTraining, () => {
     <div class="our-team pa-">
       <VRow class="align-center my-6">
         <VCol>
-          <VChip label color="primary" size="small">Nearest trainings</VChip>
-          <h4 v-if="selectedTraining == 'upcoming'" class="text-h4 mt-2 mb-1">Upcoming Football Schedules</h4>
-          <h4 v-else class="text-h4 mt-2 mb-1">Previous Football Schedule</h4>
-          <p class="text-body-1 mb-0">Check out the closest football trainings and results!</p>
+          <VChip label color="primary" size="small">Pelatihan terdekat</VChip>
+          <h4 v-if="selectedTraining == 'upcoming'" class="text-h4 mt-2 mb-1">Jadwal Sepak Bola Mendatang</h4>
+          <h4 v-else class="text-h4 mt-2 mb-1">Jadwal Sepak Bola Sebelumnya</h4>
+          <p class="text-body-1 mb-0">Simak latihan sepak bola terdekat dan hasilnya!</p>
         </VCol>
 
         <VCol class="text-end" cols="12" sm="4" md="3">
@@ -104,8 +104,8 @@ watch(selectedTraining, () => {
             single-line
             class="w-100"
             :items="[
-              { title: 'Upcoming Trainings', value: 'upcoming' },
-              { title: 'Previous Taining', value: 'previous' },
+              { title: 'Pelatihan Mendatang', value: 'upcoming' },
+              { title: 'Pelatihan Sebelumnya', value: 'previous' },
             ]"
           />
         </VCol>

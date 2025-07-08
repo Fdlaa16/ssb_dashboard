@@ -122,18 +122,18 @@ onMounted(() => {
       <div class="d-flex justify-space-between align-center my-6">
         <div>
           <VChip label color="primary" size="small">
-            Nearest Matches
+            Pertandingan Terdekat
           </VChip>
           <h4 class="d-flex align-center text-h4 mt-2 mb-1 flex-wrap">
-            Upcoming Football Schedules
+            Jadwal Sepak Bola Mendatang
           </h4>
           <p class="text-body-1 mb-0">
-            Check out the closest football matches and results!
+            Simak pertandingan sepak bola terdekat dan hasilnya!
           </p>
         </div>
 
         <VBtn color="primary" @click="goToAllMatches">
-          show more
+          Tampilkan Lebih Banyak
         </VBtn>
       </div>
 
@@ -210,18 +210,18 @@ onMounted(() => {
       <div class="d-flex justify-space-between align-center my-6">
         <div>
           <VChip label color="primary" size="small">
-            Nearest Training
+            Pelatihan Terdekat
           </VChip>
           <h4 class="d-flex align-center text-h4 mt-2 mb-1 flex-wrap">
-            Upcoming Football Schedules
+            Jadwal Sepak Bola Mendatang
           </h4>
           <p class="text-body-1 mb-0">
-            Check out the closest football tranings and results!
+            Simak latihan sepak bola terdekat dan hasilnya!
           </p>
         </div>
 
         <VBtn color="primary" @click="goToAllTrainings">
-          show more
+          Tampilkan Lebih Banyak
         </VBtn>
       </div>
 

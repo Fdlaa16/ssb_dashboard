@@ -359,9 +359,7 @@ const isPageActive = computed(() => menuItems.some(item => item.navItems.some(li
             v-if="$vuetify.display.lgAndUp"
             variant="elevated"
             color="primary"
-            href="https://1.envato.market/vuexy_admin"
-            target="_blank"
-            rel="noopener noreferrer"
+            @click="$router.push({ name: 'pages-authentication-register-multi-steps' })"
           >
             Register Now
           </VBtn>
@@ -372,11 +370,29 @@ const isPageActive = computed(() => menuItems.some(item => item.navItems.some(li
             icon
             variant="elevated"
             color="primary"
-            href="https://1.envato.market/vuexy_admin"
-            target="_blank"
-            rel="noopener noreferrer"
+            @click="$router.push({ name: 'pages-authentication-register-multi-steps' })"
           >
-            <VIcon icon="tabler-shopping-cart" />
+            <VIcon icon="tabler-align-center" />
+          </VBtn>
+
+           <VBtn
+            v-if="$vuetify.display.lgAndUp"
+            variant="elevated"
+            color="primary"
+            @click="$router.push({ name: 'pages-authentication-login-v1' })"
+          >
+            Login
+          </VBtn>
+
+          <VBtn
+            v-else
+            rounded
+            icon
+            variant="elevated"
+            color="primary"
+            @click="$router.push({ name: 'pages-authentication-login-v1' })"
+          >
+            <VIcon icon="tabler-login" />
           </VBtn>
         </div>
       </VAppBar>

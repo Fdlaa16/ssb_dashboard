@@ -89,10 +89,10 @@ watch(selectedMatch, () => {
     <div class="our-team pa-">
       <VRow class="align-center my-6">
         <VCol>
-          <VChip label color="primary" size="small">Nearest Matches</VChip>
-          <h4 v-if="selectedMatch == 'upcoming'" class="text-h4 mt-2 mb-1">Upcoming Football Schedules</h4>
-          <h4 v-else class="text-h4 mt-2 mb-1">Previous Football Schedule</h4>
-          <p class="text-body-1 mb-0">Check out the closest football matches and results!</p>
+          <VChip label color="primary" size="small">Pertandingan Terdekat</VChip>
+          <h4 v-if="selectedMatch == 'upcoming'" class="text-h4 mt-2 mb-1">Jadwal Sepak Bola Mendatang</h4>
+          <h4 v-else class="text-h4 mt-2 mb-1">Jadwal Sepak Bola Sebelumnya</h4>
+          <p class="text-body-1 mb-0">Simak pertandingan sepak bola terdekat dan hasilnya!</p>
         </VCol>
 
         <VCol class="text-end" cols="12" sm="4" md="3">
@@ -104,8 +104,8 @@ watch(selectedMatch, () => {
             single-line
             class="w-100"
             :items="[
-              { title: 'Upcoming Matches', value: 'upcoming' },
-              { title: 'Previous Match', value: 'previous' },
+              { title: 'Pertandingan Mendatang', value: 'upcoming' },
+              { title: 'Pertandingan Sebelumnya', value: 'previous' },
             ]"
           />
         </VCol>

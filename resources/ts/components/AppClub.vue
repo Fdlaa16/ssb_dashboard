@@ -86,9 +86,9 @@ watch(selectedMatch, () => {
     <div class="our-team pa-">
       <VRow class="align-center my-6">
         <VCol>
-          <VChip label color="primary" size="small">Latest Football Media</VChip>
-          <h4  class="text-h4 mt-2 mb-1">Latest Football Highlights & Reports</h4>
-          <p class="text-body-1 mb-0">Stay informed with the most recent football news, match highlights, exclusive interviews, and expert analysis from around the field. </p>
+          <VChip label color="primary" size="small">Media Sepakbola Terbaru</VChip>
+          <h4  class="text-h4 mt-2 mb-1">Sorotan dan Laporan Sepak Bola Terbaru</h4>
+          <p class="text-body-1 mb-0">Tetap terinformasi dengan berita sepak bola terkini, cuplikan pertandingan, wawancara eksklusif, dan analisis ahli dari seluruh lapangan.</p>
         </VCol>
       </VRow>
 

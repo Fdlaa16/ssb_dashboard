@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import safeBoxWithGoldenCoin from '@images/misc/3d-safe-box-with-golden-dollar-coins.png'
-import spaceRocket from '@images/misc/3d-space-rocket-with-smoke.png'
-import dollarCoinPiggyBank from '@images/misc/dollar-coins-flying-pink-piggy-bank.png'
 
 interface Pricing {
   title?: string
@@ -14,234 +12,333 @@ interface Pricing {
 
 const props = defineProps<Pricing>()
 
-const annualMonthlyPlanPriceToggler = ref(true)
+const formatRupiah = (amount: number): string => {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(amount)
+}
 
 const pricingPlans = [
   {
-    name: 'Basic',
-    tagLine: 'A simple start for everyone',
-    logo: dollarCoinPiggyBank,
-    monthlyPrice: 0,
-    yearlyPrice: 0,
-    isPopular: false,
-    current: true,
-    features: [
-      '100 responses a month',
-      'Unlimited forms and surveys',
-      'Unlimited fields',
-      'Basic form creation tools',
-      'Up to 2 subdomains',
-    ],
-  },
-  {
-    name: 'Standard',
-    tagLine: 'For small to medium businesses',
+    name: 'Anggota Aktif SSB',
+    tagLine: 'Paket pendaftaran lengkap untuk siswa baru',
     logo: safeBoxWithGoldenCoin,
-    monthlyPrice: 49,
-    yearlyPrice: 499,
+    price: 750000,
     isPopular: true,
-    current: false,
     features: [
-      'Unlimited responses',
-      'Unlimited forms and surveys',
-      'Instagram profile page',
-      'Google Docs integration',
-      'Custom “Thank you” page',
-    ],
-  },
-  {
-    name: 'Enterprise',
-    tagLine: 'Solution for big organizations',
-    logo: spaceRocket,
-    monthlyPrice: 99,
-    yearlyPrice: 999,
-    isPopular: false,
-    current: false,
-    features: [
-      'PayPal payments',
-      'Logic Jumps',
-      'File upload with 5GB storage',
-      'Custom domain support',
-      'Stripe integration',
+      '1 Set Jersey Latihan (atas & bawah)',
+      'Kaos Kaki',
+      'Baju Harian SSB',
+      'ID Card Anggota',
+      'Latihan rutin bersama pelatih bersertifikat',
+      'Akses ke turnamen dan pertandingan resmi',
     ],
   },
 ]
 </script>
 
 <template>
-  <!-- 👉 Title and subtitle -->
-  <div class="text-center">
-    <h3 class="text-h3 pricing-title mb-2">
-      {{ props.title ? props.title : 'Pricing Plans' }}
-    </h3>
-    <p class="mb-0">
-      All plans include 40+ advanced tools and features to boost your product.
-    </p>
-    <p class="mb-2">
-      Choose the best plan to fit your needs.
-    </p>
-  </div>
-
-  <!-- 👉 Annual and monthly price toggler -->
-
-  <div class="d-flex font-weight-medium text-body-1 align-center justify-center mx-auto mt-12 mb-6">
-    <VLabel
-      for="pricing-plan-toggle"
-      class="me-3"
-    >
-      Monthly
-    </VLabel>
-
-    <div class="position-relative">
-      <VSwitch
-        id="pricing-plan-toggle"
-        v-model="annualMonthlyPlanPriceToggler"
-      >
-        <template #label>
-          <div class="text-body-1 font-weight-medium">
-            Annually
-          </div>
-        </template>
-      </VSwitch>
-
-      <div class="save-upto-chip position-absolute align-center d-none d-md-flex gap-1">
-        <VIcon
-          icon="tabler-corner-left-down"
-          size="24"
-          class="flip-in-rtl mt-2 text-disabled"
-        />
-        <VChip
-          label
-          color="primary"
-          size="small"
-        >
-          Save up to 10%
-        </VChip>
-      </div>
+  <div class="pricing-wrapper">
+    <!-- 👉 Title and subtitle -->
+    <div class="text-center mb-8">
+      <h3 class="text-h3 pricing-title mb-4">
+        Biaya Pendaftaran SSB
+      </h3>
+      <p class="text-body-1 mb-2">
+        Menjadi bagian dari SSB berarti mendapatkan pelatihan berkualitas, perlengkapan lengkap, dan pengalaman bertanding yang seru.
+      </p>
+      <p class="text-body-1 mb-0">
+        Dapatkan semua fasilitas dalam satu paket pendaftaran yang dirancang khusus untuk mendukung perkembangan anak Anda di dunia sepak bola.
+      </p>
     </div>
-  </div>
 
-  <!-- SECTION pricing plans -->
-  <VRow>
-    <VCol
-      v-for="plan in pricingPlans"
-      :key="plan.logo"
-      v-bind="props"
-      cols="12"
-    >
-      <!-- 👉  Card -->
-      <VCard
-        flat
-        border
-        :class="plan.isPopular ? 'border-primary border-opacity-100' : ''"
+    <!-- SECTION pricing plans -->
+    <div class="pricing-container">
+      <div 
+        v-for="plan in pricingPlans" 
+        :key="plan.name"
+        class="pricing-card-wrapper"
       >
-        <VCardText
-          style="block-size: 3.75rem;"
-          class="text-end"
+        <div 
+          class="pricing-card"
+          :class="{ 'popular-card': plan.isPopular }"
         >
-          <!-- 👉 Popular -->
-          <VChip
-            v-show="plan.isPopular"
-            label
-            color="primary"
-            size="small"
-          >
-            Popular
-          </VChip>
-        </VCardText>
+          <!-- Popular badge -->
+          <div class="card-header">
+            <div 
+              v-if="plan.isPopular" 
+              class="popular-badge"
+            >
+              Popular
+            </div>
+          </div>
 
-        <!-- 👉 Plan logo -->
-        <VCardText>
-          <VImg
-            :height="120"
-            :width="120"
-            :src="plan.logo"
-            class="mx-auto mb-5"
-          />
+          <!-- Card content -->
+          <div class="card-content">
+            <!-- Logo -->
+            <div class="logo-section">
+              <img 
+                :src="plan.logo" 
+                alt="SSB Logo"
+                class="plan-logo"
+              />
+            </div>
 
-          <!-- 👉 Plan name -->
-          <h4 class="text-h4 mb-1 text-center">
-            {{ plan.name }}
-          </h4>
-          <p class="mb-0 text-body-1 text-center">
-            {{ plan.tagLine }}
-          </p>
+            <!-- Plan info -->
+            <div class="plan-info">
+              <h4 class="plan-name">{{ plan.name }}</h4>
+              <p class="plan-tagline">{{ plan.tagLine }}</p>
+            </div>
 
-          <!-- 👉 Plan price  -->
-
-          <div class="position-relative">
-            <div class="d-flex justify-center pt-5 pb-10">
-              <div class="text-body-1 align-self-start font-weight-medium">
-                $
-              </div>
-              <h1 class="text-h1 font-weight-medium text-primary">
-                {{ annualMonthlyPlanPriceToggler ? Math.floor(Number(plan.yearlyPrice) / 12) : plan.monthlyPrice }}
-              </h1>
-              <div class="text-body-1 font-weight-medium align-self-end">
-                /month
+            <!-- Price -->
+            <div class="price-section">
+              <div class="price-display">
+                <span class="price-amount">{{ formatRupiah(plan.price) }}</span>
+                <span class="price-period">Sekali bayar</span>
               </div>
             </div>
 
-            <!-- 👉 Annual Price -->
-            <span
-              v-show="annualMonthlyPlanPriceToggler"
-              class="annual-price-text position-absolute text-caption text-disabled pb-4"
-            >
-              {{ plan.yearlyPrice === 0 ? 'free' : `USD ${plan.yearlyPrice}/Year` }}
-            </span>
+            <!-- Features -->
+            <div class="features-section">
+              <ul class="features-list">
+                <li 
+                  v-for="feature in plan.features" 
+                  :key="feature"
+                  class="feature-item"
+                >
+                  <span class="feature-icon">✓</span>
+                  <span class="feature-text">{{ feature }}</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- CTA Button -->
+            <div class="cta-section">
+              <button 
+                class="cta-button"
+                @click="$router.push({ name: 'pages-authentication-register-multi-steps' })"
+              >
+                Daftar Sekarang
+              </button>
+            </div>
           </div>
-
-          <!-- 👉 Plan features -->
-
-          <VList class="card-list mb-4">
-            <VListItem
-              v-for="feature in plan.features"
-              :key="feature"
-            >
-              <template #prepend>
-                <VIcon
-                  size="8"
-                  icon="tabler-circle-filled"
-                  color="rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity))"
-                />
-              </template>
-
-              <VListItemTitle class="text-body-1">
-                {{ feature }}
-              </VListItemTitle>
-            </VListItem>
-          </VList>
-
-          <!-- 👉 Plan actions -->
-          <VBtn
-            block
-            :color="plan.current ? 'success' : 'primary'"
-            :variant="plan.isPopular ? 'elevated' : 'tonal'"
-            :to="{ name: 'front-pages-payment' }"
-            :active="false"
-          >
-            {{ plan.yearlyPrice === 0 ? 'Your Current Plan' : 'Upgrade' }}
-          </VBtn>
-        </VCardText>
-      </VCard>
-    </VCol>
-  </VRow>
-  <!-- !SECTION  -->
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style lang="scss" scoped>
-.card-list {
-  --v-card-list-gap: 1rem;
+.pricing-wrapper {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
-.save-upto-chip {
-  inset-block-start: -2.4rem;
-  inset-inline-end: -6rem;
+.pricing-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
 }
 
-.annual-price-text {
-  inset-block-end: 3%;
-  inset-inline-start: 50%;
-  transform: translateX(-50%);
+.pricing-card-wrapper {
+  width: 100%;
+  max-width: 600px;
+  margin: 0;
+  padding: 0;
+}
+
+.pricing-card {
+  width: 100%;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+  
+  &.popular-card {
+    border-color: rgb(var(--v-theme-primary));
+    border-width: 2px;
+  }
+}
+
+.card-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 24px 0;
+  min-height: 40px;
+}
+
+.popular-badge {
+  background: rgb(var(--v-theme-primary));
+  color: white;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-content {
+  padding: 0 24px 24px;
+}
+
+.logo-section {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.plan-logo {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+}
+
+.plan-info {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.plan-name {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+}
+
+.plan-tagline {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
+}
+
+.price-section {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.price-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.price-amount {
+  font-size: 36px;
+  font-weight: 700;
+  color: rgb(var(--v-theme-primary));
+  line-height: 1;
+}
+
+.price-period {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.features-section {
+  margin-bottom: 32px;
+}
+
+.features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.feature-icon {
+  width: 20px;
+  height: 20px;
+  background: rgb(var(--v-theme-primary));
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.feature-text {
+  font-size: 16px;
+  color: #333;
+  line-height: 1.5;
+}
+
+.cta-section {
+  width: 100%;
+}
+
+.cta-button {
+  width: 100%;
+  background: rgb(var(--v-theme-primary));
+  color: white;
+  border: none;
+  padding: 16px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(var(--v-theme-primary), 0.9);
+    transform: translateY(-1px);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .pricing-card-wrapper {
+    max-width: 100%;
+  }
+  
+  .card-content {
+    padding: 0 16px 16px;
+  }
+  
+  .plan-name {
+    font-size: 20px;
+  }
+  
+  .price-amount {
+    font-size: 28px;
+  }
+  
+  .feature-text {
+    font-size: 14px;
+  }
 }
 </style>

@@ -111,15 +111,15 @@ onMounted(() => {
                 class="mb-4"
                 size="small"
               >
-                Media Center
+                Pusat Media
               </VChip>
               <div class="position-relative mb-1 me-2">
                 <div class="section-title">
-                  Official Highlights
+                  Sorotan Resmi
                 </div>
               </div>
               <p class="text-body-1 mb-12">
-                Catch a glimpse of our latest matchday coverage, club moments, and more.
+                Lihatlah sekilas liputan pertandingan terkini kami, momen klub, dan banyak lagi.
               </p>
               <div class="position-relative">
                 <IconBtn
@@ -199,26 +199,28 @@ onMounted(() => {
                   v-for="(data, index) in medias"
                   :key="index"
                 >
-                  <VCard>
-                    <VImg
-                      :src="data.document_media.url"
-                      cover
-                      class="media-img"
-                    />
-  
-                    <VCardItem>
-                      <VCardTitle>{{ data.title }}</VCardTitle>
-                    </VCardItem>
-  
-                    <VCardText>
-                      <p class="line-clamp">
-                        {{ data.description }}
-                      </p>
-                      <span class="text-caption text-disabled">
-                        {{ formatTanggalIndonesia(data.start_date) }}
-                      </span>
-                    </VCardText>
-                  </VCard>
+                  <router-link :to="{ name: 'front-pages-media-id', params: { id: String(data.id) } }">
+                    <VCard>
+                      <VImg
+                        :src="data.document_media.url"
+                        cover
+                        class="media-img"
+                      />
+    
+                      <VCardItem>
+                        <VCardTitle>{{ data.title }}</VCardTitle>
+                      </VCardItem>
+    
+                      <VCardText>
+                        <p class="line-clamp">
+                          {{ data.description }}
+                        </p>
+                        <span class="text-caption text-disabled">
+                          {{ formatTanggalIndonesia(data.start_date) }}
+                        </span>
+                      </VCardText>
+                    </VCard>
+                  </router-link>  
                 </swiper-slide>
 
 
@@ -226,7 +228,7 @@ onMounted(() => {
 
               <div class="d-flex justify-end mt-4">
                 <VBtn color="primary" @click="goToMedias">
-                  Show More
+                  Tampilkan Lebih Banyak
                 </VBtn>
               </div>
             </div>
