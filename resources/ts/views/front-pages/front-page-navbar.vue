@@ -6,8 +6,6 @@ import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
 import { useDisplay } from 'vuetify'
 
 import NavbarThemeSwitcher from '@/layouts/components/NavbarThemeSwitcher.vue'
-import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
-import { themeConfig } from '@themeConfig'
 
 const props = defineProps({
   activeId: String,
@@ -365,7 +363,7 @@ const isPageActive = computed(() => menuItems.some(item => item.navItems.some(li
             target="_blank"
             rel="noopener noreferrer"
           >
-            Resgister Now
+            Register Now
           </VBtn>
 
           <VBtn

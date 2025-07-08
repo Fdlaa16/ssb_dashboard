@@ -3,11 +3,15 @@
 namespace Modules\Company\Http\Controllers;
 
 use App\Helpers\Helper;
+use App\Models\ClubPlayer;
+use App\Models\File;
 use App\Models\Player;
+use App\Models\User;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class PlayerController extends Controller
 {
@@ -151,7 +155,94 @@ class PlayerController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        DB::beginTransaction();
+
+        try {
+            $postData = $request->all();
+            $rules = [
+                'email'     => 'required|email|unique:users,email',
+                'nisn'      => 'required|unique:players,nisn',
+                'name'      => 'required',
+                'height'    => 'required',
+                'weight'    => 'required',
+                'club_id'   => 'required',
+                'category'  => 'required',
+            ];
+
+            $messages = [
+                'email.required'     => 'Email harus diisi',
+                'email.email'        => 'Format email tidak valid',
+                'email.unique'       => 'Email sudah digunakan',
+                'nisn.required'      => 'NISN harus diisi',
+                'nisn.unique'        => 'NISN sudah digunakan',
+                'name.required'      => 'Nama harus diisi',
+                'height.required'    => 'Tinggi badan harus diisi',
+                'weight.required'    => 'Berat badan harus diisi',
+                'club_id.required'   => 'Club harus diisi',
+                'club_id.exists'     => 'Club tidak ditemukan',
+                'category.required'  => 'Kategori harus diisi',
+            ];
+
+            $validator = Validator::make($postData, $rules, $messages);
+
+            if ($validator->fails()) {
+                return response()->json(array('errors' => $validator->messages()->toArray()), 422);
+            } else {
+                $user = User::create(['email' => $request->email]);
+
+                $player = Player::create([
+                    'user_id' => $user->id,
+                    'nisn' => $request->nisn,
+                    'name' => $request->name,
+                    'height' => $request->height,
+                    'weight' => $request->weight,
+                ]);
+
+                $types = ['family_card', 'report_grades', 'birth_certificate'];
+                $fileObj = new File();
+
+                foreach ($types as $type) {
+                    if ($request->hasFile($type)) {
+                        $file = $request->file($type);
+                        $fileDir = $fileObj->getDirectory($type);
+                        $fileName = $fileObj->getFileName($type, $player->id, $file);
+
+                        $file->storeAs($fileDir, $fileName, 'public');
+
+                        $player->files()->where('type', $type)->delete();
+
+                        $player->files()->create([
+                            'type' => $type,
+                            'name' => $fileName,
+                            'original_name' => $file->getClientOriginalName(),
+                            'extension' => $file->getClientOriginalExtension(),
+                            'path' => "$fileDir$fileName",
+                        ]);
+                    }
+                }
+
+                ClubPlayer::create([
+                    'club_id' => $request->club_id,
+                    'player_id' => $player->id,
+                    'position' => $request->position,
+                    'back_number' => $request->back_number,
+                    'category' => $request->category,
+                ]);
+
+                DB::commit();
+
+                return response()->json([
+                    'message' => 'Player created successfully.',
+                    'data' => $player
+                ], 201);
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

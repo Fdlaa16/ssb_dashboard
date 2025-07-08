@@ -93,7 +93,6 @@ watch(selectedMatch, () => {
       </VRow>
 
       <VRow>
-        <!-- Tampilkan jika ada data -->
         <template v-if="scheduleMatchs.length > 0">
           <VCol
             v-for="(data, index) in scheduleMatchs"
@@ -102,26 +101,28 @@ watch(selectedMatch, () => {
             sm="6"
             md="4"
           >
-            <VCard>
-              <VImg
-                :src="data.document_media.url"
-                cover
-                class="media-img"
-              />
+            <router-link :to="{ name: 'front-pages-media-id', params: { id: String(data.id) } }">
+              <VCard class="cursor-pointer" hover>
+                <VImg
+                  :src="data.document_media.url"
+                  cover
+                  class="media-img"
+                />
 
-              <VCardItem>
-                <VCardTitle>{{ data.title }}</VCardTitle>
-              </VCardItem>
+                <VCardItem>
+                  <VCardTitle>{{ data.title }}</VCardTitle>
+                </VCardItem>
 
-              <VCardText>
-                <p class="line-clamp">
-                  {{ data.description }}
-                </p>
-                <span class="text-caption text-disabled">
-                  {{ formatTanggalIndonesia(data.start_date) }}
-                </span>
-              </VCardText>
-            </VCard>
+                <VCardText>
+                  <p class="line-clamp">
+                    {{ data.description }}
+                  </p>
+                  <span class="text-caption text-disabled">
+                    {{ formatTanggalIndonesia(data.start_date) }}
+                  </span>
+                </VCardText>
+              </VCard>
+            </router-link>
           </VCol>
         </template>
 

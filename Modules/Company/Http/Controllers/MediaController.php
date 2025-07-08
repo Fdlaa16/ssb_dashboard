@@ -121,7 +121,11 @@ class MediaController extends Controller
      */
     public function show($id)
     {
-        return view('company::show');
+        $media = Media::with(['document_media'])->findOrFail($id);
+
+        return [
+            'data' => $media,
+        ];
     }
 
     /**
@@ -131,7 +135,11 @@ class MediaController extends Controller
      */
     public function edit($id)
     {
-        return view('company::edit');
+        $media = Media::with(['document_media'])->findOrFail($id);
+
+        return [
+            'data' => $media,
+        ];
     }
 
     /**

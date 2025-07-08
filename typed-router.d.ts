@@ -124,6 +124,7 @@ declare module 'vue-router/auto-routes' {
     'front-pages-history': RouteRecordInfo<'front-pages-history', '/front-pages/history', Record<never, never>, Record<never, never>>,
     'front-pages-landing-page': RouteRecordInfo<'front-pages-landing-page', '/front-pages/landing-page', Record<never, never>, Record<never, never>>,
     'front-pages-media': RouteRecordInfo<'front-pages-media', '/front-pages/media', Record<never, never>, Record<never, never>>,
+    'front-pages-media-id': RouteRecordInfo<'front-pages-media-id', '/front-pages/media/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     'front-pages-payment': RouteRecordInfo<'front-pages-payment', '/front-pages/payment', Record<never, never>, Record<never, never>>,
     'front-pages-player': RouteRecordInfo<'front-pages-player', '/front-pages/player', Record<never, never>, Record<never, never>>,
     'front-pages-pricing': RouteRecordInfo<'front-pages-pricing', '/front-pages/pricing', Record<never, never>, Record<never, never>>,

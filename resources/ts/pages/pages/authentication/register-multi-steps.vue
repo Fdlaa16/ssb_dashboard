@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
-import type { CustomInputContent } from '@core/types'
-import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
-import { themeConfig } from '@themeConfig'
+import type { Club } from '../../../views/dashboards/player/types'
 
 import registerMultiStepIllustrationDark from '@images/illustrations/register-multi-step-illustration-dark.png'
 import registerMultiStepIllustrationLight from '@images/illustrations/register-multi-step-illustration-light.png'
@@ -19,44 +17,70 @@ definePage({
   },
 })
 
+const router = useRouter()
 const currentStep = ref(0)
 const isPasswordVisible = ref(false)
 const isConfirmPasswordVisible = ref(false)
+const clubs = ref<Club[]>([])
 
-const registerMultiStepIllustration = useGenerateImageVariant(registerMultiStepIllustrationLight, registerMultiStepIllustrationDark)
-
-const radioContent: CustomInputContent[] = [
-  {
-    title: 'Starter',
-    desc: 'A simple start for everyone.',
-    value: '0',
-  },
-  {
-    title: 'Standard',
-    desc: 'For small to medium businesses.',
-    value: '99',
-  },
-  {
-    title: 'Enterprise',
-    desc: 'Solution for big organizations.',
-    value: '499',
+const rules = [
+  (file: File | null) => {
+    if (!file) return true
+    return file.size < 1000000 || 'Ukuran gambar maksimal 1 MB!'
   },
 ]
 
+const rulesNisn = {
+  required: (value: string) => !!value || 'Harus diisi.',
+  exactLength: (value: string) => value.length === 10 || 'Harus tepat 10 karakter',
+};
+
+const rulesPassword = {
+  required: (value: string) => !!value || 'Password harus diisi',
+  minLength: (value: string) => value.length >= 8 || 'Minimal 8 karakter',
+}
+
+const rulesConfirmPassword = {
+  required: (value: string) => !!value || 'Konfirmasi password harus diisi',
+  sameAsPassword: (value: string) => value === localData.value.password || 'Konfirmasi password tidak cocok',
+}
+
+const registerMultiStepIllustration = useGenerateImageVariant(registerMultiStepIllustrationLight, registerMultiStepIllustrationDark)
+
+const localData = ref({
+  email: '',
+  password: '',
+  confirmPassword: '',
+  name: '',
+  phone: '',
+  nisn: '',
+  height: '',
+  weight: '',
+  family_card: null,
+  report_grades: null,
+  birth_certificate: null,
+  club_player: {
+    club_id: '',
+    category: '',
+    position: '',
+    back_number: '',
+  },
+})
+
 const items = [
   {
-    title: 'Account',
-    subtitle: 'Account Details',
+    title: 'Akun',
+    subtitle: 'Rincian Akun',
     icon: 'tabler-file-analytics',
   },
   {
-    title: 'Personal',
-    subtitle: 'Enter Information',
+    title: 'Pribadi',
+    subtitle: 'Masukkan Informasi',
     icon: 'tabler-user',
   },
   {
-    title: 'Billing',
-    subtitle: 'Payment Details',
+    title: 'Dokumen',
+    subtitle: 'Masukan Dokumen Pribadi',
     icon: 'tabler-credit-card',
   },
 ]
@@ -67,9 +91,8 @@ const form = ref({
   password: '',
   confirmPassword: '',
   link: '',
-  firstName: '',
-  lastName: '',
-  mobile: '',
+  name: '',
+  phone: '',
   pincode: '',
   address: '',
   landmark: '',
@@ -82,19 +105,186 @@ const form = ref({
   cvv: '',
 })
 
-const onSubmit = () => {
-  // eslint-disable-next-line no-alert
-  alert('Submitted..!!')
+const onSubmit = async () => {
+  const formData = new FormData()
+
+  formData.append('email', localData.value.email)
+  formData.append('password', localData.value.password)
+  formData.append('confirmPassword', localData.value.confirmPassword)
+  formData.append('name', localData.value.name)
+  formData.append('phone', localData.value.phone)
+  formData.append('nisn', localData.value.nisn)
+  formData.append('height', localData.value.height)
+  formData.append('weight', localData.value.weight)
+  formData.append('club_id', localData.value.club_player.club_id)
+  formData.append('category', localData.value.club_player.category)
+  formData.append('position', localData.value.club_player.position)
+  formData.append('back_number', localData.value.club_player.back_number)
+
+  // file upload
+  if (localData.value.family_card instanceof File) {
+    formData.append('family_card', localData.value.family_card)
+  }
+  if (localData.value.report_grades instanceof File) {
+    formData.append('report_grades', localData.value.report_grades)
+  }
+  if (localData.value.birth_certificate instanceof File) {
+    formData.append('birth_certificate', localData.value.birth_certificate)
+  }
+
+  try {
+    const res = await $api('/company/player/store', {
+      method: 'POST',
+      body: formData,
+    })
+
+    router.push('/login')
+  } catch (err: any) {
+    if (err.response?.status === 422) {
+      console.error('Validasi gagal:', err.response.data.errors)
+    } else {
+      console.error('Gagal submit:', err)
+    }
+  }
 }
+
+const categories = [
+  { title: 'Pilih Kategori', value: '' },
+  { title: 'U-6', value: 'u6' },
+  { title: 'U-7', value: 'u7' },
+  { title: 'U-8', value: 'u8' },
+  { title: 'U-9', value: 'u9' },
+  { title: 'U-10', value: 'u10' },
+  { title: 'U-11', value: 'u11' },
+  { title: 'U-12', value: 'u12' },
+  { title: 'U-13', value: 'u13' },
+  { title: 'U-14', value: 'u14' },
+  { title: 'U-15', value: 'u15' },
+  { title: 'U-16', value: 'u16' },
+  { title: 'U-17', value: 'u17' },
+  { title: 'U-18', value: 'u18' },
+  { title: 'U-19', value: 'u19' },
+  { title: 'U-20', value: 'u20' },
+]
+
+const positions = [
+  { title: 'Pilih Posisi', value: '' },
+  { title: 'Penjaga Gawang', value: 'goalkeeper' },
+  { title: 'Bek', value: 'defender' },
+  { title: 'Gelandang', value: 'midfielder' },
+  { title: 'Penyerang', value: 'forward' },
+];
+
+async function getClubs() {
+  try {
+    const response = await $api('club', {
+      method: 'GET',
+    })
+
+    const clubData = response.data.map((club: any) => ({
+      title: club.name,
+      value: club.id,
+    }))
+
+    clubs.value = [{ title: 'Pilih Club', value: '' }, ...clubData]
+  } catch (error) {
+    console.error('Gagal memuat clubs', error)
+  }
+}
+
+onMounted(async () => {
+  getClubs()
+})
+
+const familyCardPreview = ref<string | null>(null)
+const reportGradesPreview = ref<string | null>(null)
+const birthCertificatePreview = ref<string | null>(null)
+
+const props = defineProps<{
+  data?: {
+    family_card?: { url: string },
+    report_grades?: { url: string },
+    birth_certificate?: { url: string },
+  }
+}>()
+
+onMounted(() => {
+  if (props.data?.family_card?.url) {
+    familyCardPreview.value = getImageUrl(props.data.family_card.url)
+  }
+  if (props.data?.report_grades?.url) {
+    reportGradesPreview.value = getImageUrl(props.data.report_grades.url)
+  }
+  if (props.data?.birth_certificate?.url) {
+    birthCertificatePreview.value = getImageUrl(props.data.birth_certificate.url)
+  }
+})
+
+const getImageUrl = (path: string) => {  
+  return import.meta.env.VITE_APP_URL + path
+}
+
+watch(() => localData.value.family_card, (newFamilyCard: any) => {
+  if (newFamilyCard instanceof File) {
+    familyCardPreview.value = URL.createObjectURL(newFamilyCard)
+  } else if (newFamilyCard?.url) {
+    familyCardPreview.value = getImageUrl(newFamilyCard.url)
+  } else {
+    familyCardPreview.value = null
+  }
+})
+
+watch(() => localData.value.report_grades, (newReportGrades: any) => {
+  if (newReportGrades instanceof File) {
+    reportGradesPreview.value = URL.createObjectURL(newReportGrades)
+  } else if (newReportGrades?.url) {
+    reportGradesPreview.value = getImageUrl(newReportGrades.url)
+  } else {
+    reportGradesPreview.value = null
+  }
+})
+
+watch(() => localData.value.birth_certificate, (newBirthCertificatePreview: any) => {
+  if (newBirthCertificatePreview instanceof File) {
+    birthCertificatePreview.value = URL.createObjectURL(newBirthCertificatePreview)
+  } else if (newBirthCertificatePreview?.url) {
+    birthCertificatePreview.value = getImageUrl(newBirthCertificatePreview.url)
+  } else {
+    birthCertificatePreview.value = null
+  }
+})
+
+onBeforeUnmount(() => {
+  if (familyCardPreview.value?.startsWith('blob:')) {
+    URL.revokeObjectURL(familyCardPreview.value)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (reportGradesPreview.value?.startsWith('blob:')) {
+    URL.revokeObjectURL(reportGradesPreview.value)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (birthCertificatePreview.value?.startsWith('blob:')) {
+    URL.revokeObjectURL(birthCertificatePreview.value)
+  }
+})
 </script>
 
 <template>
   <RouterLink to="/">
     <div class="auth-logo d-flex align-center gap-x-3">
-      <VNodeRenderer :nodes="themeConfig.app.logo" />
-      <h1 class="auth-title">
-        {{ themeConfig.app.title }}
-      </h1>
+      <img
+        src="/storage/logo/LOGOSSB.png"
+        alt="Logo SSB"
+        class="app-logo-img"
+        style="height: 40px;"
+      />
+      <h3 class="app-logo-title mb-0">
+        PUTRA MUDA BALARAJA
+      </h3>
     </div>
   </RouterLink>
 
@@ -148,32 +338,21 @@ const onSubmit = () => {
           <VForm>
             <VWindowItem>
               <h4 class="text-h4">
-                Account Information
+                Informasi Akun
               </h4>
               <p class="text-body-1 mb-6">
-                Enter Your Account Details
+                Masukan Detail Akun Anda
               </p>
 
               <VRow>
                 <VCol
                   cols="12"
-                  md="6"
+                  md="12"
                 >
                   <AppTextField
-                    v-model="form.username"
-                    label="Username"
-                    placeholder="Johndoe"
-                  />
-                </VCol>
-
-                <VCol
-                  cols="12"
-                  md="6"
-                >
-                  <AppTextField
-                    v-model="form.email"
+                    v-model="localData.email"
                     label="Email"
-                    placeholder="johndoe@email.com"
+                    placeholder="budi@gmail.com"
                   />
                 </VCol>
 
@@ -182,13 +361,14 @@ const onSubmit = () => {
                   md="6"
                 >
                   <AppTextField
-                    v-model="form.password"
+                    v-model="localData.password"
                     label="Password"
                     placeholder="············"
                     :type="isPasswordVisible ? 'text' : 'password'"
                     autocomplete="password"
                     :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
                     @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                    :rules="[rulesPassword.required, rulesPassword.minLength]"
                   />
                 </VCol>
 
@@ -197,22 +377,14 @@ const onSubmit = () => {
                   md="6"
                 >
                   <AppTextField
-                    v-model="form.confirmPassword"
-                    label="Confirm Password"
-                    autocomplete="confirm-password"
+                    v-model="localData.confirmPassword"
+                    label="Konfirmasi Password"
                     placeholder="············"
                     :type="isConfirmPasswordVisible ? 'text' : 'password'"
+                    autocomplete="confirm-password"
                     :append-inner-icon="isConfirmPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
                     @click:append-inner="isConfirmPasswordVisible = !isConfirmPasswordVisible"
-                  />
-                </VCol>
-
-                <VCol cols="12">
-                  <AppTextField
-                    v-model="form.link"
-                    label="Profile Link"
-                    placeholder="https://profile.com/johndoe"
-                    type="url"
+                    :rules="[rulesConfirmPassword.required, rulesConfirmPassword.sameAsPassword]"
                   />
                 </VCol>
               </VRow>
@@ -220,21 +392,21 @@ const onSubmit = () => {
 
             <VWindowItem>
               <h4 class="text-h4">
-                Personal Information
+                Informasi Pribadi
               </h4>
               <p>
-                Enter Your Personal Information
+                Masukan Informasi Pribadi Anda
               </p>
 
               <VRow>
                 <VCol
                   cols="12"
-                  md="6"
+                  md="12"
                 >
                   <AppTextField
-                    v-model="form.firstName"
-                    label="First Name"
-                    placeholder="John"
+                    v-model="localData.name"
+                    label="Nama Lengkap"
+                    placeholder="Contoh: Budi"
                   />
                 </VCol>
 
@@ -243,21 +415,10 @@ const onSubmit = () => {
                   md="6"
                 >
                   <AppTextField
-                    v-model="form.lastName"
-                    label="Last Name"
-                    placeholder="Doe"
-                  />
-                </VCol>
-
-                <VCol
-                  cols="12"
-                  md="6"
-                >
-                  <AppTextField
-                    v-model="form.mobile"
+                    v-model="localData.phone"
                     type="number"
-                    label="Mobile"
-                    placeholder="+1 123 456 7890"
+                    label="Nomor Telepon"
+                    placeholder="081234567890"
                   />
                 </VCol>
 
@@ -266,26 +427,13 @@ const onSubmit = () => {
                   md="6"
                 >
                   <AppTextField
-                    v-model="form.pincode"
-                    type="number"
-                    label="Pincode"
-                    placeholder="123456"
-                  />
-                </VCol>
-
-                <VCol cols="12">
-                  <AppTextField
-                    v-model="form.address"
-                    label="Address"
-                    placeholder="1234 Main St, New York, NY 10001, USA"
-                  />
-                </VCol>
-
-                <VCol cols="12">
-                  <AppTextField
-                    v-model="form.landmark"
-                    label="Landmark"
-                    placeholder="Near Central Park"
+                    v-model="localData.nisn"
+                    label="NISN"
+                    placeholder="Contoh: 1234567890"
+                    maxlength="10"
+                    hint="Harus tepat 10 karakter"
+                    countertype="number"
+                    :rules="[rulesNisn.required, rulesNisn.exactLength]"
                   />
                 </VCol>
 
@@ -294,9 +442,49 @@ const onSubmit = () => {
                   md="6"
                 >
                   <AppTextField
-                    v-model="form.city"
-                    label="City"
-                    placeholder="New York"
+                    v-model="localData.height"
+                    label="Tinggi Badan (cm)"
+                    placeholder="Contoh: 160"
+                    maxlength="3"
+                  />
+                </VCol>
+
+                <VCol
+                  cols="12"
+                  md="6"
+                >
+                  <AppTextField
+                    v-model="localData.weight"
+                    label="Berat Badan (kg)"
+                    placeholder="Contoh: 45"
+                    maxlength="3"
+                  />
+                </VCol>
+
+                <VCol
+                  cols="12"
+                  md="12"
+                >
+                  <AppSelect
+                    v-model="localData.club_player.club_id"
+                    label="Club"
+                    :items="clubs"
+                    placeholder="Pilih Club"
+                    clearable
+                    clear-icon="tabler-x"
+                    single-line
+                  />
+                </VCol>
+
+                <VCol
+                  cols="12"
+                  md="6"
+                >
+                  <AppTextField
+                    v-model="localData.club_player.back_number"
+                    label="Nomor Punggung"
+                    placeholder="Contoh: 07"
+                    maxlength="3"
                   />
                 </VCol>
 
@@ -305,10 +493,28 @@ const onSubmit = () => {
                   md="6"
                 >
                   <AppSelect
-                    v-model="form.state"
-                    label="State"
-                    placeholder="Select State"
-                    :items="['New York', 'California', 'Florida', 'Washington', 'Texas']"
+                    v-model="localData.club_player.category"
+                    label="Kategori"
+                    :items="categories"
+                    clearable
+                    clear-icon="tabler-x"
+                    single-line
+                    placeholder="Pilih Kategori"
+                  />
+                </VCol>
+                
+                <VCol
+                  cols="12"
+                  md="12"
+                >
+                  <AppSelect
+                    v-model="localData.club_player.position"
+                    label="Posisi"
+                    :items="positions"
+                    clearable
+                    clear-icon="tabler-x"
+                    single-line
+                    placeholder="Pilih Posisi"
                   />
                 </VCol>
               </VRow>
@@ -316,88 +522,62 @@ const onSubmit = () => {
 
             <VWindowItem>
               <h4 class="text-h4">
-                Select Plan
+                Dokumen Pribadi
               </h4>
               <p class="text-body-1 mb-5">
-                Select plan as per your requirement
+                Silakan unggah dokumen yang diperlukan untuk pendaftaran. Pastikan foto yang diunggah jelas dan sesuai dengan format yang ditentukan.
               </p>
 
-              <CustomRadiosWithIcon
-                v-model:selected-radio="form.selectedPlan"
-                :radio-content="radioContent"
-                :grid-column="{ sm: '4', cols: '12' }"
-              >
-                <template #default="{ item }">
-                  <div class="text-center">
-                    <h5 class="text-h5 mb-2">
-                      {{ item.title }}
-                    </h5>
-                    <p class="clamp-text mb-2">
-                      {{ item.desc }}
-                    </p>
+              <div class="text-h6 mt-4">
+                <h6 class="text-h6 mb-2">Kartu Keluarga</h6>
+                <img
+                  v-if="familyCardPreview"
+                  :src="familyCardPreview"
+                  alt="Preview Family Card"
+                  style="width: 30%; border-radius: 8px; margin-bottom: 1rem;"
+                />
 
-                    <div class="d-flex align-center justify-center">
-                      <span class="text-primary mb-2">$</span>
-                      <span class="text-h4 text-primary">
-                        {{ item.value }}
-                      </span>
-                      <span class="mt-2">/month</span>
-                    </div>
-                  </div>
-                </template>
-              </CustomRadiosWithIcon>
+                <VFileInput
+                  v-model="localData.family_card"
+                  label="Ganti Foto"
+                  accept="image/png, image/jpeg, image/bmp"
+                  density="comfortable"
+                /> 
+              </div>  
 
-              <h4 class="text-h4 mt-12">
-                Payment Information
-              </h4>
-              <p class="text-body-1 mb-6">
-                Enter your card information
-              </p>
+              <div class="text-h6 mt-4">
+                <h6 class="text-h6 mb-2">Rapor Terakhir</h6>
+                <img
+                  v-if="reportGradesPreview"
+                  :src="reportGradesPreview"
+                  alt="Preview Report Grades"
+                  style="width: 30%; border-radius: 8px; margin-bottom: 1rem;"
+                />
 
-              <VRow>
-                <VCol cols="12">
-                  <AppTextField
-                    v-model="form.cardNumber"
-                    type="number"
-                    label="Card Number"
-                    placeholder="1234 1234 1234 1234"
-                  />
-                </VCol>
+                <VFileInput
+                  v-model="localData.report_grades"
+                  label="Ganti Foto"
+                  accept="image/png, image/jpeg, image/bmp"
+                  density="comfortable"
+                />
+              </div>  
 
-                <VCol
-                  cols="12"
-                  md="6"
-                >
-                  <AppTextField
-                    v-model="form.cardName"
-                    label="Name on Card"
-                    placeholder="John Doe"
-                  />
-                </VCol>
+              <div class="text-h6 mt-4">
+                <h6 class="text-h6 mb-2">Akte Kelahiran</h6>
+                <img
+                  v-if="birthCertificatePreview"
+                  :src="birthCertificatePreview"
+                  alt="Preview Birth Certificate"
+                  style="width: 30%; border-radius: 8px; margin-bottom: 1rem;"
+                />
 
-                <VCol
-                  cols="6"
-                  md="3"
-                >
-                  <AppTextField
-                    v-model="form.expiryDate"
-                    label="Expiry"
-                    placeholder="MM/YY"
-                  />
-                </VCol>
-
-                <VCol
-                  cols="6"
-                  md="3"
-                >
-                  <AppTextField
-                    v-model="form.cvv"
-                    type="number"
-                    label="CVV"
-                    placeholder="123"
-                  />
-                </VCol>
-              </VRow>
+                <VFileInput
+                  v-model="localData.birth_certificate"
+                  label="Ganti Foto"
+                  accept="image/png, image/jpeg, image/bmp"
+                  density="comfortable"
+                />
+              </div>  
             </VWindowItem>
           </VForm>
         </VWindow>
