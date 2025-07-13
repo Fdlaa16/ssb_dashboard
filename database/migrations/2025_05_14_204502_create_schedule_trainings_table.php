@@ -13,15 +13,15 @@ return new class extends Migration
     {
         Schema::create('schedule_trainings', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('first_club_id')->nullable();
-            $table->unsignedBigInteger('secound_club_id')->nullable();
+            // $table->unsignedBigInteger('first_club_id')->nullable();
+            // $table->unsignedBigInteger('secound_club_id')->nullable();
             $table->unsignedBigInteger('stadium_id')->nullable();
             $table->date('schedule_date')->nullable();
             $table->time('schedule_start_at')->nullable();
-            $table->time('schedule_end_at')->nullable();
-            $table->string('first_club_score')->nullable();
-            $table->string('secound_club_score')->nullable();
-            $table->string('status')->nullable();
+            // $table->time('schedule_end_at')->nullable();
+            // $table->string('first_club_score')->nullable();
+            // $table->string('secound_club_score')->nullable();
+            // $table->string('status')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

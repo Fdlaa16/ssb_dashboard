@@ -16,6 +16,11 @@ class Player extends Model
         'nisn',
         'height',
         'weight',
+        'back_number',
+        'position',
+        'is_captain',
+        'category',
+        'status',
     ];
 
     public static $code_prefix = "PLY";

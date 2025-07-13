@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Club, PlayerData } from './types'
+import type { Club, PlayerData } from './types';
 
 const currentTab = ref('biodata')
 const clubs = ref<Club[]>([])
@@ -15,14 +15,6 @@ const emit = defineEmits(['submit', 'update:data'])
 
 const localData = ref<PlayerData>({
   ...props.data,
-  club_player: props.data.club_player || { 
-    club_id: '',
-    player_id: 0,
-    back_number: '',   
-    position: '',
-    is_captain: false,   
-    status: false, 
-  },
 })
 
 const avatarPreview = ref<string | null>(
@@ -84,10 +76,6 @@ onMounted(async () => {
 const categories = [
   { title: 'Pilih Kategori', value: '' },
   { title: 'Tim Utama', value: 'main' },
-  { title: 'Putri', value: 'female' },
-  { title: 'U-6', value: 'u6' },
-  { title: 'U-7', value: 'u7' },
-  { title: 'U-8', value: 'u8' },
   { title: 'U-9', value: 'u9' },
   { title: 'U-10', value: 'u10' },
   { title: 'U-11', value: 'u11' },
@@ -95,11 +83,6 @@ const categories = [
   { title: 'U-13', value: 'u13' },
   { title: 'U-14', value: 'u14' },
   { title: 'U-15', value: 'u15' },
-  { title: 'U-16', value: 'u16' },
-  { title: 'U-17', value: 'u17' },
-  { title: 'U-18', value: 'u18' },
-  { title: 'U-19', value: 'u19' },
-  { title: 'U-20', value: 'u20' },
 ]
 
 watch(localData, (newVal, oldVal) => {
@@ -203,21 +186,16 @@ onBeforeUnmount(() => {
           <VWindow v-model="currentTab">
             <!-- Tab Biodata -->
             <VWindowItem value="biodata">
-              <div
-                  v-if="localData.club_player?.club?.profile_club"
-                  class="d-flex justify-end flex-column rounded bg-var-theme-background flex-sm-row gap-6 pa-6 mb-6"
-                  >
-                  <div class="d-flex align-center app-logo gap-4">
-                      <img
-                        v-if="localData.club_player?.club?.profile_club?.url"
-                        :src="getImageUrl(localData.club_player.club.profile_club.url)"
-                        alt="Logo Club"
-                        style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover;"
-                      />
-                      <h6 class="app-logo-title mb-0">
-                      {{ localData.club_player?.club?.name }}
-                      </h6>
-                  </div>
+              <div class="d-flex justify-end flex-column rounded bg-var-theme-background flex-sm-row gap-6 pa-6 mb-6">
+                <div class="d-flex align-center align-end app-logo">
+                  <img
+                    src="/storage/logo/LOGOSSB.png"
+                    alt="Logo SSB"
+                    style="height: 40px;"
+                    class="me-2"
+                  />
+                  <h6 class="app-logo-title">PUTRA MUDA BALARAJA</h6>
+                </div>
               </div>
 
               <VRow>
@@ -281,21 +259,21 @@ onBeforeUnmount(() => {
                     maxlength="3"
                   />
 
-                 <AppSelect
+                 <!-- <AppSelect
                     label="Club"
-                    v-model="localData.club_player.club_id"
+                    v-model="localData.club_id"
                     :items="clubs"
                     placeholder="Pilih Club"
                     clearable
                     clear-icon="tabler-x"
                     single-line
                     class="mb-4"
-                  />
+                  /> -->
                   
                   <VRow class="mb-4">
                     <VCol cols="6">
                       <AppTextField
-                        v-model="localData.club_player.back_number"
+                        v-model="localData.back_number"
                         label="Nomor Punggung"
                         placeholder="Contoh: 07"
                         maxlength="3"
@@ -305,7 +283,7 @@ onBeforeUnmount(() => {
                     <VCol cols="6">
                       <AppSelect
                         label="Kategori"
-                        v-model="localData.club_player.category"
+                        v-model="localData.category"
                         :items="categories"
                         clearable
                         clear-icon="tabler-x"
@@ -316,7 +294,7 @@ onBeforeUnmount(() => {
                   
                   <AppSelect
                     label="Position"
-                    v-model="localData.club_player.position"
+                    v-model="localData.position"
                     :items="positions"
                     clearable
                     clear-icon="tabler-x"

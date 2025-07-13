@@ -10,15 +10,15 @@ class ScheduleTraining extends Model
 {
     use HasFactory, SoftDeletes;
     protected $fillable = [
-        'first_club_id',
-        'secound_club_id',
+        // 'first_club_id',
+        // 'secound_club_id',
         'stadium_id',
         'schedule_date',
         'schedule_start_at',
-        'schedule_end_at',
-        'first_club_score',
-        'secound_club_score',
-        'status'
+        // 'schedule_end_at',
+        // 'first_club_score',
+        // 'secound_club_score',
+        // 'status'
     ];
 
     public function stadium()

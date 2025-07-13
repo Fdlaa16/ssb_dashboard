@@ -119,7 +119,7 @@ const demoList = [
 }
 
 .footer-top {
-  border-radius: 60px 60px 0 0;
+  // border-radius: 60px 60px 0 0;
   background-size: cover;
   color: #fff;
 }

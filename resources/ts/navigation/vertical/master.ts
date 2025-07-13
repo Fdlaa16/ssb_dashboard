@@ -8,6 +8,7 @@ export default [
       { title: 'Club', to: 'dashboards-club-list', },
       { title: 'Media', to: 'dashboards-media-list', },
       { title: 'Stadium', to: 'dashboards-stadium-list', },
+      { title: 'Slide Home', to: 'dashboards-slide-home-list', },
     ],
   },
 ]

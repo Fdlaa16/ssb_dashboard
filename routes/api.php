@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Dashboard\Http\Controllers\AuthController;
+use Modules\Dashboard\Http\Controllers\SlideHomeController;
 use Modules\Dashboard\Http\Controllers\ClubController;
 use Modules\Dashboard\Http\Controllers\MediaController;
 use Modules\Dashboard\Http\Controllers\PlayerController;
@@ -14,6 +16,9 @@ use Modules\Dashboard\Http\Controllers\StandingController;
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
+
+Route::post('/login', [AuthController::class, 'authenticate']);
+Route::post('/logout', [AuthController::class, 'logout']);
 
 Route::get('hehe', [PlayerController::class, 'hehe'])->name('hehe');
 Route::get('player', [PlayerController::class, 'index'])->name('player.index');
@@ -61,6 +66,15 @@ Route::get('stadium/{id}/edit', [StadiumController::class, 'edit'])->name('stadi
 Route::put('stadium/{id}', [StadiumController::class, 'update'])->name('stadium.update');
 Route::delete('stadium/{id}', [StadiumController::class, 'destroy'])->name('stadium.destroy');
 Route::put('stadium/{id}/active', [StadiumController::class, 'active'])->name('stadium.active');
+
+Route::get('slide_home', [SlideHomeController::class, 'index'])->name('slide_home.index');
+Route::get('slide_home/create', [SlideHomeController::class, 'create'])->name('slide_home.create');
+Route::post('slide_home/store', [SlideHomeController::class, 'store'])->name('slide_home.store');
+Route::get('slide_home/{id}', [SlideHomeController::class, 'show'])->name('slide_home.show');
+Route::get('slide_home/{id}/edit', [SlideHomeController::class, 'edit'])->name('slide_home.edit');
+Route::put('slide_home/{id}', [SlideHomeController::class, 'update'])->name('slide_home.update');
+Route::delete('slide_home/{id}', [SlideHomeController::class, 'destroy'])->name('slide_home.destroy');
+Route::put('slide_home/{id}/active', [SlideHomeController::class, 'active'])->name('slide_home.active');
 
 Route::get('schedule-match', [ScheduleMatchController::class, 'index'])->name('schedule-match.index');
 Route::get('schedule-match/create', [ScheduleMatchController::class, 'create'])->name('schedule-match.create');

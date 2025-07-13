@@ -32,9 +32,8 @@ class ClubController extends Controller
         $clubQuery->when(!empty($request->search), function ($q) use ($request) {
             $q->where(function ($q) use ($request) {
                 $q->where('created_at', 'like', '%' . $request->search . '%')
-                    ->orWhere('name', 'like', '%' . $request->search . '%')
+                    ->orWhere('type_media', 'like', '%' . $request->search . '%')
                     ->orWhere('title', 'like', '%' . $request->search . '%')
-                    ->orWhere('hashtag', 'like', '%' . $request->search . '%')
                     ->orWhere('description', 'like', '%' . $request->search . '%')
                     ->orWhere('link', 'like', '%' . $request->search . '%');
             });

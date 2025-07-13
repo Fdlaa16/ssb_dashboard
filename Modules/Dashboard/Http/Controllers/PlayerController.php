@@ -38,7 +38,7 @@ class PlayerController extends Controller
         $playersQuery = Player::query()
             ->with([
                 'user',
-                'clubPlayers.club',
+                // 'clubPlayers.club',
                 'sports' => function ($query) {
                     $query->whereNull('sports.deleted_at');
                 },
@@ -55,11 +55,11 @@ class PlayerController extends Controller
                     ->orWhereHas('user', function ($user) use ($request) {
                         $user->where('email', 'like', '%' . $request->search . '%');
                     })
-                    ->orWhereHas('club_players', function ($clubPlayers) use ($request) {
-                        $clubPlayers->orWhereHas('clubs', function ($club) use ($request) {
-                            $club->where('name', 'like', '%' . $request->search . '%');
-                        });
-                    })
+                    // ->orWhereHas('club_players', function ($clubPlayers) use ($request) {
+                    //     $clubPlayers->orWhereHas('clubs', function ($club) use ($request) {
+                    //         $club->where('name', 'like', '%' . $request->search . '%');
+                    //     });
+                    // })
                     ->orWhereHas('sports', function ($sport) use ($request) {
                         $sport->where('name', 'like', '%' . $request->search . '%');
                     });
@@ -165,8 +165,12 @@ class PlayerController extends Controller
                 'name'      => 'required',
                 'height'    => 'required',
                 'weight'    => 'required',
-                'club_id'   => 'required',
+                // 'club_id'   => 'required',
                 'category'  => 'required',
+                'avatar' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
+                'family_card' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
+                'report_grades' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
+                'birth_certificate' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
             ];
 
             $messages = [
@@ -178,9 +182,21 @@ class PlayerController extends Controller
                 'name.required'      => 'Nama harus diisi',
                 'height.required'    => 'Tinggi badan harus diisi',
                 'weight.required'    => 'Berat badan harus diisi',
-                'club_id.required'   => 'Club harus diisi',
-                'club_id.exists'     => 'Club tidak ditemukan',
+                // 'club_id.required'   => 'Club harus diisi',
+                // 'club_id.exists'     => 'Club tidak ditemukan',
                 'category.required'  => 'Kategori harus diisi',
+                'avatar.image' => 'Avatar harus berupa gambar',
+                'avatar.mimes' => 'Format Avatar harus jpeg, png, jpg, atau bmp',
+                'avatar.max' => 'Ukuran Avatar maksimal 2MB',
+                'family_card.image' => 'Kartu Keluarga harus berupa gambar',
+                'family_card.mimes' => 'Format Kartu Keluarga harus jpeg, png, jpg, atau bmp',
+                'family_card.max' => 'Ukuran Kartu Keluarga maksimal 2MB',
+                'report_grades.image' => 'Nilai Rapot harus berupa gambar',
+                'report_grades.mimes' => 'Format Nilai Rapot harus jpeg, png, jpg, atau bmp',
+                'report_grades.max' => 'Ukuran Nilai Rapot maksimal 2MB',
+                'birth_certificate.image' => 'Akte Kelahiran harus berupa gambar',
+                'birth_certificate.mimes' => 'Format Akte Kelahiran harus jpeg, png, jpg, atau bmp',
+                'birth_certificate.max' => 'Ukuran Akte Kelahiran maksimal 2MB',
             ];
 
             $validator = Validator::make($postData, $rules, $messages);
@@ -191,11 +207,14 @@ class PlayerController extends Controller
                 $user = User::create(['email' => $request->email]);
 
                 $player = Player::create([
-                    'user_id' => $user->id,
-                    'nisn' => $request->nisn,
-                    'name' => $request->name,
-                    'height' => $request->height,
-                    'weight' => $request->weight,
+                    'user_id' => $user->id ?? '',
+                    'nisn' => $request->nisn ?? '',
+                    'name' => $request->name ?? '',
+                    'height' => $request->height ?? '',
+                    'weight' => $request->weight ?? '',
+                    'position' => $request->position ?? '',
+                    'back_number' => $request->back_number ?? '',
+                    'category' => $request->category ?? '',
                 ]);
 
                 $types = ['avatar', 'family_card', 'report_grades', 'birth_certificate'];
@@ -221,13 +240,13 @@ class PlayerController extends Controller
                     }
                 }
 
-                ClubPlayer::create([
-                    'club_id' => $request->club_id,
-                    'player_id' => $player->id,
-                    'position' => $request->position,
-                    'back_number' => $request->back_number,
-                    'category' => $request->category,
-                ]);
+                // ClubPlayer::create([
+                //     'club_id' => $request->club_id,
+                //     'player_id' => $player->id,
+                //     'position' => $request->position,
+                //     'back_number' => $request->back_number,
+                //     'category' => $request->category,
+                // ]);
 
                 DB::commit();
 
@@ -265,7 +284,7 @@ class PlayerController extends Controller
         $players = Player::query()
             ->with([
                 'user',
-                'clubPlayers.club.profile_club',
+                // 'clubPlayers.club.profile_club',
                 'avatar',
                 'birth_certificate',
                 'family_card',
@@ -304,7 +323,11 @@ class PlayerController extends Controller
                 'name'      => 'required',
                 'height'    => 'required',
                 'weight'    => 'required',
-                'club_id'   => 'required',
+                // 'club_id'   => 'required',
+                'avatar.*' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
+                'family_card.*' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
+                'report_grades.*' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
+                'birth_certificate.*' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
             ];
 
             $messages = [
@@ -316,8 +339,20 @@ class PlayerController extends Controller
                 'name.required'      => 'Nama harus diisi',
                 'height.required'    => 'Tinggi badan harus diisi',
                 'weight.required'    => 'Berat badan harus diisi',
-                'club_id.required'   => 'Club harus diisi',
-                'club_id.exists'     => 'Club tidak ditemukan',
+                // 'club_id.required'   => 'Club harus diisi',
+                // 'club_id.exists'     => 'Club tidak ditemukan',
+                'avatar.*.image' => 'Avatar harus berupa gambar',
+                'avatar.*.mimes' => 'Format Avatar harus jpeg, png, jpg, atau bmp',
+                'avatar.*.max' => 'Ukuran Avatar maksimal 2MB',
+                'family_card.*.image' => 'Kartu Keluarga harus berupa gambar',
+                'family_card.*.mimes' => 'Format Kartu Keluarga harus jpeg, png, jpg, atau bmp',
+                'family_card.*.max' => 'Ukuran Kartu Keluarga maksimal 2MB',
+                'report_grades.*.image' => 'Nilai Rapot harus berupa gambar',
+                'report_grades.*.mimes' => 'Format Nilai Rapot harus jpeg, png, jpg, atau bmp',
+                'report_grades.*.max' => 'Ukuran Nilai Rapot maksimal 2MB',
+                'birth_certificate.*.image' => 'Akte Kelahiran harus berupa gambar',
+                'birth_certificate.*.mimes' => 'Format Akte Kelahiran harus jpeg, png, jpg, atau bmp',
+                'birth_certificate.*.max' => 'Ukuran Akte Kelahiran maksimal 2MB',
             ];
 
             $validator = Validator::make($request->all(), $rules, $messages);
@@ -331,10 +366,13 @@ class PlayerController extends Controller
                 ]);
 
                 $player->update([
-                    'nisn'   => $request->nisn,
-                    'name'   => $request->name,
-                    'height' => $request->height,
-                    'weight' => $request->weight,
+                    'nisn'   => $request->nisn ?? '',
+                    'name'   => $request->name ?? '',
+                    'height' => $request->height ?? '',
+                    'weight' => $request->weight ?? '',
+                    'position' => $request->position ?? '',
+                    'back_number' => $request->back_number ?? '',
+                    'category' => $request->category ?? '',
                 ]);
 
                 $types = ['avatar', 'family_card', 'report_grades', 'birth_certificate'];
@@ -359,13 +397,13 @@ class PlayerController extends Controller
                     }
                 }
 
-                $player->clubPlayers()->update([
-                    'player_id' => $player->id,
-                    'club_id' => $request->club_id,
-                    'position' => $request->position,
-                    'back_number' => $request->back_number,
-                    'category' => $request->category,
-                ]);
+                // $player->clubPlayers()->update([
+                //     'player_id' => $player->id,
+                //     'club_id' => $request->club_id,
+                //     'position' => $request->position,
+                //     'back_number' => $request->back_number,
+                //     'category' => $request->category,
+                // ]);
 
                 DB::commit();
 

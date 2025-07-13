@@ -8,7 +8,7 @@ const router = useRouter()
 const route = useRoute()
 
 const searchQuery = ref('')
-const selectedClub = ref('')
+// const selectedClub = ref('')
 const selectedStadium = ref('')
 const selectedStatus = ref('')
 const selectedSort = ref('')
@@ -48,8 +48,8 @@ const widgetData = ref([
 
 const headers = [
   { title: 'ID', key: 'id' },
-  { title: 'Club 1', key: 'first_club.name' },
-  { title: 'Club 2', key: 'secound_club.name' },
+  // { title: 'Club 1', key: 'first_club.name' },
+  // { title: 'Club 2', key: 'secound_club.name' },
   { title: 'Stadium', key: 'stadium.name' },
   { title: 'Schedule Date', key: 'schedule_date' },
   { title: 'Schedule Start At', key: 'schedule_start_at' },
@@ -75,7 +75,7 @@ async function fetchScheduleTraining() {
       method: 'GET',
       params: {
         search: searchQuery.value,
-        club_id: selectedClub.value,
+        // club_id: selectedClub.value,
         stadium_id: selectedStadium.value,
         status: selectedStatus.value,
         sort: selectedSort.value,
@@ -139,7 +139,7 @@ function editScheduleTraining(scheduleTraining: any) {
 async function deleteScheduleTraining(scheduleTraining: any) {
   const confirm = await Swal.fire({
     title: 'Apakah kamu yakin?',
-    text: `Data Schedule Training ${scheduleTraining.first_club.name} melawan ${scheduleTraining.secound_club.name} pada tanggal ${scheduleTraining.schedule_date} pukul ${scheduleTraining.schedule_start_at} akan dihapus.`,
+    text: `Data Schedule Training pada tanggal ${scheduleTraining.schedule_date} pukul ${scheduleTraining.schedule_start_at} akan dihapus.`,
     icon: 'warning',
     showCancelButton: true,
     confirmButtonText: 'Ya, hapus!',
@@ -216,7 +216,7 @@ function getQueryParam(param: LocationQueryValue | LocationQueryValue[] | undefi
 
 onMounted(() => {
   searchQuery.value = getQueryParam(route.query.search)
-  selectedClub.value = getQueryParam(route.query.club_id)
+  // selectedClub.value = getQueryParam(route.query.club_id)
   selectedStadium.value = getQueryParam(route.query.stadium_id)
   selectedStatus.value = getQueryParam(route.query.status)
   selectedSort.value = getQueryParam(route.query.sort)
@@ -226,12 +226,12 @@ onMounted(() => {
   fetchStadiums()
 })
 
-watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort], () => {
+watch([searchQuery, selectedStadium, selectedStatus, selectedSort], () => {
   router.replace({
     query: {
       ...route.query,
       search: searchQuery.value || undefined,
-      club_id: selectedClub.value || undefined,
+      // club_id: selectedClub.value || undefined,
       stadium_id: selectedStadium.value || undefined,
       status: selectedStatus.value || undefined,
       sort: selectedSort.value || undefined,
@@ -240,6 +240,16 @@ watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort]
 
   fetchScheduleTraining()
 })
+
+function formatIndoDate(dateStr: string): string {
+  const date = new Date(dateStr)
+  return new Intl.DateTimeFormat('id-ID', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  }).format(date)
+}
 </script>
 
 <template>
@@ -300,21 +310,7 @@ watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort]
           <VRow>
             <VCol
               cols="12"
-              sm="3"
-            >
-              <AppSelect
-                v-model="selectedClub"
-                :items="clubs"
-                placeholder="Club"
-                clearable
-                clear-icon="tabler-x"
-                single-line
-              />
-            </VCol>
-
-            <VCol
-              cols="12"
-              sm="3"
+              sm="4"
             >
               <AppSelect
                 v-model="selectedStadium"
@@ -328,7 +324,7 @@ watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort]
 
             <VCol
               cols="12"
-              sm="3"
+              sm="4"
             >
               <AppSelect
                 v-model="selectedStatus"
@@ -347,7 +343,7 @@ watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort]
 
             <VCol
               cols="12"
-              sm="3"
+              sm="4"
             >
               <AppSelect
                 v-model="selectedSort"
@@ -408,20 +404,12 @@ watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort]
             <div class="text-body-1">{{ item.id }}</div>
           </template>
 
-          <template #item.first_club.name="{ item }">
-            <div class="text-body-1">{{ item.first_club.name }}</div>
-          </template>
-
-          <template #item.secound_club.name="{ item }">
-            <div class="text-body-1">{{ item.secound_club.name }}</div>
-          </template>
-
           <template #item.stadium.name="{ item }">
             <div class="text-body-1">{{ item.stadium.name }}</div>
           </template>
 
           <template #item.schedule_date="{ item }">
-            <div class="text-body-1">{{ item.schedule_date }}</div>
+            <div class="text-body-1">{{ formatIndoDate(item.schedule_date) }}</div>
           </template>
 
           <template #item.schedule_start_at="{ item }">

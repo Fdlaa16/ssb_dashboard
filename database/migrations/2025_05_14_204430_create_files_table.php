@@ -20,6 +20,7 @@ return new class extends Migration
             $table->text('original_name');
             $table->string('extension');
             $table->string('path');
+            $table->integer('sort_order')->default(0);
             $table->timestamps();
             $table->softDeletes();
 

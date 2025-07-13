@@ -11,27 +11,27 @@ const snackbarColor = ref<'success' | 'error'>('success')
 
 const scheduleTrainingData = ref<ScheduleTrainingData>({
   id: 0, 
-  first_club_id: '',
-  secound_club_id: '',
+  // first_club_id: '',
+  // secound_club_id: '',
   stadium_id: '',
   schedule_date: '',
   schedule_start_at: '',
-  schedule_end_at: '',
-  first_club_score: '',
-  secound_club_score: '',
-  status: '',
+  // schedule_end_at: '',
+  // first_club_score: '',
+  // secound_club_score: '',
+  // status: '',
 })
 
 const handleSubmit = async () => {
   const formData = new FormData();
-  formData.append('first_club_id', String(scheduleTrainingData.value.first_club_id));
-  formData.append('secound_club_id', String(scheduleTrainingData.value.secound_club_id));
+  // formData.append('first_club_id', String(scheduleTrainingData.value.first_club_id));
+  // formData.append('secound_club_id', String(scheduleTrainingData.value.secound_club_id));
   formData.append('stadium_id', String(scheduleTrainingData.value.stadium_id));
   formData.append('schedule_date', scheduleTrainingData.value.schedule_date); 
   formData.append('schedule_start_at', scheduleTrainingData.value.schedule_start_at);
-  formData.append('schedule_end_at', scheduleTrainingData.value.schedule_end_at);
-  formData.append('first_club_score', scheduleTrainingData.value.first_club_score ?? '');
-  formData.append('secound_club_score', scheduleTrainingData.value.secound_club_score ?? '');
+  // formData.append('schedule_end_at', scheduleTrainingData.value.schedule_end_at);
+  // formData.append('first_club_score', scheduleTrainingData.value.first_club_score ?? '');
+  // formData.append('secound_club_score', scheduleTrainingData.value.secound_club_score ?? '');
 
   try {
     const response = await $api('schedule-training/store', {

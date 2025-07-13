@@ -96,4 +96,14 @@ const onSubmit = () => {
 
     </VCol>
   </VRow>
+
+  <VSnackbar
+    v-model="isFlatSnackbarVisible"
+    :color="snackbarColor"
+    location="bottom start"
+    variant="flat"
+    timeout="3000"
+  >
+    {{ snackbarMessage }}
+  </VSnackbar>
 </template>

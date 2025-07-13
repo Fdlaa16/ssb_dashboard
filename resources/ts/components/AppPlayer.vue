@@ -56,7 +56,7 @@ const groupedByPosition = computed(() => {
   const groups: Record<string, any[]> = {}
 
   for (const player of scheduleMatchs.value) {
-    const position = player.club_players[0]?.position ?? 'unknown'
+    const position = player.position ?? 'unknown'
     if (!groups[position]) {
       groups[position] = []
     }
@@ -78,10 +78,6 @@ const formatMatchTime = (date: string, time: string) => {
 const categories = [
   { title: 'Semua Kategori', value: '' },
   { title: 'Tim Utama', value: 'main' },
-  { title: 'Putri', value: 'female' },
-  { title: 'U-6', value: 'u6' },
-  { title: 'U-7', value: 'u7' },
-  { title: 'U-8', value: 'u8' },
   { title: 'U-9', value: 'u9' },
   { title: 'U-10', value: 'u10' },
   { title: 'U-11', value: 'u11' },
@@ -89,11 +85,6 @@ const categories = [
   { title: 'U-13', value: 'u13' },
   { title: 'U-14', value: 'u14' },
   { title: 'U-15', value: 'u15' },
-  { title: 'U-16', value: 'u16' },
-  { title: 'U-17', value: 'u17' },
-  { title: 'U-18', value: 'u18' },
-  { title: 'U-19', value: 'u19' },
-  { title: 'U-20', value: 'u20' },
 ]
 const category = ref(categories[0])
 
@@ -172,60 +163,63 @@ watch([category, selectedPosition], () => {
         </VCol>
       </VRow>
 
-      <VRow v-if="Object.keys(groupedByPosition).length > 0">
-        <template v-for="(players, positionKey) in groupedByPosition" :key="positionKey">
-          <VCol cols="12">
-            <h5 class="text-h5 font-weight-bold mb-3 mt-6">
-              {{ getPositionTitle(positionKey) }}
-            </h5>
-          </VCol>
+      <VRow>
+        <template v-if="Object.keys(groupedByPosition).length > 0">
+          <VCol v-for="(players, positionKey) in groupedByPosition" :key="positionKey">
+            <VCol cols="12">
+              <h5 class="text-h5 font-weight-bold mb-3 mt-6">
+                {{ getPositionTitle(positionKey) }}
+              </h5>
+            </VCol>
 
-          <VCol
-            v-for="(data, index) in players"
-            :key="index"
-            cols="12"
-            sm="6"
-            md="4"
-          >
-            <router-link :to="{ name: 'front-pages-player-id', params: { id: String(data.id) } }">
-              <VCard>
-                <VImg
-                  :src="data.avatar.url"
-                  cover
-                  class="media-img"
-                />
+            <VCol
+              v-for="(data, index) in players"
+              :key="`${positionKey}-${index}`"
+              cols="12"
+              sm="6"
+              md="4"
+            >
+              <router-link :to="{ name: 'front-pages-player-id', params: { id: String(data.id) } }">
+                <VCard>
+                  <VImg
+                    :src="data?.avatar?.url"
+                    cover
+                    class="media-img"
+                  />
 
-                <VCardItem class="py-1"> 
-                  <div class="d-flex align-center justify-space-between">
-                    <VCardTitle class="text-subtitle-1 font-weight-bold pa-0">
-                      {{ data.name }}
-                    </VCardTitle>
-                    <div class="d-flex align-center">
-                      <VIcon icon="tabler-shirt" size="18" class="mr-1" />
-                      <span class="text-subtitle-1">{{ data.club_players[0].back_number }}</span>
+                  <VCardItem class="py-1"> 
+                    <div class="d-flex align-center justify-space-between">
+                      <VCardTitle class="text-subtitle-1 font-weight-bold pa-0">
+                        {{ data.name }}
+                      </VCardTitle>
+                      <div class="d-flex align-center">
+                        <VIcon icon="tabler-shirt" size="18" class="mr-1" />
+                        <span class="text-subtitle-1">{{ data.back_number }}</span>
+                      </div>
                     </div>
-                  </div>
-                </VCardItem>
+                  </VCardItem>
 
-                <VCardText class="pt-1 pb-2"> 
-                  <div class="d-flex justify-space-between text-caption text-grey-darken-1">
-                    <span>{{ getPositionTitle(data.club_players[0].position) }}</span>
-                  </div>
-                </VCardText>
-              </VCard>
-            </router-link>  
+                  <VCardText class="pt-1 pb-2"> 
+                    <div class="d-flex justify-space-between text-caption text-grey-darken-1">
+                      <span>{{ getPositionTitle(data.position) }}</span>
+                    </div>
+                  </VCardText>
+                </VCard>
+              </router-link>  
+            </VCol>
+          </VCol>
+        </template>
+
+        <template v-else>
+          <VCol cols="12" class="text-center py-10">
+            <VIcon size="64" color="grey-lighten-1">tabler-calendar-x</VIcon>
+            <p class="text-body-1 mt-2 text-grey">
+              Belum ada pemain ditemukan.
+            </p>
           </VCol>
         </template>
       </VRow>
 
-      <template v-else>
-        <VCol cols="12" class="text-center py-10">
-          <VIcon size="64" color="grey-lighten-1">tabler-calendar-x</VIcon>
-          <p class="text-body-1 mt-2 text-grey">
-            Belum ada pemain ditemukan.
-          </p>
-        </VCol>
-      </template>
     </div>    
   </VContainer>
   

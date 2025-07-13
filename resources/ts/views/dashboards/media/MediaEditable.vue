@@ -9,15 +9,26 @@ const localData = ref<MediaData>({ ...props.data })
 const currentTab = ref('biodata')
 const documentMediaPreviews = ref<string[]>([])
 const MAX_IMAGES = 5
+const removedMediaIds = ref<number[]>([]) // Track removed media IDs
 
-const getImageUrl = (path: string) => import.meta.env.VITE_APP_URL + path
+const getImageUrl = (path: string) => {
+  // Handle both old format (path) and new format (url)
+  if (path.startsWith('http')) {
+    return path
+  }
+  return import.meta.env.VITE_APP_URL + '/storage/' + path
+}
 
 const initializePreviews = () => {
   if (localData.value.document_media && Array.isArray(localData.value.document_media)) {
     documentMediaPreviews.value = localData.value.document_media.map((item: any) => {
       if (item instanceof File) {
         return URL.createObjectURL(item)
+      } else if (typeof item === 'object' && item.url) {
+        // Use .url property like in avatar implementation
+        return getImageUrl(item.url)
       } else if (typeof item === 'object' && item.path) {
+        // Fallback for old path property
         return getImageUrl(item.path)
       } else if (typeof item === 'string') {
         return getImageUrl(item)
@@ -25,6 +36,8 @@ const initializePreviews = () => {
       return null
     }).filter(Boolean)
   }
+  // Reset removed media IDs when initializing
+  removedMediaIds.value = []
 }
 
 watch(() => props.data, (newData) => {
@@ -42,6 +55,7 @@ watch(localData, (newVal, oldVal) => {
 
 watch(() => localData.value.document_media, (newDocumentMedia: any) => {
   if (newDocumentMedia && Array.isArray(newDocumentMedia)) {
+    // Revoke old blob URLs
     documentMediaPreviews.value.forEach(url => {
       if (url?.startsWith('blob:')) {
         URL.revokeObjectURL(url)
@@ -51,7 +65,11 @@ watch(() => localData.value.document_media, (newDocumentMedia: any) => {
     documentMediaPreviews.value = newDocumentMedia.map((item: any) => {
       if (item instanceof File) {
         return URL.createObjectURL(item)
+      } else if (typeof item === 'object' && item.url) {
+        // Use .url property like in avatar implementation
+        return getImageUrl(item.url)
       } else if (typeof item === 'object' && item.path) {
+        // Fallback for old path property
         return getImageUrl(item.path)
       } else if (typeof item === 'string') {
         return getImageUrl(item)
@@ -59,6 +77,7 @@ watch(() => localData.value.document_media, (newDocumentMedia: any) => {
       return null
     }).filter(Boolean)
   } else {
+    // Clean up blob URLs
     documentMediaPreviews.value.forEach(url => {
       if (url?.startsWith('blob:')) {
         URL.revokeObjectURL(url)
@@ -69,7 +88,12 @@ watch(() => localData.value.document_media, (newDocumentMedia: any) => {
 }, { immediate: true })
 
 const submitForm = () => {
-  emit('update:data', localData.value)
+  // Add removed media IDs to localData before emitting
+  const dataWithRemovedIds = {
+    ...localData.value,
+    removed_media_ids: removedMediaIds.value
+  }
+  emit('update:data', dataWithRemovedIds)
   emit('submit')
 }
 
@@ -107,6 +131,9 @@ const getFileName = (index: number) => {
       return file.name
     } else if (typeof file === 'object' && file.original_name) {
       return file.original_name
+    } else if (typeof file === 'object' && file.url) {
+      // Extract filename from URL
+      return file.url.split('/').pop() || `Image ${index + 1}`
     } else if (typeof file === 'string') {
       return file.split('/').pop() || `Image ${index + 1}`
     }
@@ -117,6 +144,15 @@ const getFileName = (index: number) => {
 const removeImage = (index: number) => {
   if (documentMediaPreviews.value[index]?.startsWith('blob:')) {
     URL.revokeObjectURL(documentMediaPreviews.value[index])
+  }
+  
+  // Check if it's an existing file (not a new File object)
+  if (localData.value.document_media && Array.isArray(localData.value.document_media)) {
+    const file = localData.value.document_media[index]
+    if (typeof file === 'object' && file.id && !(file instanceof File)) {
+      // It's an existing file, add to removed list
+      removedMediaIds.value.push(file.id)
+    }
   }
   
   documentMediaPreviews.value.splice(index, 1)
@@ -133,6 +169,11 @@ onBeforeUnmount(() => {
     }
   })
 })
+
+const typeMedia = ref([
+  { title: 'Dokumentasi', value: 'documentation' },
+  { title: 'Prestasi', value: 'performance' },
+])
 </script>
 
 <template>
@@ -145,31 +186,38 @@ onBeforeUnmount(() => {
             <VWindowItem >
               <VRow>
                 <VCol cols="12" class="text-no-wrap">
-                  <VRow>
-                    <VCol cols="6">
-                      <AppDateTimePicker
-                        v-model="localData.start_date"
-                        label="Start Date"
-                        placeholder="Start date"
-                        class="mb-4"
-                      />
-                    </VCol>
-
-                    <VCol cols="6">
-                      <AppDateTimePicker
-                        v-model="localData.end_date"
-                        label="End Date"
-                        placeholder="End date"
-                        class="mb-4"
-                      />
-                    </VCol>
-                  </VRow>             
-                  <AppTextField
-                    v-model="localData.name"
-                    label="Name"
-                    placeholder="Name"
+                  <h6 class="text-h6 mb-1 mt-5">Tipe Media</h6>
+                  <AppSelect
+                    v-model="localData.type_media"
+                    :items="typeMedia"
+                    placeholder="Status"
+                    clearable
+                    clear-icon="tabler-x"
+                    single-line
                     class="mb-4"
                   />
+
+                  <template v-if="localData.type_media === 'documentation'">
+                    <VRow>
+                      <VCol cols="6">
+                        <AppDateTimePicker
+                          v-model="localData.start_date"
+                          label="Start Date"
+                          placeholder="Start date"
+                          class="mb-4"
+                        />
+                      </VCol>
+
+                      <VCol cols="6">
+                        <AppDateTimePicker
+                          v-model="localData.end_date"
+                          label="End Date"
+                          placeholder="End date"
+                          class="mb-4"
+                        />
+                      </VCol>
+                    </VRow>       
+                  </template>
 
                   <AppTextField
                     v-model="localData.title"
@@ -178,25 +226,18 @@ onBeforeUnmount(() => {
                     class="mb-4"
                   />
 
-                  <AppTextField
-                    v-model="localData.hashtag"
-                    label="Hashtag"
-                    placeholder="Hashtag"
-                    class="mb-4"
-                  />
-
-                  <DemoTextareaBasic 
+                  <h6 class="text-h6 mb-1 mt-5">Description</h6>
+                  <TiptapEditor
                     v-model="localData.description"
-                    label="Description"
+                    class="border rounded basic-editor"
                     placeholder="Masukkan deskripsi media"
-                    class="mb-4"
                   />
 
                   <AppTextField
                     v-model="localData.link"
                     label="Link"
                     placeholder="Link"
-                    class="mb-4"
+                    class="mb-4 mt-4"
                   />
 
                   <h6 class="text-h6 mb-2">Document Media (Maksimal 5 gambar)</h6>                  
@@ -290,3 +331,14 @@ onBeforeUnmount(() => {
     </div>
   </form>
 </template>
+
+<style lang="scss">
+.basic-editor {
+  .ProseMirror {
+    block-size: 200px;
+    outline: none;
+    overflow-y: auto;
+    padding-inline: 0.5rem;
+  }
+}
+</style>

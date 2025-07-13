@@ -44,6 +44,7 @@ class File extends Model
         'report_grades' => 'report_grades/',
         'profile_club' => 'profile_club/',
         'document_media' => 'document_media/',
+        'slide_home' => 'slide_home/'
     ];
 
     public function getDirectory($type)

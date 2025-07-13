@@ -79,7 +79,7 @@ const capitalizedLabel = (label: boolean) => {
 <template>
   <form @submit.prevent="$emit('submit')">
     <div class="d-flex flex-column gap-6 mb-6">
-      <VCard title="Create Schedule Training" >
+      <VCard :title="props.data.id ? 'Edit Schedule Training' : 'Create Schedule Training'"></VCard>
         <VCardText>
           <VWindow>
             <VWindowItem>
@@ -87,7 +87,7 @@ const capitalizedLabel = (label: boolean) => {
               <VRow>
                 <VCol cols="12" class="text-no-wrap">
                   <VRow class="justify-center align-center">
-                    <VCol cols="4">
+                    <VCol cols="6">
                       <AppDateTimePicker
                         v-model="localData.schedule_date"
                         label="Schedule Date"
@@ -95,7 +95,7 @@ const capitalizedLabel = (label: boolean) => {
                       />
                     </VCol>
 
-                    <VCol cols="4">
+                    <VCol cols="6">
                       <AppDateTimePicker
                         v-model="localData.schedule_start_at"
                         label="Start At"
@@ -104,17 +104,17 @@ const capitalizedLabel = (label: boolean) => {
                       />
                     </VCol>
 
-                    <VCol cols="4">
+                    <!-- <VCol cols="4">
                       <AppDateTimePicker
                         v-model="localData.schedule_end_at"
                         label="End At"
                         placeholder="Select time"
                         :config="{ enableTime: true, noCalendar: true, dateFormat: 'H:i' }"
                       />
-                    </VCol>
+                    </VCol> -->
                   </VRow>
 
-                  <VRow class="justify-center align-center">
+                  <!-- <VRow class="justify-center align-center">
                     <VCol cols="6">
                       <h6 class="text-h6 mb-1">Club Pertama</h6>
                       <AppSelect
@@ -138,7 +138,7 @@ const capitalizedLabel = (label: boolean) => {
                         single-line
                       />
                     </VCol>
-                  </VRow>
+                  </VRow> -->
 
                   <h6 class="text-h6 mb-1 mt-5">Stadium</h6>
                   <AppSelect
@@ -150,7 +150,7 @@ const capitalizedLabel = (label: boolean) => {
                     :items="stadiums"
                   />
                       
-                  <template v-if="localData.id">
+                  <!-- <template v-if="localData.id">
                     <h6 class="text-h6 mb-1 mt-5">Status</h6>
                     <AppSelect
                       v-model="localData.status"
@@ -182,7 +182,7 @@ const capitalizedLabel = (label: boolean) => {
                         </VCol>
                       </VRow>
                     </template>
-                  </template> 
+                  </template>  -->
 
                 </VCol>
               </VRow>

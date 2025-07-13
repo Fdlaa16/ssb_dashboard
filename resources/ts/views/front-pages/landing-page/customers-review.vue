@@ -202,7 +202,7 @@ onMounted(() => {
                   <router-link :to="{ name: 'front-pages-media-id', params: { id: String(data.id) } }">
                     <VCard>
                       <VImg
-                        :src="data.document_media.url"
+                        :src="data.document_media?.[0]?.url"
                         cover
                         class="media-img"
                       />

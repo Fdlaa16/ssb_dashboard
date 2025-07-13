@@ -28,8 +28,8 @@ class ScheduleTrainingController extends Controller
 
         $scheduleTrainingQuery = ScheduleTraining::query()
             ->with([
-                'firstClub.profile_club',
-                'secoundClub.profile_club',
+                // 'firstClub.profile_club',
+                // 'secoundClub.profile_club',
                 'stadium'
             ])
             ->whereNull('deleted_at')
@@ -44,12 +44,12 @@ class ScheduleTrainingController extends Controller
                     ->orWhere('schedule_date', 'like', '%' . $request->search . '%')
                     ->orWhere('schedule_start_at', 'like', '%' . $request->search . '%')
                     ->orWhere('schedule_end_at', 'like', '%' . $request->search . '%')
-                    ->orWhereHas('firstClub', function ($user) use ($request) {
-                        $user->where('name', 'like', '%' . $request->search . '%');
-                    })
-                    ->orWhereHas('secoundClub', function ($user) use ($request) {
-                        $user->where('name', 'like', '%' . $request->search . '%');
-                    })
+                    // ->orWhereHas('firstClub', function ($user) use ($request) {
+                    //     $user->where('name', 'like', '%' . $request->search . '%');
+                    // })
+                    // ->orWhereHas('secoundClub', function ($user) use ($request) {
+                    //     $user->where('name', 'like', '%' . $request->search . '%');
+                    // })
                     ->orWhereHas('stadium', function ($user) use ($request) {
                         $user->where('name', 'like', '%' . $request->search . '%');
                     });
@@ -70,15 +70,15 @@ class ScheduleTrainingController extends Controller
             }
         });
 
-        $scheduleTrainingQuery->when($request->club_id, function ($query) use ($request) {
-            $query->where(function ($q) use ($request) {
-                $q->whereHas('firstClub', function ($q1) use ($request) {
-                    $q1->where('id', $request->club_id);
-                })->orWhereHas('secoundClub', function ($q2) use ($request) {
-                    $q2->where('id', $request->club_id);
-                });
-            });
-        });
+        // $scheduleTrainingQuery->when($request->club_id, function ($query) use ($request) {
+        //     $query->where(function ($q) use ($request) {
+        //         $q->whereHas('firstClub', function ($q1) use ($request) {
+        //             $q1->where('id', $request->club_id);
+        //         })->orWhereHas('secoundClub', function ($q2) use ($request) {
+        //             $q2->where('id', $request->club_id);
+        //         });
+        //     });
+        // });
 
         $scheduleTrainingQuery->when($request->stadium_id, function ($query) use ($request) {
             $query->whereHas('stadium', function ($q) use ($request) {
@@ -133,8 +133,8 @@ class ScheduleTrainingController extends Controller
 
     public function listTrainings(Request $request)
     {
-        $orderByColumn = 'created_at';
-        $orderByDirection = 'desc';
+        $orderByColumn = 'schedule_date';
+        $orderByDirection = 'asc';
 
         if ($request->has('sort')) {
             $orderByDirection = $request->input('sort') === 'asc' ? 'asc' : 'desc';
@@ -192,15 +192,15 @@ class ScheduleTrainingController extends Controller
             }
         });
 
-        $scheduleTrainingQuery->when($request->club_id, function ($query) use ($request) {
-            $query->where(function ($q) use ($request) {
-                $q->whereHas('firstClub', function ($q1) use ($request) {
-                    $q1->where('id', $request->club_id);
-                })->orWhereHas('secoundClub', function ($q2) use ($request) {
-                    $q2->where('id', $request->club_id);
-                });
-            });
-        });
+        // $scheduleTrainingQuery->when($request->club_id, function ($query) use ($request) {
+        //     $query->where(function ($q) use ($request) {
+        //         $q->whereHas('firstClub', function ($q1) use ($request) {
+        //             $q1->where('id', $request->club_id);
+        //         })->orWhereHas('secoundClub', function ($q2) use ($request) {
+        //             $q2->where('id', $request->club_id);
+        //         });
+        //     });
+        // });
 
         $scheduleTrainingQuery->when($request->stadium_id, function ($query) use ($request) {
             $query->whereHas('stadium', function ($q) use ($request) {

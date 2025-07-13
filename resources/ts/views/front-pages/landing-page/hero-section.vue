@@ -8,6 +8,10 @@ import { useTheme } from 'vuetify'
 import heroElementsImgDark from '@images/front-pages/landing-page/hero-elements-dark.png'
 import heroElementsImgLight from '@images/front-pages/landing-page/hero-elements-light.png'
 
+const detail = ref<any>([])
+const loading = ref(true)
+const error = ref<string | null>(null)
+
 const theme = useTheme()
 
 const heroElementsImg = useGenerateImageVariant(heroElementsImgLight, heroElementsImgDark)
@@ -26,6 +30,24 @@ const translateMouse = computed(() => {
   return { transform: 'perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)' }
 })
 
+const fetchSlideHome = async () => {
+  try {
+    const response = await $api(`company/slide_home`, {
+      method: 'GET'
+    })
+
+    detail.value = response.data    
+  } catch (err: any) {
+    error.value = err.message || 'Gagal memuat slide home'
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchSlideHome()
+})
+
 const colors = [
   'indigo',
   'warning',
@@ -40,6 +62,10 @@ const slides = [
   'Fourth',
   'Fifth',
 ]
+
+const slideImages = computed(() => {
+  return detail.value.flatMap(item => item.slide_home || [])
+})
 </script>
 
 <template>
@@ -48,24 +74,30 @@ const slides = [
     :style="{ background: 'rgb(var(--v-theme-surface))' }"
   >
     <v-carousel
-      height="900"
+      height="800"
       show-arrows="hover"
       cycle
       hide-delimiter-background
     >
       <v-carousel-item
-        v-for="(slide, i) in slides"
+        v-for="(img, i) in slideImages"
         :key="i"
       >
         <v-sheet
-          :color="colors[i]"
+          class="d-flex justify-center align-center"
+          color="transparent"
           height="100%"
         >
-          <div class="d-flex fill-height justify-center align-center">
-            <div class="text-h2">
-              {{ slide }} Slide
-            </div>
-          </div>
+          <v-img
+            :src="img.url"
+            height="100%"
+            width="100%"
+            max-height="100%"
+            max-width="1000px"
+            style="object-fit: contain"
+            class="rounded-lg"
+            contain
+          />
         </v-sheet>
       </v-carousel-item>
     </v-carousel>

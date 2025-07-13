@@ -1,4 +1,3 @@
-// Frontend Edit Script
 <script lang="ts" setup>
 import MediaEditable from '@/views/dashboards/media/MediaEditable.vue';
 import type { MediaData } from '@/views/dashboards/media/types';
@@ -17,9 +16,7 @@ const snackbarColor = ref<'success' | 'error'>('success')
 const mediaData = ref<MediaData>({
   id: 0,
   code: '',
-  name: '',
   title: '',
-  hashtag: '',
   description: '',
   link: '',
   start_date: '',
@@ -40,7 +37,13 @@ const fetchMedia = async () => {
         ? mediaResponse.files
             .filter((file: any) => file.type === 'document_media')
             .sort((a: any, b: any) => a.sort_order - b.sort_order)
-            .map((file: any) => file.path) 
+            .map((file: any) => ({
+              id: file.id,
+              path: file.path,
+              url: file.path, // Make sure we have url property
+              original_name: file.original_name,
+              name: file.name
+            }))
         : []
     };
    
@@ -59,14 +62,21 @@ const handleSubmit = async () => {
   try {        
     const formData = new FormData();
     formData.append('_method', 'PUT');
-    formData.append('name', mediaData.value.name);
+    formData.append('type_media', mediaData.value.type_media);
     formData.append('title', mediaData.value.title);
-    formData.append('hashtag', mediaData.value.hashtag);
     formData.append('description', mediaData.value.description);
     formData.append('link', mediaData.value.link);
     formData.append('start_date', mediaData.value.start_date);
     formData.append('end_date', mediaData.value.end_date);
     
+    // Add removed media IDs
+    if (mediaData.value.removed_media_ids && mediaData.value.removed_media_ids.length > 0) {
+      mediaData.value.removed_media_ids.forEach((id, index) => {
+        formData.append(`removed_media_ids[${index}]`, id.toString());
+      });
+    }
+    
+    // Add new files only
     if (mediaData.value.document_media && Array.isArray(mediaData.value.document_media)) {
       const newFiles = mediaData.value.document_media.filter(file => file instanceof File);
       newFiles.forEach((file, index) => {
@@ -74,10 +84,6 @@ const handleSubmit = async () => {
           formData.append(`document_media[${index}]`, file);
         }
       });
-      
-      if (newFiles.length > 0) {
-        formData.append('replace_files', 'true');
-      }
     }
     
     const res = await $api(`media/${mediaId}`, {

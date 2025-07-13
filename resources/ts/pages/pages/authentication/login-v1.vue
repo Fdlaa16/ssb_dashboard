@@ -12,13 +12,68 @@ definePage({
   },
 })
 
-const form = ref({
+const router = useRouter()
+const isFlatSnackbarVisible = ref(false)
+const snackbarMessage = ref('')
+const snackbarColor = ref<'success' | 'error'>('success')
+
+const rulesPassword = {
+  required: (value: string) => !!value || 'Password harus diisi',
+  minLength: (value: string) => value.length >= 8 || 'Minimal 8 karakter',
+}
+
+const rulesConfirmPassword = {
+  required: (value: string) => !!value || 'Konfirmasi password harus diisi',
+  sameAsPassword: (value: string) => value === localData.value.password || 'Konfirmasi password tidak cocok',
+}
+
+
+const localData = ref({
   email: '',
   password: '',
   remember: false,
 })
 
 const isPasswordVisible = ref(false)
+
+const onSubmit = async () => {
+  const formData = new FormData()
+  formData.append('email', localData.value.email)
+  formData.append('password', localData.value.password)
+
+  try {
+    const response = await $api('/login', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const role = response.role
+
+    snackbarMessage.value = 'Login Berhasil!';
+    snackbarColor.value = 'success';
+    isFlatSnackbarVisible.value = true;
+
+    if (role === 'user') {
+      router.push({ name: 'front-pages-landing-page' })
+    } else if (role === 'admin') {
+      router.push({ name: 'dashboards-ecommerce' })
+    }
+
+  } catch (err: any) {
+    const errors = err?.data?.errors
+
+    if (err?.status === 422 && errors) {
+      const messages = Object.values(errors).flat()
+      snackbarMessage.value = 'Validasi gagal: ' + messages.join(', ')
+    } else {
+      snackbarMessage.value = 'Gagal login: ' + (err?.message || 'Unknown error')
+    }
+
+    snackbarColor.value = 'error'
+    isFlatSnackbarVisible.value = true
+  }
+}
+
 </script>
 
 <template>
@@ -65,12 +120,12 @@ const isPasswordVisible = ref(false)
         </VCardText>
 
         <VCardText>
-          <VForm @submit.prevent="() => {}">
+          <VForm @submit.prevent="() => {onSubmit()}">
             <VRow>
               <!-- email -->
               <VCol cols="12">
                 <AppTextField
-                  v-model="form.email"
+                  v-model="localData.email"
                   autofocus
                   label="Email or Username"
                   type="email"
@@ -81,7 +136,7 @@ const isPasswordVisible = ref(false)
               <!-- password -->
               <VCol cols="12">
                 <AppTextField
-                  v-model="form.password"
+                  v-model="localData.password"
                   label="Password"
                   placeholder="············"
                   :type="isPasswordVisible ? 'text' : 'password'"
@@ -93,7 +148,7 @@ const isPasswordVisible = ref(false)
                 <!-- remember me checkbox -->
                 <div class="d-flex align-center justify-space-between flex-wrap my-6">
                   <VCheckbox
-                    v-model="form.remember"
+                    v-model="localData.remember"
                     label="Remember me"
                   />
 
@@ -152,6 +207,16 @@ const isPasswordVisible = ref(false)
       </VCard>
     </div>
   </div>
+
+  <VSnackbar
+    v-model="isFlatSnackbarVisible"
+    :color="snackbarColor"
+    location="bottom start"
+    variant="flat"
+    timeout="3000"
+  >
+    {{ snackbarMessage }}
+  </VSnackbar>
 </template>
 
 <style lang="scss">

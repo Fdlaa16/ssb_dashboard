@@ -4,6 +4,24 @@ const isConfirmPasswordVisible = ref(false)
 const smsVerificationNumber = ref('+1(968) 819-2547')
 const isTwoFactorDialogOpen = ref(false)
 
+const loading = ref(false)
+const error = ref<string | null>(null)
+const isFlatSnackbarVisible = ref(false)
+const snackbarMessage = ref('')
+const snackbarColor = ref<'success' | 'error'>('success')
+
+interface UserData {
+  id: number
+  new_password: string
+  confirm_password: string
+}
+
+const userData = ref<UserData>({
+  id: 0,
+  new_password: '',
+  confirm_password: ''
+})
+
 // Recent devices Headers
 const recentDeviceHeader = [
   { title: 'BROWSER', key: 'browser' },
@@ -47,6 +65,77 @@ const recentDevices = [
   },
 
 ]
+
+const rulesPassword = {
+  required: (value: string) => !!value || 'Password harus diisi',
+  minLength: (value: string) => value.length >= 8 || 'Minimal 8 karakter',
+}
+
+const rulesConfirmPassword = {
+  required: (value: string) => !!value || 'Konfirmasi password harus diisi',
+  sameAsPassword: (value: string) => value === userData.value.new_password || 'Konfirmasi password tidak cocok',
+}
+
+const fetchPlayer = async () => {
+  // if (!props.playerId) return
+
+  loading.value = true
+  error.value = null
+
+  try {
+    const res = await $api(`player/2/edit`)
+    userData.value = res.data
+
+  } catch (err: any) {
+    error.value = err.message || 'Gagal memuat data'
+
+    snackbarMessage.value = error.value
+    snackbarColor.value = 'error'
+    isFlatSnackbarVisible.value = true
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchPlayer()
+})
+
+const updatePassword = async () => {
+  // if (!props.playerId) return
+
+  loading.value = true
+
+  try {
+    const formData = new FormData()
+    formData.append('_method', 'PUT')
+
+    // Basic data
+    formData.append('new_password', userData.value.new_password ?? '')
+    formData.append('confirm_password', userData.value.confirm_password ?? '')
+
+    const res = await $api(`company/player/password-update/2`, {
+      method: 'POST',
+      body: formData,
+    })
+
+    snackbarMessage.value = 'Password Berhasil Diperbarui!'
+    snackbarColor.value = 'success'
+    isFlatSnackbarVisible.value = true
+  } catch (err: any) {
+    const errors = err?.data?.errors
+
+    if (err?.status === 422 && errors) {
+      const messages = Object.values(errors).flat()
+      snackbarMessage.value = 'Validasi gagal: ' + messages.join(', ')
+    } else {
+      snackbarMessage.value = 'Gagal mengirim data: ' + (err?.message || 'Unknown error')
+    }
+
+    snackbarColor.value = 'error'
+    isFlatSnackbarVisible.value = true
+  }
+}
 </script>
 
 <template>
@@ -55,27 +144,21 @@ const recentDevices = [
       <!-- 👉 Change password -->
       <VCard title="Change Password">
         <VCardText>
-          <VAlert
-            closable
-            variant="tonal"
-            color="warning"
-            class="mb-4"
-            title="Ensure that these requirements are met"
-            text="Minimum 8 characters long, uppercase & symbol"
-          />
-
-          <VForm @submit.prevent="() => { }">
+          <VForm @submit.prevent="() => { updatePassword() }">
             <VRow>
               <VCol
                 cols="12"
                 md="6"
               >
                 <AppTextField
+                  v-model="userData.new_password"
                   label="New Password"
                   placeholder="············"
                   :type="isNewPasswordVisible ? 'text' : 'password'"
+                  autocomplete="password"
                   :append-inner-icon="isNewPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
                   @click:append-inner="isNewPasswordVisible = !isNewPasswordVisible"
+                  :rules="[rulesPassword.required, rulesPassword.minLength]"
                 />
               </VCol>
               <VCol
@@ -83,12 +166,14 @@ const recentDevices = [
                 md="6"
               >
                 <AppTextField
-                  label="Confirm Password"
-                  autocomplete="confirm-password"
+                  v-model="userData.confirm_password"
+                  label="Konfirmasi Password"
                   placeholder="············"
                   :type="isConfirmPasswordVisible ? 'text' : 'password'"
+                  autocomplete="confirm-password"
                   :append-inner-icon="isConfirmPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
                   @click:append-inner="isConfirmPasswordVisible = !isConfirmPasswordVisible"
+                  :rules="[rulesConfirmPassword.required, rulesConfirmPassword.sameAsPassword]"
                 />
               </VCol>
 
@@ -102,72 +187,6 @@ const recentDevices = [
         </VCardText>
       </VCard>
     </VCol>
-
-    <VCol cols="12">
-      <!-- 👉 Two step verification -->
-      <VCard
-        title="Two-steps verification"
-        subtitle="Keep your account secure with authentication step."
-      >
-        <VCardText>
-          <div class="text-h6 mb-1">
-            SMS
-          </div>
-          <AppTextField placeholder="+1(968) 819-2547">
-            <template #append>
-              <IconBtn color="secondary">
-                <VIcon
-                  icon="tabler-edit"
-                  size="22"
-                />
-              </IconBtn>
-              <IconBtn color="secondary">
-                <VIcon
-                  icon="tabler-user-plus"
-                  size="22"
-                />
-              </IconBtn>
-            </template>
-          </AppTextField>
-
-          <p class="mb-0 mt-4">
-            Two-factor authentication adds an additional layer of security to your account by requiring more than just a password to log in. <a
-              href="javascript:void(0)"
-              class="text-decoration-none"
-            >Learn more</a>.
-          </p>
-        </VCardText>
-      </VCard>
-    </VCol>
-
-    <VCol cols="12">
-      <!-- 👉 Recent devices -->
-
-      <VCard title="Recent devices">
-        <VDivider />
-        <VDataTable
-          :items="recentDevices"
-          :headers="recentDeviceHeader"
-          hide-default-footer
-          class="text-no-wrap"
-        >
-          <template #item.browser="{ item }">
-            <div class="d-flex align-center gap-x-4">
-              <VIcon
-                :icon="item.icon"
-                :color="item.color"
-                :size="22"
-              />
-              <div class="text-body-1 text-high-emphasis">
-                {{ item.browser }}
-              </div>
-            </div>
-          </template>
-          <!-- TODO Refactor this after vuetify provides proper solution for removing default footer -->
-          <template #bottom />
-        </VDataTable>
-      </VCard>
-    </VCol>
   </VRow>
 
   <!-- 👉 Enable One Time Password Dialog -->
@@ -175,4 +194,14 @@ const recentDevices = [
     v-model:is-dialog-visible="isTwoFactorDialogOpen"
     :sms-code="smsVerificationNumber"
   />
+
+  <VSnackbar
+    v-model="isFlatSnackbarVisible"
+    :color="snackbarColor"
+    location="bottom start"
+    variant="flat"
+    timeout="3000"
+  >
+    {{ snackbarMessage }}
+  </VSnackbar>
 </template>

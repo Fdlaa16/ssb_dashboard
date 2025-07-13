@@ -40,7 +40,6 @@ const getScheduleTrainingQuery = async () => {
     logisticData.value = trainings.map((item: any) => ({
       icon: 'tabler-calendar-event',
       color: 'primary',
-      title: `${item.first_club.name} vs ${item.secound_club.name}`,
       value: formatTrainingTime(item.schedule_date, item.schedule_start_at),
       change: 0,
       isHover: false,
@@ -82,6 +81,16 @@ onMounted(() => {
 watch(selectedTraining, () => {
   getScheduleTrainingQuery()
 })
+
+function formatIndoDate(dateStr: string): string {
+  const date = new Date(dateStr)
+  return new Intl.DateTimeFormat('id-ID', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  }).format(date)
+}
 </script>
 
 <template>
@@ -90,8 +99,8 @@ watch(selectedTraining, () => {
       <VRow class="align-center my-6">
         <VCol>
           <VChip label color="primary" size="small">Pelatihan terdekat</VChip>
-          <h4 v-if="selectedTraining == 'upcoming'" class="text-h4 mt-2 mb-1">Jadwal Sepak Bola Mendatang</h4>
-          <h4 v-else class="text-h4 mt-2 mb-1">Jadwal Sepak Bola Sebelumnya</h4>
+          <h4 v-if="selectedTraining == 'upcoming'" class="text-h4 mt-2 mb-1">Jadwal Latihan Sepak Bola Mendatang</h4>
+          <h4 v-else class="text-h4 mt-2 mb-1">Jadwal Latihan Sepak Bola Sebelumnya</h4>
           <p class="text-body-1 mb-0">Simak latihan sepak bola terdekat dan hasilnya!</p>
         </VCol>
 
@@ -129,50 +138,31 @@ watch(selectedTraining, () => {
         @mouseleave="data.isHover = false"
       >
         <VCardText>
+          <div class="text-center text-caption mb-8 text-grey"> 
+            
+          </div>
           <VRow class="align-center justify-space-between">
+
             <VCol class="text-center" cols="4">
-              <VAvatar size="80" variant="flat" rounded="lg" class="mb-2">
-                <img
-                  :src="data.first_club.profile_club.url"
-                  alt="Club A"
-                  style="width: 100%; height: 100%; object-fit: contain"
-                />
-              </VAvatar>
-              <h5 class="text-h6 font-weight-bold">
-                {{ data.first_club.name }}
-              </h5>
+              🗓️ {{ formatIndoDate(data.schedule_date) }}
             </VCol>
 
             <VCol class="text-center" cols="4">
-              <div class="text-h4 font-weight-bold">
-                {{ data.first_club_score ?? '0' }} : {{ data.secound_club_score ?? '0' }}
-              </div>
-              <VChip
-                color="grey-lighten-2"
-                size="small"
-                class="mt-1"
-                v-if="data.first_club_score !== null && data.secound_club_score !== null"
-              >
-                FT
-              </VChip>
+              <img
+                src="/storage/logo/LOGOSSB.png"
+                alt="Logo SSB"
+                style="height: 90px;"
+                class="me-2"
+              />
+             
             </VCol>
 
             <VCol class="text-center" cols="4">
-              <VAvatar size="80" variant="flat" rounded="lg" class="mb-2">
-                <img
-                  :src="data.secound_club.profile_club.url"
-                  alt="Club B"
-                  style="width: 100%; height: 100%; object-fit: contain"
-                />
-              </VAvatar>
-              <h5 class="text-h6 font-weight-bold">
-                {{ data.secound_club.name }}
-              </h5>
+              ⏰ {{ data.schedule_start_at }}
             </VCol>
           </VRow>
-
-          <div class="text-center text-caption mt-2 text-grey">
-            📍 {{ data.stadium.name }} • 🗓️ {{ data.schedule_date }} • ⏰ {{ data.schedule_start_at }}
+          <div class="text-center mt-4">
+              📍 {{ data.stadium.name }} - {{ data.stadium.area }}
           </div>
         </VCardText>
       </VCard>

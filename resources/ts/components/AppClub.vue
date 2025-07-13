@@ -86,9 +86,11 @@ watch(selectedMatch, () => {
     <div class="our-team pa-">
       <VRow class="align-center my-6">
         <VCol>
-          <VChip label color="primary" size="small">Media Sepakbola Terbaru</VChip>
-          <h4  class="text-h4 mt-2 mb-1">Sorotan dan Laporan Sepak Bola Terbaru</h4>
-          <p class="text-body-1 mb-0">Tetap terinformasi dengan berita sepak bola terkini, cuplikan pertandingan, wawancara eksklusif, dan analisis ahli dari seluruh lapangan.</p>
+          <VChip label color="primary" size="small">Daftar Klub</VChip>
+          <h4 class="text-h4 mt-2 mb-1">Klub Sepak Bola Terdaftar</h4>
+          <p class="text-body-1 mb-0">
+            Jelajahi daftar klub sepak bola yang terdaftar dalam sistem kami. Temukan informasi singkat mengenai masing-masing klub yang aktif berpartisipasi.
+          </p>
         </VCol>
       </VRow>
 
@@ -229,7 +231,7 @@ watch(selectedMatch, () => {
 
 .media-img {
   width: 100%;
-  height: 200px;
+  height: 340px;
   object-fit: cover;
 }
 

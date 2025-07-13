@@ -78,12 +78,11 @@ onBeforeUnmount(() => {
                     v-if="profileClubPreview"
                     :src="profileClubPreview"
                     alt="Preview Profile Club"
-                    style="width: 30%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); margin-bottom: 1rem;"
+                    style="width: 30%; border-radius: 8px; margin-bottom: 1rem;"
                   />
 
                   <VFileInput
                     v-model="localData.profile_club"
-                    :rules="rules"
                     label="Ganti Foto"
                     accept="image/png, image/jpeg, image/bmp"
                     density="comfortable"
@@ -91,7 +90,7 @@ onBeforeUnmount(() => {
                   
                   <AppTextField
                     v-model="localData.name"
-                    label="name"
+                    label="Name"
                     placeholder="Contoh: Nama Club"
                   />
                 </VCol>

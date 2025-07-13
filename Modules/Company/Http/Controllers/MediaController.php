@@ -29,15 +29,13 @@ class MediaController extends Controller
                 'document_media',
             ])
             ->whereDate('start_date', '<=', now())
-            ->whereDate('end_date', '>=', now())
-            ->withTrashed();
+            ->whereDate('end_date', '>=', now());
 
         $mediasQuery->when(!empty($request->search), function ($q) use ($request) {
             $q->where(function ($q) use ($request) {
                 $q->where('created_at', 'like', '%' . $request->search . '%')
-                    ->orWhere('name', 'like', '%' . $request->search . '%')
+                    ->orWhere('type_media', 'like', '%' . $request->search . '%')
                     ->orWhere('title', 'like', '%' . $request->search . '%')
-                    ->orWhere('hashtag', 'like', '%' . $request->search . '%')
                     ->orWhere('description', 'like', '%' . $request->search . '%')
                     ->orWhere('link', 'like', '%' . $request->search . '%');
             });
@@ -56,6 +54,10 @@ class MediaController extends Controller
                     break;
             }
         });
+
+        if ($request->filled('type')) {
+            $mediasQuery->where('type_media', $request->type);
+        }
 
         if ($request->filled('from_date')) {
             $mediasQuery->where('created_at', '>=', Helper::formatDate($request->from_date, 'Y-m-d') . ' 00:00:00');

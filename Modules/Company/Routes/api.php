@@ -7,6 +7,7 @@ use Modules\Company\Http\Controllers\MediaController;
 use Modules\Company\Http\Controllers\PlayerController;
 use Modules\Company\Http\Controllers\ScheduleMatchController;
 use Modules\Company\Http\Controllers\ScheduleTrainingController;
+use Modules\Company\Http\Controllers\SlideHomeController;
 use Modules\Company\Http\Controllers\StandingController;
 
 /*
@@ -35,6 +36,8 @@ Route::prefix('company')->group(function () {
     Route::put('player/{id}/active', [PlayerController::class, 'active'])->name('player.active');
     Route::put('player/{id}/approve', [PlayerController::class, 'approve'])->name('player.approve');
     Route::put('player/{id}/reject', [PlayerController::class, 'reject'])->name('player.reject');
+    Route::put('player/profile-update/{id}', [PlayerController::class, 'profileUpdate'])->name('player.profile-update');
+    Route::put('player/password-update/{id}', [PlayerController::class, 'passwordUpdate'])->name('player.password-update');
 
     Route::get('club', [ClubController::class, 'index'])->name('club.index');
     Route::get('club/create', [ClubController::class, 'create'])->name('club.create');
@@ -63,6 +66,15 @@ Route::prefix('company')->group(function () {
 
     Route::get('nearest-trainings', [ScheduleTrainingController::class, 'nearestTrainings'])->name('nearest-trainings.index');
     Route::get('list-trainings', [ScheduleTrainingController::class, 'listTrainings'])->name('list-trainings.index');
+
+    Route::get('slide_home', [SlideHomeController::class, 'index'])->name('slide_home.index');
+    Route::get('slide_home/create', [SlideHomeController::class, 'create'])->name('slide_home.create');
+    Route::post('slide_home/store', [SlideHomeController::class, 'store'])->name('slide_home.store');
+    Route::get('slide_home/{id}', [SlideHomeController::class, 'show'])->name('slide_home.show');
+    Route::get('slide_home/{id}/edit', [SlideHomeController::class, 'edit'])->name('slide_home.edit');
+    Route::put('slide_home/{id}', [SlideHomeController::class, 'update'])->name('slide_home.update');
+    Route::delete('slide_home/{id}', [SlideHomeController::class, 'destroy'])->name('slide_home.destroy');
+    Route::put('slide_home/{id}/active', [SlideHomeController::class, 'active'])->name('slide_home.active');
 
     Route::get('schedule-match', [ScheduleMatchController::class, 'index'])->name('schedule-match.index');
     Route::get('schedule-match/create', [ScheduleMatchController::class, 'create'])->name('schedule-match.create');

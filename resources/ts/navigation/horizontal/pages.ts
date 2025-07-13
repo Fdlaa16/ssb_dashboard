@@ -34,6 +34,8 @@ export default [
             title: 'Login',
             children: [
               { title: 'Login v1', to: 'pages-authentication-login-v1', target: '_blank' },
+              { title: 'Login v1 Admin', to: 'pages-authentication-login-v1-admin', target: '_blank' },
+              { title: 'Login v1 Company', to: 'pages-authentication-login-v1-company', target: '_blank' },
               { title: 'Login v2', to: 'pages-authentication-login-v2', target: '_blank' },
             ],
           },

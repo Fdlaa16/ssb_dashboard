@@ -8,7 +8,7 @@ const router = useRouter()
 const route = useRoute()
 
 const searchQuery = ref('')
-const selectedClub = ref('')
+// const selectedClub = ref('')
 const selectedStatus = ref('')
 const selectedSort = ref('')
 
@@ -53,7 +53,6 @@ const headers = [
   { title: 'Height (cm)', key: 'height' },
   { title: 'Weight (kg)', key: 'weight' },
   { title: 'Back Number', key: 'back_number' },
-  { title: 'Club', key: 'club' },
   { title: 'Status', key: 'status' },
   { title: 'Action', key: 'action', sortable: false },
 ]
@@ -78,7 +77,7 @@ async function fetchPlayer() {
       method: 'GET',
       params: {
         search: searchQuery.value,
-        club_id: selectedClub.value,
+        // club_id: selectedClub.value,
         status: selectedStatus.value,
         sort: selectedSort.value,
       },
@@ -283,7 +282,7 @@ function getQueryParam(param: LocationQueryValue | LocationQueryValue[] | undefi
 
 onMounted(() => {
   searchQuery.value = getQueryParam(route.query.search)
-  selectedClub.value = getQueryParam(route.query.club_id)
+  // selectedClub.value = getQueryParam(route.query.club_id)
   selectedStatus.value = getQueryParam(route.query.status)
   selectedSort.value = getQueryParam(route.query.sort)
 
@@ -292,12 +291,12 @@ onMounted(() => {
   fetchSports()
 })
 
-watch([searchQuery, selectedClub, selectedStatus, selectedSort], () => {
+watch([searchQuery, selectedStatus, selectedSort], () => {
   router.replace({
     query: {
       ...route.query,
       search: searchQuery.value || undefined,
-      club_id: selectedClub.value || undefined,
+      // club_id: selectedClub.value || undefined,
       status: selectedStatus.value || undefined,
       sort: selectedSort.value || undefined,
     },
@@ -365,21 +364,7 @@ watch([searchQuery, selectedClub, selectedStatus, selectedSort], () => {
           <VRow>
             <VCol
               cols="12"
-              sm="4"
-            >
-              <AppSelect
-                v-model="selectedClub"
-                :items="clubs"
-                placeholder="Club"
-                clearable
-                clear-icon="tabler-x"
-                single-line
-              />
-            </VCol>
-
-            <VCol
-              cols="12"
-              sm="4"
+              sm="6"
             >
               <AppSelect
                 v-model="selectedStatus"
@@ -399,7 +384,7 @@ watch([searchQuery, selectedClub, selectedStatus, selectedSort], () => {
 
             <VCol
               cols="12"
-              sm="4"
+              sm="6"
             >
               <AppSelect
                 v-model="selectedSort"
@@ -423,7 +408,7 @@ watch([searchQuery, selectedClub, selectedStatus, selectedSort], () => {
           <div style="inline-size: 15.625rem;">
             <AppTextField
                 v-model="searchQuery"
-                placeholder="Search User"
+                placeholder="Search Player"
             />
           </div>
           <VSpacer />
@@ -483,13 +468,7 @@ watch([searchQuery, selectedClub, selectedStatus, selectedSort], () => {
           </template>
 
           <template #item.back_number="{ item }">
-            <div class="text-body-1">{{ item.club_players[0]?.back_number || '-' }}</div>
-          </template>
-
-          <template #item.club="{ item }">
-            <div class="text-body-1">
-              {{ item.club_players[0]?.club?.name || '-' }}
-            </div>
+            <div class="text-body-1">{{ item.back_number || '-' }}</div>
           </template>
 
           <template #item.status="{ item }">
@@ -508,7 +487,7 @@ watch([searchQuery, selectedClub, selectedStatus, selectedSort], () => {
           <template #item.action="{ item }">
             <div class="d-flex gap-x-2">
               <VBtn
-                v-if="!item.deleted_at && item.status !== 0"
+                v-if="!item.deleted_at"
                 icon
                 size="small"
                 color="primary"

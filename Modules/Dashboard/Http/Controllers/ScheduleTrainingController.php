@@ -39,14 +39,6 @@ class ScheduleTrainingController extends Controller
             $q->where('created_at', 'like', '%' . $request->search . '%')
                 ->orWhere('schedule_date', 'like', '%' . $request->search . '%')
                 ->orWhere('schedule_start_at', 'like', '%' . $request->search . '%')
-                ->orWhere('schedule_end_at', 'like', '%' . $request->search . '%')
-                ->orWhere('score', 'like', '%' . $request->search . '%')
-                ->orWhereHas('firstClub', function ($user) use ($request) {
-                    $user->where('name', 'like', '%' . $request->search . '%');
-                })
-                ->orWhereHas('secoundClub', function ($user) use ($request) {
-                    $user->where('name', 'like', '%' . $request->search . '%');
-                })
                 ->orWhereHas('stadium', function ($user) use ($request) {
                     $user->where('name', 'like', '%' . $request->search . '%');
                 });
@@ -64,16 +56,6 @@ class ScheduleTrainingController extends Controller
                 default:
                     break;
             }
-        });
-
-        $scheduleTrainingQuery->when($request->club_id, function ($query) use ($request) {
-            $query->where(function ($q) use ($request) {
-                $q->whereHas('firstClub', function ($q1) use ($request) {
-                    $q1->where('id', $request->club_id);
-                })->orWhereHas('secoundClub', function ($q2) use ($request) {
-                    $q2->where('id', $request->club_id);
-                });
-            });
         });
 
         $scheduleTrainingQuery->when($request->stadium_id, function ($query) use ($request) {
@@ -133,22 +115,22 @@ class ScheduleTrainingController extends Controller
         try {
             $postData = $request->all();
             $rules = [
-                'first_club_id'     => 'required',
-                'secound_club_id'   => 'required',
+                // 'first_club_id'     => 'required',
+                // 'secound_club_id'   => 'required',
                 'stadium_id'        => 'required',
                 'schedule_date'     => 'required',
                 'schedule_start_at' => 'required',
-                'schedule_end_at'   => 'required',
-                'score'             => 'nullable',
+                // 'schedule_end_at'   => 'required',
+                // 'score'             => 'nullable',
             ];
 
             $messages = [
-                'first_club_id.required'     => 'Club pertama harus diisi',
-                'secound_club_id.required'   => 'Club kedua harus diisi',
+                // 'first_club_id.required'     => 'Club pertama harus diisi',
+                // 'secound_club_id.required'   => 'Club kedua harus diisi',
                 'stadium_id.required'        => 'Stadium harus diisi',
                 'schedule_date.required'     => 'Schedule Date harus diisi',
                 'schedule_start_at.required' => 'Schedule Start At harus diisi',
-                'schedule_end_at.required'   => 'Schedule End At harus diisi',
+                // 'schedule_end_at.required'   => 'Schedule End At harus diisi',
             ];
 
             $validator = Validator::make($postData, $rules, $messages);
@@ -157,13 +139,13 @@ class ScheduleTrainingController extends Controller
                 return response()->json(array('errors' => $validator->messages()->toArray()), 422);
             } else {
                 $scheduleTraining = ScheduleTraining::create([
-                    'first_club_id'     => $request->first_club_id,
-                    'secound_club_id'   => $request->secound_club_id,
+                    // 'first_club_id'     => $request->first_club_id,
+                    // 'secound_club_id'   => $request->secound_club_id,
                     'stadium_id'        => $request->stadium_id,
                     'schedule_date'     => Carbon::parse($request->schedule_date)->format('Y-m-d'),
                     'schedule_start_at' => Carbon::parse($request->schedule_start_at)->format('H:i:s'),
-                    'schedule_end_at'   => Carbon::parse($request->schedule_end_at)->format('H:i:s'),
-                    'score'             => $request->score,
+                    // 'schedule_end_at'   => Carbon::parse($request->schedule_end_at)->format('H:i:s'),
+                    // 'score'             => $request->score,
                 ]);
 
                 DB::commit();
@@ -201,8 +183,8 @@ class ScheduleTrainingController extends Controller
     {
         $schduleTrainings = ScheduleTraining::query()
             ->with([
-                'firstClub',
-                'secoundClub',
+                // 'firstClub',
+                // 'secoundClub',
                 'stadium'
             ])
             ->find($id);
@@ -227,24 +209,24 @@ class ScheduleTrainingController extends Controller
         try {
             $postData = $request->all();
             $rules = [
-                'first_club_id'         => 'required',
-                'secound_club_id'       => 'required',
+                // 'first_club_id'         => 'required',
+                // 'secound_club_id'       => 'required',
                 'stadium_id'            => 'required',
                 'schedule_date'         => 'required',
                 'schedule_start_at'     => 'required',
-                'schedule_end_at'       => 'required',
-                'first_club_score'      => 'nullable',
-                'secound_club_score'    => 'nullable',
-                'status'                => 'nullable',
+                // 'schedule_end_at'       => 'required',
+                // 'first_club_score'      => 'nullable',
+                // 'secound_club_score'    => 'nullable',
+                // 'status'                => 'nullable',
             ];
 
             $messages = [
-                'first_club_id.required'     => 'Club pertama harus diisi',
-                'secound_club_id.required'   => 'Club kedua harus diisi',
+                // 'first_club_id.required'     => 'Club pertama harus diisi',
+                // 'secound_club_id.required'   => 'Club kedua harus diisi',
                 'stadium_id.required'        => 'Stadium harus diisi',
                 'schedule_date.required'     => 'Schedule Date harus diisi',
                 'schedule_start_at.required' => 'Schedule Start At harus diisi',
-                'schedule_end_at.required'   => 'Schedule End At harus diisi',
+                // 'schedule_end_at.required'   => 'Schedule End At harus diisi',
             ];
 
             $validator = Validator::make($postData, $rules, $messages);
@@ -256,15 +238,15 @@ class ScheduleTrainingController extends Controller
             $scheduleTraining = ScheduleTraining::findOrFail($id);
 
             $scheduleTraining->update([
-                'first_club_id'         => $request->first_club_id,
-                'secound_club_id'       => $request->secound_club_id,
+                // 'first_club_id'         => $request->first_club_id,
+                // 'secound_club_id'       => $request->secound_club_id,
                 'stadium_id'            => $request->stadium_id,
                 'schedule_date'         => $request->schedule_date ? Carbon::parse($request->schedule_date)->format('Y-m-d') : null,
                 'schedule_start_at'     => $request->schedule_start_at ? Carbon::parse($request->schedule_start_at)->format('H:i:s') : null,
-                'schedule_end_at'       => $request->schedule_end_at ? Carbon::parse($request->schedule_end_at)->format('H:i:s') : null,
-                'first_club_score'      => $request->first_club_score ?? '',
-                'secound_club_score'    => $request->secound_club_score ?? '',
-                'status'                => $request->status ?? '',
+                // 'schedule_end_at'       => $request->schedule_end_at ? Carbon::parse($request->schedule_end_at)->format('H:i:s') : null,
+                // 'first_club_score'      => $request->first_club_score ?? '',
+                // 'secound_club_score'    => $request->secound_club_score ?? '',
+                // 'status'                => $request->status ?? '',
             ]);
 
             DB::commit();

@@ -26,6 +26,7 @@ declare module 'vue' {
     AppMedia: typeof import('./resources/ts/components/AppMedia.vue')['default']
     AppPlayer: typeof import('./resources/ts/components/AppPlayer.vue')['default']
     AppPricing: typeof import('./resources/ts/components/AppPricing.vue')['default']
+    AppProfile: typeof import('./resources/ts/components/AppProfile.vue')['default']
     AppScheduleMatch: typeof import('./resources/ts/components/AppScheduleMatch.vue')['default']
     AppScheduleTraining: typeof import('./resources/ts/components/AppScheduleTraining.vue')['default']
     AppSearchHeader: typeof import('./resources/ts/components/AppSearchHeader.vue')['default']

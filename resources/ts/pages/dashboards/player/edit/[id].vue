@@ -25,20 +25,16 @@ const playerData = ref<PlayerData>({
   nisn: '',
   height: '',
   weight: '',
+  back_number: '',   
+  position: '',
+  category: '',
+  is_captain: false,   
+  status: false,
   sport_players: [],
   club: {
     id: 0,
     code: '',
     name: '',
-  },
-  club_player: {
-    club_id: 0,
-    player_id: 0,
-    back_number: '',   
-    position: '',
-    category: '',
-    is_captain: false,   
-    status: false,
   },
   avatar: null,
   family_card: null,
@@ -52,17 +48,6 @@ const fetchPlayer = async () => {
   try {
     const res = await $api(`player/${playerId}/edit`);
     const data = res.data
-
-    const clubPlayer = data.club_players?.[0]
-    
-    data.club_player = clubPlayer || {
-      club_id: 0,
-      player_id: 0,
-      back_number: '',   
-      position: '',
-      is_captain: false,   
-      status: false,
-    }
 
     playerData.value = data     
   } catch (err: any) {
@@ -81,15 +66,15 @@ const handleSubmit = async () => {
     const formData = new FormData();
     formData.append('_method', 'PUT'); 
 
-    formData.append('email', playerData.value.user.email);
-    formData.append('nisn', playerData.value.nisn);
-    formData.append('name', playerData.value.name);
-    formData.append('height', playerData.value.height);
-    formData.append('weight', playerData.value.weight);
-    formData.append('club_id', playerData.value.club_player.club_id.toString())
-    formData.append('back_number', playerData.value.club_player.back_number)
-    formData.append('position', playerData.value.club_player.position)
-    formData.append('category', playerData.value.club_player.category)
+    formData.append('email', playerData.value.user.email ?? '');
+    formData.append('nisn', playerData.value.nisn ?? '');
+    formData.append('name', playerData.value.name ?? '');
+    formData.append('height', playerData.value.height ?? '');
+    formData.append('weight', playerData.value.weight ?? '');
+    // formData.append('club_id', playerData.value.club_id.toString())
+    formData.append('back_number', playerData.value.back_number ?? '');
+    formData.append('position', playerData.value.position ?? '');
+    formData.append('category', playerData.value.category ?? '');
     
     if (typeof playerData.value.user.id === 'number') {
       formData.append('user_id', playerData.value.user.id.toString());
@@ -156,4 +141,14 @@ const onSubmit = () => {
 
     </VCol>
   </VRow>
+
+  <VSnackbar
+    v-model="isFlatSnackbarVisible"
+    :color="snackbarColor"
+    location="bottom start"
+    variant="flat"
+    timeout="3000"
+  >
+    {{ snackbarMessage }}
+  </VSnackbar>
 </template>

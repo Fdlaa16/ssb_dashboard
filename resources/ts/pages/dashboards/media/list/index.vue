@@ -8,7 +8,7 @@ const router = useRouter()
 const route = useRoute()
 
 const searchQuery = ref('')
-const selectedClub = ref('')
+const selectedTypeMedia = ref('')
 const selectedSport = ref('')
 const selectedStatus = ref('')
 const selectedSort = ref('')
@@ -48,8 +48,8 @@ const widgetData = ref([
 
 const headers = [
   { title: 'ID', key: 'id' },
-  { title: 'Name', key: 'name' },
   { title: 'Title', key: 'title' },
+  { title: 'Type Media', key: 'type_media' },
   { title: 'Action', key: 'action', sortable: false },
 ]
 
@@ -67,6 +67,7 @@ async function fetchMedia() {
       method: 'GET',
       params: {
         search: searchQuery.value,
+        type_media: selectedTypeMedia.value,
         status: selectedStatus.value,
         sort: selectedSort.value,
       },
@@ -237,17 +238,19 @@ function getQueryParam(param: LocationQueryValue | LocationQueryValue[] | undefi
 
 onMounted(() => {
   searchQuery.value = getQueryParam(route.query.search)
+  selectedTypeMedia.value = getQueryParam(route.query.type_media)
   selectedStatus.value = getQueryParam(route.query.status)
   selectedSort.value = getQueryParam(route.query.sort)
 
   fetchMedia()
 })
 
-watch([searchQuery, selectedStatus, selectedSort], () => {
+watch([searchQuery, selectedTypeMedia, selectedStatus, selectedSort], () => {
   router.replace({
     query: {
       ...route.query,
       search: searchQuery.value || undefined,
+      type_media: selectedTypeMedia.value || undefined,
       status: selectedStatus.value || undefined,
       sort: selectedSort.value || undefined,
     },
@@ -311,21 +314,29 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
           <VCardTitle>Medias</VCardTitle>
         </VCardItem>
 
-        <VCardText>
+         <VCardText>
           <VRow>
             <VCol
               cols="12"
-              sm="3"
+              sm="4"
             >
-             <AppTextField
-                v-model="searchQuery"
-                placeholder="Search Media"
+              <AppSelect
+                v-model="selectedTypeMedia"
+                placeholder="Type Media"
+                clearable
+                clear-icon="tabler-x"
+                single-line
+                :items="[
+                  { title: 'Pilih Type Media', value: '' },
+                  { title: 'Documentation', value: 'documentation' },
+                  { title: 'Performance', value: 'performance' }
+                ]"
               />
             </VCol>
 
             <VCol
               cols="12"
-              sm="3"
+              sm="4"
             >
               <AppSelect
                 v-model="selectedStatus"
@@ -341,10 +352,10 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
                 ]"
               />
             </VCol>
-            
+
             <VCol
               cols="12"
-              sm="3"
+              sm="4"
             >
               <AppSelect
                 v-model="selectedSort"
@@ -359,8 +370,19 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
                 ]"
               />
             </VCol>
+          </VRow>
+        </VCardText>
 
-            <VSpacer />
+        <VDivider />
+
+        <VCardText class="d-flex flex-wrap gap-4">
+          <div style="inline-size: 15.625rem;">
+            <AppTextField
+                v-model="searchQuery"
+                placeholder="Search Media"
+            />
+          </div>
+          <VSpacer />
 
           <div class="app-user-search-filter d-flex align-center flex-wrap gap-4">
             <VBtn
@@ -370,7 +392,6 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
               Add New Media
             </VBtn>
           </div>
-          </VRow>
         </VCardText>
 
         <VDivider />

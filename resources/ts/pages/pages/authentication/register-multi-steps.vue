@@ -23,6 +23,10 @@ const isPasswordVisible = ref(false)
 const isConfirmPasswordVisible = ref(false)
 const clubs = ref<Club[]>([])
 
+const isFlatSnackbarVisible = ref(false)
+const snackbarMessage = ref('')
+const snackbarColor = ref<'success' | 'error'>('success')
+
 const rules = [
   (file: File | null) => {
     if (!file) return true
@@ -133,26 +137,38 @@ const onSubmit = async () => {
   }
 
   try {
-    const res = await $api('/company/player/store', {
+    const response = await $api('company/player/store', {
       method: 'POST',
       body: formData,
-    })
+    });
 
-    router.push('/login')
+    snackbarMessage.value = 'Registrasi Berhasil!!';
+    snackbarColor.value = 'success';
+    isFlatSnackbarVisible.value = true;
+
+    router.push({
+      name: 'pages-authentication-login-v1-company',
+      query: {
+        success: 'Registrasi Berhasil!!',
+      },
+    });
   } catch (err: any) {
-    if (err.response?.status === 422) {
-      console.error('Validasi gagal:', err.response.data.errors)
+    const errors = err?.data?.errors
+
+    if (err?.status === 422 && errors) {
+      const messages = Object.values(errors).flat()
+      snackbarMessage.value = 'Validasi gagal: ' + messages.join(', ')
     } else {
-      console.error('Gagal submit:', err)
+      snackbarMessage.value = 'Gagal mengirim data: ' + (err?.message || 'Unknown error')
     }
+
+    snackbarColor.value = 'error'
+    isFlatSnackbarVisible.value = true
   }
 }
 
 const categories = [
   { title: 'Pilih Kategori', value: '' },
-  { title: 'U-6', value: 'u6' },
-  { title: 'U-7', value: 'u7' },
-  { title: 'U-8', value: 'u8' },
   { title: 'U-9', value: 'u9' },
   { title: 'U-10', value: 'u10' },
   { title: 'U-11', value: 'u11' },
@@ -160,11 +176,6 @@ const categories = [
   { title: 'U-13', value: 'u13' },
   { title: 'U-14', value: 'u14' },
   { title: 'U-15', value: 'u15' },
-  { title: 'U-16', value: 'u16' },
-  { title: 'U-17', value: 'u17' },
-  { title: 'U-18', value: 'u18' },
-  { title: 'U-19', value: 'u19' },
-  { title: 'U-20', value: 'u20' },
 ]
 
 const positions = [
@@ -372,7 +383,7 @@ onBeforeUnmount(() => {
                   />
                 </VCol>
 
-                <VCol
+                <VCol 
                   cols="12"
                   md="6"
                 >
@@ -461,7 +472,7 @@ onBeforeUnmount(() => {
                   />
                 </VCol>
 
-                <VCol
+                <!-- <VCol
                   cols="12"
                   md="12"
                 >
@@ -474,9 +485,9 @@ onBeforeUnmount(() => {
                     clear-icon="tabler-x"
                     single-line
                   />
-                </VCol>
+                </VCol> -->
 
-                <VCol
+                <!-- <VCol
                   cols="12"
                   md="6"
                 >
@@ -486,7 +497,7 @@ onBeforeUnmount(() => {
                     placeholder="Contoh: 07"
                     maxlength="3"
                   />
-                </VCol>
+                </VCol> -->
 
                 <VCol
                   cols="12"
@@ -505,7 +516,7 @@ onBeforeUnmount(() => {
                 
                 <VCol
                   cols="12"
-                  md="12"
+                  md="6"
                 >
                   <AppSelect
                     v-model="localData.club_player.position"
@@ -621,6 +632,16 @@ onBeforeUnmount(() => {
       </VCard>
     </VCol>
   </VRow>
+
+  <VSnackbar
+    v-model="isFlatSnackbarVisible"
+    :color="snackbarColor"
+    location="bottom start"
+    variant="flat"
+    timeout="3000"
+  >
+    {{ snackbarMessage }}
+  </VSnackbar>
 </template>
 
 <style lang="scss">

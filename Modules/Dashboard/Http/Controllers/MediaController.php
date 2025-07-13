@@ -11,8 +11,10 @@ use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Symfony\Contracts\Service\Attribute\Required;
 
 class MediaController extends Controller
 {
@@ -35,12 +37,15 @@ class MediaController extends Controller
         $mediasQuery->when(!empty($request->search), function ($q) use ($request) {
             $q->where(function ($q) use ($request) {
                 $q->where('created_at', 'like', '%' . $request->search . '%')
-                    ->orWhere('name', 'like', '%' . $request->search . '%')
+                    ->orWhere('type_media', 'like', '%' . $request->search . '%')
                     ->orWhere('title', 'like', '%' . $request->search . '%')
-                    ->orWhere('hashtag', 'like', '%' . $request->search . '%')
                     ->orWhere('description', 'like', '%' . $request->search . '%')
                     ->orWhere('link', 'like', '%' . $request->search . '%');
             });
+        });
+
+        $mediasQuery->when($request->type_media, function ($query) use ($request) {
+            $query->where('type_media', $request->type_media);
         });
 
         $mediasQuery->when($request->status, function ($query, $status) {
@@ -115,22 +120,24 @@ class MediaController extends Controller
         try {
             $postData = $request->all();
             $rules = [
-                'start_date' => 'required',
-                'end_date' => 'required',
-                'name' => 'required',
+                'type_media' => 'required',
+                'start_date' => 'required_if:type_media,documentation',
+                'end_date' => 'required_if:type_media,documentation',
+                // 'name' => 'required',
                 'title' => 'required',
-                'hashtag' => 'required',
+                // 'hashtag' => 'required',
                 'description' => 'required',
                 'link' => 'required',
                 'document_media.*' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
             ];
 
             $messages = [
-                'start_date.required' => 'Tanggal mulai harus diisi',
-                'end_date.required' => 'Tanggal akhir harus diisi',
-                'name.required' => 'Nama harus diisi',
+                'type_media.required' => 'Tipe Media harus diisi',
+                'start_date.required_if' => 'Tanggal mulai harus diisi',
+                'end_date.required_if' => 'Tanggal akhir harus diisi',
+                // 'name.required' => 'Nama harus diisi',
                 'title.required' => 'Judul harus diisi',
-                'hashtag.required' => 'Hashtag harus diisi',
+                // 'hashtag.required' => 'Hashtag harus diisi',
                 'description.required' => 'Deskripsi harus diisi',
                 'link.required' => 'Link harus diisi',
                 'document_media.*.image' => 'File harus berupa gambar',
@@ -153,9 +160,9 @@ class MediaController extends Controller
                 return response()->json(['errors' => $validator->messages()->toArray()], 422);
             } else {
                 $media = Media::create([
-                    'name' => $request->name,
+                    'type_media' => $request->type_media,
                     'title' => $request->title,
-                    'hashtag' => $request->hashtag,
+                    // 'hashtag' => $request->hashtag,
                     'description' => $request->description,
                     'link' => $request->link,
                     'start_date' => Carbon::parse($request->start_date)->format('Y-m-d'),
@@ -251,22 +258,20 @@ class MediaController extends Controller
             $postData = $request->all();
 
             $rules = [
-                'start_date' => 'required',
-                'end_date' => 'required',
-                'name' => 'required',
+                'type_media' => 'required',
+                'start_date' => 'required_if:type_media,documentation',
+                'end_date' => 'required_if:type_media,documentation',
                 'title' => 'required',
-                'hashtag' => 'required',
                 'description' => 'required',
                 'link' => 'required',
                 'document_media.*' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
+                'removed_media_ids.*' => 'integer|exists:files,id',
             ];
 
             $messages = [
-                'start_date.required' => 'Tanggal mulai harus diisi',
-                'end_date.required' => 'Tanggal akhir harus diisi',
-                'name.required' => 'Nama harus diisi',
+                'start_date.required_if' => 'Tanggal mulai harus diisi',
+                'end_date.required_if' => 'Tanggal akhir harus diisi',
                 'title.required' => 'Judul harus diisi',
-                'hashtag.required' => 'Hashtag harus diisi',
                 'description.required' => 'Deskripsi harus diisi',
                 'link.required' => 'Link harus diisi',
                 'document_media.*.image' => 'File harus berupa gambar',
@@ -276,13 +281,16 @@ class MediaController extends Controller
 
             $validator = Validator::make($postData, $rules, $messages);
 
-            if ($request->hasFile('document_media')) {
-                $files = $request->file('document_media');
-                if (is_array($files) && count($files) > 5) {
-                    return response()->json([
-                        'errors' => ['document_media' => ['Maksimal 5 gambar yang dapat diupload']]
-                    ], 422);
-                }
+            // Check total files after removal and addition
+            $currentFiles = $media->files()->where('type', 'document_media')->count();
+            $removedCount = $request->has('removed_media_ids') ? count($request->removed_media_ids) : 0;
+            $newFilesCount = $request->hasFile('document_media') ? count($request->file('document_media')) : 0;
+            $totalAfterUpdate = $currentFiles - $removedCount + $newFilesCount;
+
+            if ($totalAfterUpdate > 5) {
+                return response()->json([
+                    'errors' => ['document_media' => ['Maksimal 5 gambar yang dapat diupload']]
+                ], 422);
             }
 
             if ($validator->fails()) {
@@ -290,43 +298,70 @@ class MediaController extends Controller
             }
 
             $media->update([
-                'name' => $request->name,
+                'type_media' => $request->type_media,
                 'title' => $request->title,
-                'hashtag' => $request->hashtag,
                 'description' => $request->description,
                 'link' => $request->link,
                 'start_date' => Carbon::parse($request->start_date)->format('Y-m-d'),
                 'end_date' => Carbon::parse($request->end_date)->format('Y-m-d'),
             ]);
 
+            // Handle removed files
+            if ($request->has('removed_media_ids') && !empty($request->removed_media_ids)) {
+                $filesToRemove = $media->files()
+                    ->where('type', 'document_media')
+                    ->whereIn('id', $request->removed_media_ids)
+                    ->get();
+
+                foreach ($filesToRemove as $file) {
+                    Storage::disk('public')->delete($file->path);
+                    $file->delete();
+                }
+            }
+
+            // Handle new files
             if ($request->hasFile('document_media')) {
                 $files = $request->file('document_media');
                 $fileObj = new File();
-
-                $oldFiles = $media->files()->where('type', 'document_media')->get();
-                foreach ($oldFiles as $oldFile) {
-                    Storage::disk('public')->delete($oldFile->path);
-                    $oldFile->delete();
-                }
 
                 if (!is_array($files)) {
                     $files = [$files];
                 }
 
+                // Get current max sort_order if column exists, otherwise use count
+                $maxSortOrder = 0;
+                try {
+                    // Check if sort_order column exists
+                    $maxSortOrder = $media->files()
+                        ->where('type', 'document_media')
+                        ->max('sort_order') ?? 0;
+                } catch (\Exception $e) {
+                    // If sort_order column doesn't exist, use count as fallback
+                    $maxSortOrder = $media->files()
+                        ->where('type', 'document_media')
+                        ->count();
+                }
+
                 foreach ($files as $index => $file) {
                     if ($file && $file->isValid()) {
                         $fileDir = $fileObj->getDirectory('document_media');
-                        $fileName = $fileObj->getFileName('document_media', $media->id, $file, $index);
+                        $fileName = $fileObj->getFileName('document_media', $media->id, $file, $maxSortOrder + $index + 1);
                         $file->storeAs($fileDir, $fileName, 'public');
 
-                        $media->files()->create([
+                        $fileData = [
                             'type' => 'document_media',
                             'name' => $fileName,
                             'original_name' => $file->getClientOriginalName(),
                             'extension' => $file->getClientOriginalExtension(),
                             'path' => "$fileDir$fileName",
-                            'sort_order' => $index,
-                        ]);
+                        ];
+
+                        // Only add sort_order if the column exists
+                        if (Schema::hasColumn('files', 'sort_order')) {
+                            $fileData['sort_order'] = $maxSortOrder + $index + 1;
+                        }
+
+                        $media->files()->create($fileData);
                     }
                 }
             }
@@ -344,7 +379,6 @@ class MediaController extends Controller
             ], 500);
         }
     }
-
     /**
      * Remove the specified resource from storage.
      * @param int $id

@@ -15,15 +15,15 @@ export interface Club {
   };
 }
 
-export interface ClubPlayer {
-  club_id: number | string; 
-  player_id: number;
-  back_number: string;   
-  position: string;
-  category: string; 
-  is_captain: boolean;   
-  status: boolean;
-}
+// export interface ClubPlayer {
+//   club_id: number | string; 
+//   player_id: number;
+//   back_number: string;   
+//   position: string;
+//   category: string; 
+//   is_captain: boolean;   
+//   status: boolean;
+// }
 
 export interface Sport {
   id: number;
@@ -43,9 +43,13 @@ export interface PlayerData {
   nisn: string;
   height: string;
   weight: string;
+  back_number: string;   
+  position: string;
+  category: string; 
+  is_captain: boolean;   
+  status: boolean;
   user: User; 
   club: Club;
-  club_player: ClubPlayer;
   sports?: Sport[];
   sport_players?: SportPlayer[];
   family_card?: File | { url: string; name: string };

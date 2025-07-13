@@ -1,14 +1,14 @@
 export interface ScheduleTrainingData {
   id: number; 
-  first_club_id: string;
-  secound_club_id: string;
+  // first_club_id: string;
+  // secound_club_id: string;
   stadium_id: string;
   schedule_date: string;
   schedule_start_at: string;
-  schedule_end_at: string;
-  first_club_score: string;
-  secound_club_score: string;
-  status: string;
+  // schedule_end_at: string;
+  // first_club_score: string;
+  // secound_club_score: string;
+  // status: string;
 }
 
 export interface Club {

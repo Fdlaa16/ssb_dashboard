@@ -23,6 +23,10 @@ export default [
             title: 'Stadium',
             to: 'dashboards-stadium-list',
           },
+          {
+            title: 'Slide Home',
+            to: 'dashboards-slide-home-list',
+          },
         ],
       },
     ],

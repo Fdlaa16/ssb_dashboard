@@ -45,7 +45,7 @@ const getScheduleMatchQuery = async () => {
 
       ...item
     }))
-
+    
     scheduleMatchs.value = matches
 
   } catch (err: any) {
@@ -76,14 +76,14 @@ const getScheduleTrainingQuery = async () => {
     logisticDataTraining.value = trainings.map((item: any) => ({
       icon: 'tabler-calendar-event',
       color: 'primary',
-      title: `${item.first_club.name} vs ${item.secound_club.name}`,
+      // title: `${item.first_club.name} vs ${item.secound_club.name}`,
       value: formatMatchTime(item.schedule_date, item.schedule_start_at),
       change: 0,
       isHover: false,
 
       ...item
     }))
-
+    
     scheduleTrainings.value = trainings
 
   } catch (err: any) {
@@ -100,6 +100,16 @@ const formatMatchTime = (date: string, time: string) => {
     month: 'short',
     year: 'numeric',
   }) + ' • ' + time.slice(0, 5) + ' WIB'
+}
+
+function formatIndoDate(dateStr: string): string {
+  const date = new Date(dateStr)
+  return new Intl.DateTimeFormat('id-ID', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  }).format(date)
 }
 
 const goToAllMatches = () => {
@@ -143,7 +153,7 @@ onMounted(() => {
           :key="index"
           cols="12"
           md="12"
-          sm="6"
+          sm="12"
         >
           <div>
             <VCard
@@ -197,7 +207,7 @@ onMounted(() => {
                 </VRow>
 
                 <div class="text-center text-caption mt-2 text-grey">
-                  📍 {{ data.stadium.name }} • 🗓️ {{ data.schedule_date }} • ⏰ {{ data.schedule_start_at }}
+                  📍 {{ data.stadium.name }} • 🗓️ {{ formatIndoDate(data.schedule_date) }} • ⏰ {{ data.schedule_start_at }}
                 </div>
               </VCardText>
             </VCard>
@@ -231,65 +241,44 @@ onMounted(() => {
           :key="index"
           cols="12"
           md="12"
-          sm="6"
+          sm="12"
         >
-          <div>
-            <VCard
-              class="logistics-card-statistics cursor-pointer"
-              :style="data.isHover ? `border-block-end-color: rgb(var(--v-theme-${data.color}))` : `border-block-end-color: rgba(var(--v-theme-${data.color}),0.38)`"
-              @mouseenter="data.isHover = true"
-              @mouseleave="data.isHover = false"
-            >
-              <VCardText>
-                <VRow class="align-center justify-space-between">
-                  <!-- Team 1 -->
-                  <VCol class="text-center" cols="4">
-                    <VAvatar size="80" variant="flat" rounded="lg" class="mb-2">
-                      <img
-                        :src="data.first_club.profile_club?.url"
-                        alt="Club A"
-                        style="width: 100%; height: 100%; object-fit: contain"
-                      />
-                    </VAvatar>
-                    <h5 class="text-h6 font-weight-bold">
-                      {{ data.first_club.name }}
-                    </h5>
-                  </VCol>
+          <!-- CARD latihan -->
+          <VCard
+            class="logistics-card-statistics cursor-pointer"
+            :style="data.isHover ? `border-block-end-color: rgb(var(--v-theme-${data.color}))` : `border-block-end-color: rgba(var(--v-theme-${data.color}),0.38)`"
+            @mouseenter="data.isHover = true"
+            @mouseleave="data.isHover = false"
+          >
+            <VCardText>
+              <div class="text-center text-caption mb-8 text-grey"> 
+                
+              </div>
+              <VRow class="align-center justify-space-between">
 
-                  <VCol class="text-center" cols="4">
-                    <div class="text-h4 font-weight-bold">
-                      {{ data.first_club_score ?? '0' }} : {{ data.secound_club_score ?? '0' }}
-                    </div>
-                    <VChip
-                      color="grey-lighten-2"
-                      size="small"
-                      class="mt-1"
-                      v-if="data.first_club_score !== null && data.secound_club_score !== null"
-                    >
-                      FT
-                    </VChip>
-                  </VCol>
+                <VCol class="text-center" cols="4">
+                  🗓️ {{ formatIndoDate(data.schedule_date) }}
+                </VCol>
 
-                  <VCol class="text-center" cols="4">
-                    <VAvatar size="80" variant="flat" rounded="lg" class="mb-2">
-                      <img
-                        :src="data.secound_club.profile_club?.url"
-                        alt="Club B"
-                        style="width: 100%; height: 100%; object-fit: contain"
-                      />
-                    </VAvatar>
-                    <h5 class="text-h6 font-weight-bold">
-                      {{ data.secound_club.name }}
-                    </h5>
-                  </VCol>
-                </VRow>
+                <VCol class="text-center" cols="4">
+                  <img
+                    src="/storage/logo/LOGOSSB.png"
+                    alt="Logo SSB"
+                    style="height: 90px;"
+                    class="me-2"
+                  />
+                
+                </VCol>
 
-                <div class="text-center text-caption mt-2 text-grey">
-                  📍 {{ data.stadium.name }} • 🗓️ {{ data.schedule_date }} • ⏰ {{ data.schedule_start_at }}
-                </div>
-              </VCardText>
-            </VCard>
-          </div>
+                <VCol class="text-center" cols="4">
+                  ⏰ {{ data.schedule_start_at }}
+                </VCol>
+              </VRow>
+              <div class="text-center mt-4">
+                  📍 {{ data.stadium.name }} - {{ data.stadium.area }}
+              </div>
+            </VCardText>
+          </VCard>
         </VCol>
       </VRow>
     </div>

@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('club_players', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('club_id')->nullable();
-            $table->unsignedBigInteger('player_id')->nullable();
-            $table->string('back_number')->nullable();
-            $table->string('position')->nullable();
-            $table->string('is_captain')->nullable();
-            $table->string('category')->nullable();
-            $table->boolean('status')->nullable();
+            // $table->unsignedBigInteger('club_id')->nullable();
+            // $table->unsignedBigInteger('player_id')->nullable();
+            // $table->string('back_number')->nullable();
+            // $table->string('position')->nullable();
+            // $table->string('is_captain')->nullable();
+            // $table->string('category')->nullable();
+            // $table->boolean('status')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

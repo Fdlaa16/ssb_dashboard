@@ -13,21 +13,21 @@ const snackbarColor = ref<'success' | 'error'>('success')
 const mediaData = ref<MediaData>({
   id: 0,
   code: '',
-  name: '',
+  // name: '',
   title: '',
-  hashtag: '',
+  // hashtag: '',
   description: '',
   link: '',
   start_date: '',
   end_date: '',
+  type_media: '',
   document_media: [], 
 })
 
 const handleSubmit = async () => {
   const formData = new FormData();
   formData.append('title', mediaData.value.title);
-  formData.append('name', mediaData.value.name);
-  formData.append('hashtag', mediaData.value.hashtag);
+  formData.append('type_media', mediaData.value.type_media);
   formData.append('description', mediaData.value.description);
   formData.append('link', mediaData.value.link);
   formData.append('start_date', mediaData.value.start_date);

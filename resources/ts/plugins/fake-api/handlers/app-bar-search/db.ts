@@ -152,6 +152,16 @@ export const db: DB = {
           icon: 'tabler-shirt',
           title: 'Stadium',
         },
+        {
+          url: { name: 'dashboards-slide-home-list' },
+          icon: 'tabler-shirt',
+          title: 'Slide Home',
+        },
+        {
+          url: { name: 'dashboards-slide-home-edit-id' },
+          icon: 'tabler-shirt',
+          title: 'Slide Home',
+        },
       ]
     },
     {
@@ -388,6 +398,16 @@ export const db: DB = {
           url: { name: 'pages-authentication-login-v1' },
           icon: 'tabler-login',
           title: 'Login V1',
+        },
+        {
+          url: { name: 'pages-authentication-login-v1-admin' },
+          icon: 'tabler-login',
+          title: 'Login V1 Admin',
+        },
+        {
+          url: { name: 'pages-authentication-login-v1-company' },
+          icon: 'tabler-login',
+          title: 'Login V1 Company',
         },
         {
           url: { name: 'pages-authentication-login-v2' },

@@ -60,10 +60,6 @@ const getPositionLabel = (position: string) => {
 const categories = [
   { title: 'Pilih Kategori', value: '' },
   { title: 'Tim Utama', value: 'main' },
-  { title: 'Putri', value: 'female' },
-  { title: 'U-6', value: 'u6' },
-  { title: 'U-7', value: 'u7' },
-  { title: 'U-8', value: 'u8' },
   { title: 'U-9', value: 'u9' },
   { title: 'U-10', value: 'u10' },
   { title: 'U-11', value: 'u11' },
@@ -71,11 +67,6 @@ const categories = [
   { title: 'U-13', value: 'u13' },
   { title: 'U-14', value: 'u14' },
   { title: 'U-15', value: 'u15' },
-  { title: 'U-16', value: 'u16' },
-  { title: 'U-17', value: 'u17' },
-  { title: 'U-18', value: 'u18' },
-  { title: 'U-19', value: 'u19' },
-  { title: 'U-20', value: 'u20' },
 ]
 
 const getCategoryLabel = (category: string) => {
@@ -103,170 +94,100 @@ const getCategoryLabel = (category: string) => {
         <template v-else>
           <VCard>
             <!-- Tab Navigasi -->
-            <VTabs v-model="currentTab" grow stacked>
-              <VTab value="biodata">
-                <VIcon icon="tabler-user" class="mb-2" />
-                <span>Biodata</span>
-              </VTab>
-
-              <VTab value="files">
-                <VIcon icon="tabler-file" class="mb-2" />
-                <span>Files</span>
-              </VTab>
-            </VTabs>
 
             <VCardText>
-              <VWindow v-model="currentTab">
-                <!-- Tab Biodata -->
-                <VWindowItem value="biodata">
-                 <div
-                    v-if="detail?.club_players?.[0]?.club?.profile_club"
-                    class="d-flex justify-end flex-column rounded bg-var-theme-background flex-sm-row gap-6 pa-6 mb-6"
-                    >
-                    <div class="d-flex align-center app-logo gap-4">
-                        <img
-                        v-if="detail?.club_players?.[0]?.club?.profile_club?.url"
-                        :src="getImageUrl(detail.club_players[0].club.profile_club.url)"
-                        alt="Logo Club"
-                        style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover;"
-                        />
-                        <h6 class="app-logo-title mb-0">
-                        {{ detail.club_players[0].club.name }}
-                        </h6>
-                    </div>
+              <div class="d-flex justify-end flex-column rounded bg-var-theme-background flex-sm-row gap-6 pa-6 mb-6">
+                <div class="d-flex align-center align-end app-logo">
+                  <img
+                    src="/storage/logo/LOGOSSB.png"
+                    alt="Logo SSB"
+                    style="height: 40px;"
+                    class="me-2"
+                  />
+                  <h6 class="app-logo-title">PUTRA MUDA BALARAJA</h6>
                 </div>
+              </div>
+
+              <VRow>
+                <VCol cols="4" class="d-flex flex-column align-center justify-center">
+                  <div style="width: 100%; max-width: 300px;" class="text-center justify-center">
+                    <img
+                      v-if="detail?.avatar?.url"
+                      :src="getImageUrl(detail.avatar.url)"
+                      alt="Avatar Player"
+                      style="width: 100%; margin-bottom: 1rem;"
+                    />
+                    <div v-else class="text-center text-grey">
+                      <VIcon icon="tabler-user" size="100" />
+                      <p>Tidak ada foto</p>
+                    </div>
+                  </div>
+                </VCol>
+
+                <VCol cols="8" class="text-no-wrap">
+                  <VRow>
+                    <VCol cols="4" class="text-subtitle-2 font-weight-bold">Email:</VCol>
+                    <VCol cols="8">{{ detail?.user?.email || '-' }}</VCol>
+                  </VRow>
+                  
+                  <VRow>
+                    <VCol cols="4" class="text-subtitle-2 font-weight-bold">NISN:</VCol>
+                    <VCol cols="8">{{ detail?.nisn || '-' }}</VCol>
+                  </VRow>
 
                   <VRow>
-                    <VCol cols="4" class="d-flex flex-column align-center justify-center">
-                      <div style="width: 100%; max-width: 300px;" class="text-center justify-center">
-                        <img
-                          v-if="detail?.avatar?.url"
-                          :src="getImageUrl(detail.avatar.url)"
-                          alt="Avatar Player"
-                          style="width: 100%; border-radius: 8px; margin-bottom: 1rem;"
-                        />
-                        <div v-else class="text-center text-grey">
-                          <VIcon icon="tabler-user" size="100" />
-                          <p>Tidak ada foto</p>
-                        </div>
-                      </div>
-                    </VCol>
+                    <VCol cols="4" class="text-subtitle-2 font-weight-bold">Nama Lengkap:</VCol>
+                    <VCol cols="8">{{ detail?.name || '-' }}</VCol>
+                  </VRow>
 
-                    <VCol cols="8" class="text-no-wrap">
-                      <VRow class="mb-4">
-                        <VCol cols="4" class="text-subtitle-2 font-weight-bold">Email:</VCol>
-                        <VCol cols="8">{{ detail?.user?.email || '-' }}</VCol>
-                      </VRow>
-                      
-                      <VRow class="mb-4">
-                        <VCol cols="4" class="text-subtitle-2 font-weight-bold">NISN:</VCol>
-                        <VCol cols="8">{{ detail?.nisn || '-' }}</VCol>
-                      </VRow>
+                  <VRow>
+                    <VCol cols="4" class="text-subtitle-2 font-weight-bold">Tinggi Badan:</VCol>
+                    <VCol cols="8">{{ detail?.height ? detail.height + ' cm' : '-' }}</VCol>
+                  </VRow>
 
-                      <VRow class="mb-4">
-                        <VCol cols="4" class="text-subtitle-2 font-weight-bold">Nama Lengkap:</VCol>
-                        <VCol cols="8">{{ detail?.name || '-' }}</VCol>
-                      </VRow>
+                  <VRow>
+                    <VCol cols="4" class="text-subtitle-2 font-weight-bold">Berat Badan:</VCol>
+                    <VCol cols="8">{{ detail?.weight ? detail.weight + ' kg' : '-' }}</VCol>
+                  </VRow>
 
-                      <VRow class="mb-4">
-                        <VCol cols="4" class="text-subtitle-2 font-weight-bold">Tinggi Badan:</VCol>
-                        <VCol cols="8">{{ detail?.height ? detail.height + ' cm' : '-' }}</VCol>
-                      </VRow>
+                  <!-- <VRow>
+                    <VCol cols="4" class="text-subtitle-2 font-weight-bold">Club:</VCol>
+                    <VCol cols="8">{{ detail.club?.name || '-' }}</VCol>
+                  </VRow> -->
+                  
+                  <VRow>
+                    <VCol cols="4" class="text-subtitle-2 font-weight-bold">Nomor Punggung:</VCol>
+                    <VCol cols="8">{{ detail.back_number || '-' }}</VCol>
+                  </VRow>
 
-                      <VRow class="mb-4">
-                        <VCol cols="4" class="text-subtitle-2 font-weight-bold">Berat Badan:</VCol>
-                        <VCol cols="8">{{ detail?.weight ? detail.weight + ' kg' : '-' }}</VCol>
-                      </VRow>
+                  <VRow>
+                    <VCol cols="4" class="text-subtitle-2 font-weight-bold">Kategori:</VCol>
+                    <VCol cols="8">{{ getCategoryLabel(detail.category) }}</VCol>
+                  </VRow>
+                  
+                  <VRow>
+                    <VCol cols="4" class="text-subtitle-2 font-weight-bold">Posisi:</VCol>
+                    <VCol cols="8">{{ getPositionLabel(detail.position) }}</VCol>
+                  </VRow>
 
-                      <VRow class="mb-4">
-                        <VCol cols="4" class="text-subtitle-2 font-weight-bold">Club:</VCol>
-                        <VCol cols="8">{{ detail?.club_players?.[0]?.club?.name || '-' }}</VCol>
-                      </VRow>
-                      
-                      <VRow class="mb-4">
-                        <VCol cols="4" class="text-subtitle-2 font-weight-bold">Nomor Punggung:</VCol>
-                        <VCol cols="8">{{ detail?.club_players?.[0]?.back_number || '-' }}</VCol>
-                      </VRow>
-
-                      <VRow class="mb-4">
-                        <VCol cols="4" class="text-subtitle-2 font-weight-bold">Kategori:</VCol>
-                        <VCol cols="8">{{ getCategoryLabel(detail?.club_players?.[0]?.category) }}</VCol>
-                      </VRow>
-                      
-                      <VRow class="mb-4">
-                        <VCol cols="4" class="text-subtitle-2 font-weight-bold">Posisi:</VCol>
-                        <VCol cols="8">{{ getPositionLabel(detail?.club_players?.[0]?.position) }}</VCol>
-                      </VRow>
-
-                      <VRow class="mb-4">
-                        <VCol cols="4" class="text-subtitle-2 font-weight-bold">Status:</VCol>
-                        <VCol cols="8">
-                          <VChip 
-                            :color="detail?.status === 1 ? 'success' : 'error'"
-                            size="small"
-                          >
-                            {{ detail?.status === 1 ? 'Aktif' : 'Tidak Aktif' }}
-                          </VChip>
-                        </VCol>
-                      </VRow>
-
-                      <VRow class="mb-4">
-                        <VCol cols="4" class="text-subtitle-2 font-weight-bold">Tanggal Dibuat:</VCol>
-                        <VCol cols="8">{{ formatTanggalIndonesia(detail?.created_at) }}</VCol>
-                      </VRow>
+                  <VRow>
+                    <VCol cols="4" class="text-subtitle-2 font-weight-bold">Status:</VCol>
+                    <VCol cols="8">
+                      <VChip 
+                        :color="detail?.status === 1 ? 'success' : 'error'"
+                        size="small"
+                      >
+                        {{ detail?.status === 1 ? 'Aktif' : 'Tidak Aktif' }}
+                      </VChip>
                     </VCol>
                   </VRow>
-                </VWindowItem>
 
-                <!-- Tab Files -->
-                <VWindowItem value="files">
-                  <VRow class="px-3">
-                    <VCol class="text-no-wrap">
-                      <div class="text-h6 mt-2">
-                        <h6 class="text-h6 mb-4">Kartu Keluarga</h6>
-                        <img
-                          v-if="detail?.family_card?.url"
-                          :src="getImageUrl(detail.family_card.url)"
-                          alt="Family Card"
-                          style="width: 30%; border-radius: 8px; margin-bottom: 1rem;"
-                        />
-                        <div v-else class="text-center text-grey mb-4">
-                          <VIcon icon="tabler-file-x" size="50" />
-                          <p>Tidak ada file</p>
-                        </div>
-                      </div>
-
-                      <div class="text-h6 mt-4">
-                        <h6 class="text-h6 mb-4">Rapor Terakhir</h6>
-                        <img
-                          v-if="detail?.report_grades?.url"
-                          :src="getImageUrl(detail.report_grades.url)"
-                          alt="Report Grades"
-                          style="width: 30%; border-radius: 8px; margin-bottom: 1rem;"
-                        />
-                        <div v-else class="text-center text-grey mb-4">
-                          <VIcon icon="tabler-file-x" size="50" />
-                          <p>Tidak ada file</p>
-                        </div>
-                      </div>
-
-                      <div class="text-h6 mt-4">
-                        <h6 class="text-h6 mb-4">Akte Kelahiran</h6>
-                        <img
-                          v-if="detail?.birth_certificate?.url"
-                          :src="getImageUrl(detail.birth_certificate.url)"
-                          alt="Birth Certificate"
-                          style="width: 30%; border-radius: 8px; margin-bottom: 1rem;"
-                        />
-                        <div v-else class="text-center text-grey mb-4">
-                          <VIcon icon="tabler-file-x" size="50" />
-                          <p>Tidak ada file</p>
-                        </div>
-                      </div>
-                    </VCol>
+                  <VRow>
+                    <VCol cols="4" class="text-subtitle-2 font-weight-bold">Tanggal Dibuat:</VCol>
+                    <VCol cols="8">{{ formatTanggalIndonesia(detail?.created_at) }}</VCol>
                   </VRow>
-                </VWindowItem>
-              </VWindow>
+                </VCol>
+              </VRow>
             </VCardText>
           </VCard>
         </template>

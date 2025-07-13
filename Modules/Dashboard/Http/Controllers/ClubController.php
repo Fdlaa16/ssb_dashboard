@@ -111,10 +111,14 @@ class ClubController extends Controller
             $postData = $request->all();
             $rules = [
                 'name'     => 'required',
+                'profile_club' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
             ];
 
             $messages = [
                 'name.required'     => 'Nama harus diisi',
+                'profile_club.image' => 'Profile Club harus berupa gambar',
+                'profile_club.mimes' => 'Format Profil Club harus jpeg, png, jpg, atau bmp',
+                'profile_club.max' => 'Ukuran Profile Club maksimal 2MB',
             ];
 
             $validator = Validator::make($postData, $rules, $messages);
@@ -216,10 +220,14 @@ class ClubController extends Controller
             // Validasi data
             $rules = [
                 'name'   => 'required',
+                'profile_club' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
             ];
 
             $messages = [
                 'name.required'     => 'Nama harus diisi',
+                'profile_club.image' => 'Profile Club harus berupa gambar',
+                'profile_club.mimes' => 'Format Profil Club harus jpeg, png, jpg, atau bmp',
+                'profile_club.max' => 'Ukuran Profile Club maksimal 2MB',
             ];
 
             $validator = Validator::make($request->all(), $rules, $messages);

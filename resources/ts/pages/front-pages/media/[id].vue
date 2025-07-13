@@ -24,7 +24,6 @@ const fetchMediaDetail = async () => {
 }
 
 onMounted(() => {
-  console.log('Mounted. mediaId:', mediaId.value)
   if (mediaId.value) {
     fetchMediaDetail()
   } else {
@@ -60,23 +59,37 @@ function formatTanggalIndonesia(dateString: string): string {
         </template>
 
         <template v-else>
-          <h1 class="text-h5 font-weight-bold mb-4">{{ detail?.title }}</h1>
-          <div class="text-caption text-grey mb-2">
-            {{ formatTanggalIndonesia(detail?.start_date) }}
-          </div>
+           <VCard>
+            <!-- Tab Navigasi -->
 
-          <VImg
-            :src="detail?.document_media?.url"
-            height="300"
-            cover
-            class="mb-3"
-          />
+            <VCardText>
+              <h1 class="text-h5 font-weight-bold mb-4">{{ detail?.title }}</h1>
+              <div class="text-caption text-grey mb-2">
+                {{ formatTanggalIndonesia(detail?.start_date) }}
+              </div>
+              <v-carousel
+                show-arrows="hover"
+                cycle
+                hide-delimiter-background
+              >
+                <v-carousel-item
+                  v-for="(img, i) in detail?.document_media || []"
+                  :key="i"
+                >
+                  <v-img
+                    :src="img.url"
+                    class="rounded-lg"
+                    width="100%"
+                    style="max-height: 500px; object-fit: contain"
+                    contain
+                  />
+                </v-carousel-item>
+              </v-carousel>
 
-          <div class="text-caption text-grey mb-4">
-            {{ detail?.caption || 'Tidak ada caption tersedia.' }}
-          </div>
 
-          <div class="body-1" v-html="detail?.description"></div>
+              <div class="body-1 mt-5" v-html="detail?.description"></div>
+            </VCardText>
+          </VCard>
         </template>
       </VCol>
     </VRow>

@@ -70,12 +70,20 @@ const submitForm = () => {
   emit('update:data', localData.value)
   emit('submit')
 }
+
+const filteredClubsForFirst = computed(() => {
+  return clubs.value.filter(club => club.value !== localData.value.secound_club_id)
+})
+
+const filteredClubsForSecond = computed(() => {
+  return clubs.value.filter(club => club.value !== localData.value.first_club_id)
+})
 </script>
 
 <template>
   <form @submit.prevent="$emit('submit')">
     <div class="d-flex flex-column gap-6 mb-6">
-      <VCard title="Create Schedule Match" >
+      <VCard :title="props.data.id ? 'Edit Schedule Match' : 'Create Schedule Match'">
         <VCardText>
           <VWindow>
             <VWindowItem>
@@ -112,26 +120,30 @@ const submitForm = () => {
 
                   <VRow class="justify-center align-center">
                     <VCol cols="6">
-                      <h6 class="text-h6 mb-1">Club Pertama</h6>
                       <AppSelect
                         v-model="localData.first_club_id"
-                        :items="clubs"
-                        placeholder="Club"
+                        :items="filteredClubsForFirst"
+                        item-title="title"
+                        item-value="value"
+                        placeholder="Pilih Club"
                         clearable
                         clear-icon="tabler-x"
                         single-line
+                        label="Club Pertama"
                       />
                     </VCol>
 
                     <VCol cols="6">
-                      <h6 class="text-h6 mb-1">Club Kedua</h6>
                       <AppSelect
                         v-model="localData.secound_club_id"
-                        :items="clubs"
-                        placeholder="Club"
+                        :items="filteredClubsForSecond"
+                        item-title="title"
+                        item-value="value"
+                        placeholder="Pilih Club"
                         clearable
                         clear-icon="tabler-x"
                         single-line
+                        label="Club Kedua"
                       />
                     </VCol>
                   </VRow>

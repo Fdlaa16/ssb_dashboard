@@ -1,8 +1,8 @@
 <script setup lang="ts">
 
-// const isFlatSnackbarVisible = ref(false)
-// const snackbarMessage = ref('')
-// const snackbarColor = ref<'success' | 'error'>('success')
+const isFlatSnackbarVisible = ref(false)
+const snackbarMessage = ref('')
+const snackbarColor = ref<'success' | 'error'>('success')
 
 interface Pricing {
   title?: string
@@ -21,7 +21,7 @@ const loading = ref(true)
 const error = ref<string | null>(null)
 const scheduleMatchs = ref<any[]>([])
 
-const selectedMatch = ref('')
+const selectedTypeMedia = ref('documentation')
 
 const getScheduleMatchQuery = async () => {
   loading.value = true
@@ -31,15 +31,15 @@ const getScheduleMatchQuery = async () => {
     const response = await $api('company/media', {
       method: 'GET',
       params: {
-        status: selectedMatch.value || 'upcoming',
+        type: selectedTypeMedia.value || 'documentation',
       }
     })
 
     scheduleMatchs.value = response.data
 
-    // snackbarMessage.value = 'Data berhasil dimuat!'
-    // snackbarColor.value = 'success'
-    // isFlatSnackbarVisible.value = true
+    snackbarMessage.value = 'Data berhasil dimuat!'
+    snackbarColor.value = 'success'
+    isFlatSnackbarVisible.value = true
 
   } catch (err: any) {
     error.value = err.message || 'Gagal memuat data'
@@ -62,7 +62,7 @@ const formatMatchTime = (date: string, time: string) => {
 }
 
 onMounted(() => {
-  if (!selectedMatch.value) selectedMatch.value = 'upcoming'
+  if (!selectedTypeMedia.value) selectedTypeMedia.value = 'documentation'
   
   getScheduleMatchQuery()
 })
@@ -76,7 +76,7 @@ function formatTanggalIndonesia(dateString: string): string {
   }).format(date)
 }
 
-watch(selectedMatch, () => {
+watch(selectedTypeMedia, () => {
   getScheduleMatchQuery()
 })
 </script>
@@ -85,10 +85,29 @@ watch(selectedMatch, () => {
   <VContainer id="team">
     <div class="our-team pa-">
       <VRow class="align-center my-6">
+        
+      </VRow>
+
+      <VRow class="align-center my-6">
         <VCol>
           <VChip label color="primary" size="small">Media Sepakbola Terbaru</VChip>
           <h4  class="text-h4 mt-2 mb-1">Sorotan dan Laporan Sepak Bola Terbaru</h4>
           <p class="text-body-1 mb-0">Tetap terinformasi dengan berita sepak bola terkini, cuplikan pertandingan, wawancara eksklusif, dan analisis ahli dari seluruh lapangan.</p>
+        </VCol>
+
+        <VCol class="text-end" cols="12" sm="4" md="3">
+          <AppSelect
+            v-model="selectedTypeMedia"
+            placeholder="Tipe Media"
+            clearable
+            clear-icon="tabler-x"
+            single-line
+            class="w-100"
+            :items="[
+              { title: 'Dokumentasi', value: 'documentation' },
+              { title: 'Prestasi', value: 'performance' },
+            ]"
+          />
         </VCol>
       </VRow>
 
@@ -104,7 +123,7 @@ watch(selectedMatch, () => {
             <router-link :to="{ name: 'front-pages-media-id', params: { id: String(data.id) } }">
               <VCard class="cursor-pointer" hover>
                 <VImg
-                  :src="data.document_media.url"
+                  :src="data.document_media?.[0]?.url"
                   cover
                   class="media-img"
                 />
@@ -139,7 +158,7 @@ watch(selectedMatch, () => {
     </div>    
   </VContainer>
   
-  <!-- <VSnackbar
+  <VSnackbar
     v-model="isFlatSnackbarVisible"
     :color="snackbarColor"
     location="bottom start"
@@ -147,7 +166,7 @@ watch(selectedMatch, () => {
     timeout="3000"
   >
     {{ snackbarMessage }}
-  </VSnackbar> -->
+  </VSnackbar>
 </template>
 
 

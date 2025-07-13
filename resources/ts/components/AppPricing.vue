@@ -13,25 +13,33 @@ interface Pricing {
 const props = defineProps<Pricing>()
 
 const formatRupiah = (amount: number): string => {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(amount)
+  const formatted = amount
+    .toFixed(2) 
+    .replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+    .replace('.', ',') 
+
+  return `Rp. ${formatted}`
 }
 
 const pricingPlans = [
   {
-    name: 'Anggota Aktif SSB',
-    tagLine: 'Paket pendaftaran lengkap untuk siswa baru',
+    name: 'Anggota Aktif',
+    tagLine: 'Biaya pendaftaran lengkap untuk siswa baru',
     logo: safeBoxWithGoldenCoin,
-    price: 750000,
     isPopular: true,
+    biayaMasuk: 250000,
+    biayaBulanan: [
+      {
+        ageRange: '9–12 tahun',
+        price: 50000,
+      },
+      {
+        ageRange: '13–15 tahun',
+        price: 75000,
+      },
+    ],
     features: [
       '1 Set Jersey Latihan (atas & bawah)',
-      'Kaos Kaki',
-      'Baju Harian SSB',
       'ID Card Anggota',
       'Latihan rutin bersama pelatih bersertifikat',
       'Akses ke turnamen dan pertandingan resmi',
@@ -42,11 +50,8 @@ const pricingPlans = [
 
 <template>
   <div class="pricing-wrapper">
-    <!-- 👉 Title and subtitle -->
     <div class="text-center mb-8">
-      <h3 class="text-h3 pricing-title mb-4">
-        Biaya Pendaftaran SSB
-      </h3>
+      <h3 class="text-h3 pricing-title mb-4">Biaya Pendaftaran SSB</h3>
       <p class="text-body-1 mb-2">
         Menjadi bagian dari SSB berarti mendapatkan pelatihan berkualitas, perlengkapan lengkap, dan pengalaman bertanding yang seru.
       </p>
@@ -55,53 +60,49 @@ const pricingPlans = [
       </p>
     </div>
 
-    <!-- SECTION pricing plans -->
     <div class="pricing-container">
       <div 
         v-for="plan in pricingPlans" 
         :key="plan.name"
         class="pricing-card-wrapper"
       >
-        <div 
-          class="pricing-card"
-          :class="{ 'popular-card': plan.isPopular }"
-        >
-          <!-- Popular badge -->
-          <div class="card-header">
-            <div 
-              v-if="plan.isPopular" 
-              class="popular-badge"
-            >
-              Popular
-            </div>
-          </div>
-
-          <!-- Card content -->
+        <div class="pricing-card" :class="{ 'popular-card': plan.isPopular }">
           <div class="card-content">
-            <!-- Logo -->
             <div class="logo-section">
-              <img 
-                :src="plan.logo" 
-                alt="SSB Logo"
-                class="plan-logo"
+              <img
+                src="/storage/logo/LOGOSSB.png"
+                alt="Logo SSB"
+                class="app-logo-img"
+                style="height: 70px;"
               />
             </div>
 
-            <!-- Plan info -->
             <div class="plan-info">
               <h4 class="plan-name">{{ plan.name }}</h4>
               <p class="plan-tagline">{{ plan.tagLine }}</p>
             </div>
 
-            <!-- Price -->
+            <!-- Harga -->
             <div class="price-section">
               <div class="price-display">
-                <span class="price-amount">{{ formatRupiah(plan.price) }}</span>
-                <span class="price-period">Sekali bayar</span>
+                <span class="price-amount">{{ formatRupiah(plan.biayaMasuk) }}</span>
+                <span class="price-period">Biaya Masuk (sekali bayar)</span>
+              </div>
+
+              <hr class="divider mt-3 mb-3" />
+
+              <div class="monthly-price-label">Biaya Bulanan:</div>
+              <div
+                v-for="(item, index) in plan.biayaBulanan"
+                :key="index"
+                class="monthly-price-item"
+              >
+                <span class="monthly-price-amount">{{ formatRupiah(item.price) }}</span>
+                <span class="monthly-price-text">/bulan untuk anak usia {{ item.ageRange }}</span>
               </div>
             </div>
 
-            <!-- Features -->
+            <!-- Fitur -->
             <div class="features-section">
               <ul class="features-list">
                 <li 
@@ -115,7 +116,7 @@ const pricingPlans = [
               </ul>
             </div>
 
-            <!-- CTA Button -->
+            <!-- CTA -->
             <div class="cta-section">
               <button 
                 class="cta-button"
@@ -194,6 +195,7 @@ const pricingPlans = [
 
 .card-content {
   padding: 0 24px 24px;
+  margin-top: 20px;
 }
 
 .logo-section {
@@ -214,7 +216,7 @@ const pricingPlans = [
 }
 
 .plan-name {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 600;
   color: #1a1a1a;
   margin-bottom: 8px;
@@ -246,6 +248,18 @@ const pricingPlans = [
 }
 
 .price-period {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.monthly-price-label {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.monthly-price-item {
   font-size: 14px;
   color: #666;
   font-weight: 500;

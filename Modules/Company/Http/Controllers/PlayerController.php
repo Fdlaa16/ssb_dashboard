@@ -3,7 +3,6 @@
 namespace Modules\Company\Http\Controllers;
 
 use App\Helpers\Helper;
-use App\Models\ClubPlayer;
 use App\Models\File;
 use App\Models\Player;
 use App\Models\User;
@@ -32,10 +31,10 @@ class PlayerController extends Controller
             ->where('status', 1)
             ->with([
                 'user',
-                'clubPlayers' => function ($query) {
-                    $query->whereNotNull('category')
-                        ->with('club');
-                },
+                // 'clubPlayers' => function ($query) {
+                //     $query->whereNotNull('category')
+                //         ->with('club');
+                // },
                 'avatar'
             ]);
 
@@ -49,11 +48,11 @@ class PlayerController extends Controller
                     ->orWhereHas('user', function ($user) use ($request) {
                         $user->where('email', 'like', '%' . $request->search . '%');
                     })
-                    ->orWhereHas('club_players', function ($clubPlayers) use ($request) {
-                        $clubPlayers->orWhereHas('clubs', function ($club) use ($request) {
-                            $club->where('name', 'like', '%' . $request->search . '%');
-                        });
-                    })
+                    // ->orWhereHas('club_players', function ($clubPlayers) use ($request) {
+                    //     $clubPlayers->orWhereHas('clubs', function ($club) use ($request) {
+                    //         $club->where('name', 'like', '%' . $request->search . '%');
+                    //     });
+                    // })
                     ->orWhereHas('sports', function ($sport) use ($request) {
                         $sport->where('name', 'like', '%' . $request->search . '%');
                     });
@@ -61,15 +60,11 @@ class PlayerController extends Controller
         });
 
         $playersQuery->when($request->position, function ($query) use ($request) {
-            $query->whereHas('clubPlayers', function ($q) use ($request) {
-                $q->where('position', $request->position);
-            });
+            $query->where('position', $request->position);
         });
 
         $playersQuery->when($request->category, function ($query, $category) {
-            $query->whereHas('clubPlayers', function ($q) use ($category) {
-                $q->where('category', $category);
-            });
+            $query->where('category', $category);
         });
 
         $playersQuery->when($request->status, function ($query, $status) {
@@ -89,11 +84,11 @@ class PlayerController extends Controller
             }
         });
 
-        $playersQuery->when($request->club_id, function ($query) use ($request) {
-            $query->whereHas('clubs', function ($q) use ($request) {
-                $q->where('clubs.id', $request->club_id);
-            });
-        });
+        // $playersQuery->when($request->club_id, function ($query) use ($request) {
+        //     $query->whereHas('clubs', function ($q) use ($request) {
+        //         $q->where('clubs.id', $request->club_id);
+        //     });
+        // });
 
         $playersQuery->when($request->sport_id, function ($query) use ($request) {
             $query->whereHas('sports', function ($q) use ($request) {
@@ -161,26 +156,44 @@ class PlayerController extends Controller
             $postData = $request->all();
             $rules = [
                 'email'     => 'required|email|unique:users,email',
+                'password'  => 'required',
                 'nisn'      => 'required|unique:players,nisn',
                 'name'      => 'required',
                 'height'    => 'required',
                 'weight'    => 'required',
-                'club_id'   => 'required',
+                // 'club_id'   => 'required',
                 'category'  => 'required',
+                'avatar' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
+                'family_card' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
+                'report_grades' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
+                'birth_certificate' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
             ];
 
             $messages = [
                 'email.required'     => 'Email harus diisi',
                 'email.email'        => 'Format email tidak valid',
                 'email.unique'       => 'Email sudah digunakan',
+                'password.required'  => 'Password harus diisi',
                 'nisn.required'      => 'NISN harus diisi',
                 'nisn.unique'        => 'NISN sudah digunakan',
                 'name.required'      => 'Nama harus diisi',
                 'height.required'    => 'Tinggi badan harus diisi',
                 'weight.required'    => 'Berat badan harus diisi',
-                'club_id.required'   => 'Club harus diisi',
-                'club_id.exists'     => 'Club tidak ditemukan',
+                // 'club_id.required'   => 'Club harus diisi',
+                // 'club_id.exists'     => 'Club tidak ditemukan',
                 'category.required'  => 'Kategori harus diisi',
+                'avatar.image' => 'Avatar harus berupa gambar',
+                'avatar.mimes' => 'Format Avatar harus jpeg, png, jpg, atau bmp',
+                'avatar.max' => 'Ukuran Avatar maksimal 2MB',
+                'family_card.image' => 'Kartu Keluarga harus berupa gambar',
+                'family_card.mimes' => 'Format Kartu Keluarga harus jpeg, png, jpg, atau bmp',
+                'family_card.max' => 'Ukuran Kartu Keluarga maksimal 2MB',
+                'report_grades.image' => 'Nilai Rapot harus berupa gambar',
+                'report_grades.mimes' => 'Format Nilai Rapot harus jpeg, png, jpg, atau bmp',
+                'report_grades.max' => 'Ukuran Nilai Rapot maksimal 2MB',
+                'birth_certificate.image' => 'Akte Kelahiran harus berupa gambar',
+                'birth_certificate.mimes' => 'Format Akte Kelahiran harus jpeg, png, jpg, atau bmp',
+                'birth_certificate.max' => 'Ukuran Akte Kelahiran maksimal 2MB',
             ];
 
             $validator = Validator::make($postData, $rules, $messages);
@@ -188,14 +201,20 @@ class PlayerController extends Controller
             if ($validator->fails()) {
                 return response()->json(array('errors' => $validator->messages()->toArray()), 422);
             } else {
-                $user = User::create(['email' => $request->email]);
+                $user = User::create([
+                    'email' => $request->email ?? '',
+                    'password' => bcrypt($request->password) ?? ''
+                ]);
 
                 $player = Player::create([
-                    'user_id' => $user->id,
-                    'nisn' => $request->nisn,
-                    'name' => $request->name,
-                    'height' => $request->height,
-                    'weight' => $request->weight,
+                    'user_id' => $user->id ?? '',
+                    'nisn' => $request->nisn ?? '',
+                    'name' => $request->name ?? '',
+                    'height' => $request->height ?? '',
+                    'weight' => $request->weight ?? '',
+                    'position' => $request->position ?? '',
+                    'back_number' => $request->back_number ?? '',
+                    'category' => $request->category ?? '',
                 ]);
 
                 $types = ['family_card', 'report_grades', 'birth_certificate'];
@@ -220,14 +239,6 @@ class PlayerController extends Controller
                         ]);
                     }
                 }
-
-                ClubPlayer::create([
-                    'club_id' => $request->club_id,
-                    'player_id' => $player->id,
-                    'position' => $request->position,
-                    'back_number' => $request->back_number,
-                    'category' => $request->category,
-                ]);
 
                 DB::commit();
 
@@ -255,7 +266,7 @@ class PlayerController extends Controller
         $players = Player::query()
             ->with([
                 'user',
-                'clubPlayers.club.profile_club',
+                // 'clubPlayers.club.profile_club',
                 'avatar',
                 'birth_certificate',
                 'family_card',
@@ -280,7 +291,7 @@ class PlayerController extends Controller
         $players = Player::query()
             ->with([
                 'user',
-                'clubPlayers.club.profile_club',
+                // 'clubPlayers.club.profile_club',
                 'avatar',
                 'birth_certificate',
                 'family_card',
@@ -314,5 +325,151 @@ class PlayerController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function profileUpdate(Request $request, $id)
+    {
+        DB::beginTransaction();
+
+        $player = Player::find($id);
+
+        if (!$player) {
+            return response()->json(['message' => 'Player tidak ditemukan'], 404);
+        }
+
+        try {
+            // Validasi data
+            $rules = [
+                'email'     => 'required|email|unique:users,email,' . $player->user_id,
+                'nisn'      => 'required|unique:players,nisn,' . $player->id,
+                'name'      => 'required',
+                'height'    => 'required',
+                'weight'    => 'required',
+                // 'club_id'   => 'required',
+                'avatar.*' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
+                'family_card.*' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
+                'report_grades.*' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
+                'birth_certificate.*' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
+            ];
+
+            $messages = [
+                'email.required'     => 'Email harus diisi',
+                'email.email'        => 'Format email tidak valid',
+                'email.unique'       => 'Email sudah digunakan',
+                'nisn.required'      => 'NISN harus diisi',
+                'nisn.unique'        => 'NISN sudah digunakan',
+                'name.required'      => 'Nama harus diisi',
+                'height.required'    => 'Tinggi badan harus diisi',
+                'weight.required'    => 'Berat badan harus diisi',
+                // 'club_id.required'   => 'Club harus diisi',
+                // 'club_id.exists'     => 'Club tidak ditemukan',
+                'avatar.*.image' => 'Avatar harus berupa gambar',
+                'avatar.*.mimes' => 'Format Avatar harus jpeg, png, jpg, atau bmp',
+                'avatar.*.max' => 'Ukuran Avatar maksimal 2MB',
+                'family_card.*.image' => 'Kartu Keluarga harus berupa gambar',
+                'family_card.*.mimes' => 'Format Kartu Keluarga harus jpeg, png, jpg, atau bmp',
+                'family_card.*.max' => 'Ukuran Kartu Keluarga maksimal 2MB',
+                'report_grades.*.image' => 'Nilai Rapot harus berupa gambar',
+                'report_grades.*.mimes' => 'Format Nilai Rapot harus jpeg, png, jpg, atau bmp',
+                'report_grades.*.max' => 'Ukuran Nilai Rapot maksimal 2MB',
+                'birth_certificate.*.image' => 'Akte Kelahiran harus berupa gambar',
+                'birth_certificate.*.mimes' => 'Format Akte Kelahiran harus jpeg, png, jpg, atau bmp',
+                'birth_certificate.*.max' => 'Ukuran Akte Kelahiran maksimal 2MB',
+            ];
+
+            $validator = Validator::make($request->all(), $rules, $messages);
+
+            if ($validator->fails()) {
+                return response()->json(array('errors' => $validator->messages()->toArray()), 422);
+            } else {
+
+                $player->user()->update([
+                    'email' => $request->email ?? '',
+                    'password' => bcrypt($request->new_password) ?? '',
+                ]);
+
+                $player->update([
+                    'nisn'   => $request->nisn ?? '',
+                    'name'   => $request->name ?? '',
+                    'height' => $request->height ?? '',
+                    'weight' => $request->weight ?? '',
+                    'position' => $request->position ?? '',
+                    'back_number' => $request->back_number ?? '',
+                    'category' => $request->category ?? '',
+                ]);
+
+                $types = ['avatar', 'family_card', 'report_grades', 'birth_certificate'];
+                $fileObj = new File();
+
+                foreach ($types as $type) {
+                    if ($request->hasFile($type)) {
+                        $file = $request->file($type);
+                        $fileDir = $fileObj->getDirectory($type);
+                        $fileName = $fileObj->getFileName($type, $player->id, $file);
+
+                        $file->storeAs($fileDir, $fileName, 'public');
+                        $player->files()->where('type', $type)->delete();
+
+                        $player->files()->create([
+                            'type'           => $type,
+                            'name'           => $fileName,
+                            'original_name'  => $file->getClientOriginalName(),
+                            'extension'      => $file->getClientOriginalExtension(),
+                            'path'           => $fileDir . $fileName,
+                        ]);
+                    }
+                }
+
+                DB::commit();
+
+                return response()->json([
+                    'message' => 'Player updated successfully.',
+                    'data' => $player,
+                ]);
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat memperbarui player.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function passwordUpdate(Request $request, $id)
+    {
+        DB::beginTransaction();
+
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['message' => 'User tidak ditemukan'], 404);
+        }
+
+        try {
+            $request->validate([
+                'new_password' => 'required|min:8',
+                'confirm_password' => 'required',
+            ]);
+
+            $user->update([
+                'password' => bcrypt($request->password),
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Password updated successfully.',
+                'data' => $user,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat memperbarui password.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

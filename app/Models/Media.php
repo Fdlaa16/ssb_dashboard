@@ -13,9 +13,8 @@ class Media extends Model
     protected $table = 'medias';
     protected $fillable = [
         'code',
-        'name',
+        'type_media',
         'title',
-        'hashtag',
         'description',
         'link',
         'thumbnail',
@@ -60,6 +59,6 @@ class Media extends Model
 
     public function document_media()
     {
-        return $this->morphMany(File::class, 'fileable')->where('type', 'document_media')->latest()->one();
+        return $this->morphMany(File::class, 'fileable')->where('type', 'document_media')->latest();
     }
 }
