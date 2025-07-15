@@ -42,6 +42,9 @@ const isMegaMenuOpen2 = ref(false)
 const isMenuOpen3 = ref(false)
 const isMegaMenuOpen3 = ref(false)
 
+const isMenuOpenMedia = ref(false)
+const isMegaMenuOpenMedia = ref(false)
+
 const menuItems: MenuItem[] = [
   {
     listTitle: 'Sejarah',
@@ -71,7 +74,7 @@ const menuItems3: MenuItem[] = [
     listIcon: 'tabler-list',
     navItems: [
       { name: 'Klub', to: { name: 'front-pages-club' } },
-      { name: 'Berita', to: { name: 'front-pages-media' } },
+      // { name: 'Berita', to: { name: 'front-pages-media' } },
       { name: 'Biaya Pendaftaran', to: { name: 'front-pages-pricing' } },
     ],
   },
@@ -442,6 +445,14 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
                 </VCard>
               </VMenu>
             </span>
+
+            <RouterLink
+              :to="{ name: 'front-pages-media'}"
+              class="nav-link font-weight-medium py-2 px-2 px-lg-4"
+              :class="isMenuOpenMedia || isMegaMenuOpenMedia ? 'active-link' : ''"
+            >
+              Media
+            </RouterLink>
 
             <span
               class="font-weight-medium cursor-pointer px-2 px-lg-4 py-2"
