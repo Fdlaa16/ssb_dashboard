@@ -79,7 +79,7 @@ const capitalizedLabel = (label: boolean) => {
 <template>
   <form @submit.prevent="$emit('submit')">
     <div class="d-flex flex-column gap-6 mb-6">
-      <VCard :title="props.data.id ? 'Edit Schedule Training' : 'Create Schedule Training'"></VCard>
+      <VCard :title="props.data.id ? 'Edit Schedule Training' : 'Create Schedule Training'">
         <VCardText>
           <VWindow>
             <VWindowItem>

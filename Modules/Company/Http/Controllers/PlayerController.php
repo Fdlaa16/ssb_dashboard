@@ -27,6 +27,9 @@ class PlayerController extends Controller
             $orderByDirection = $request->input('sort') === 'asc' ? 'asc' : 'desc';
         }
 
+        $perPage = $request->input('per_page', 5);
+        $page = $request->input('page', 1);
+
         $playersQuery = Player::query()
             ->where('status', 1)
             ->with([
@@ -106,7 +109,7 @@ class PlayerController extends Controller
 
         $playersQuery->orderBy($orderByColumn, $orderByDirection);
 
-        $players = $playersQuery->get();
+        $players = $playersQuery->paginate($perPage, ['*'], 'page', $page);
 
         $statusCounts = DB::table('players')
             ->select('status', DB::raw('COUNT(*) as total'))
@@ -129,7 +132,7 @@ class PlayerController extends Controller
         ];
 
         return response()->json([
-            'data' => $players,
+            'data' => $players, // ⬅️ ini adalah `LengthAwarePaginator` bawaan Laravel
             'totals' => $responseTotals,
         ]);
     }
@@ -163,6 +166,7 @@ class PlayerController extends Controller
                 'weight'    => 'required',
                 // 'club_id'   => 'required',
                 'category'  => 'required',
+                'position'  => 'required',
                 'avatar' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
                 'family_card' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
                 'report_grades' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
@@ -182,6 +186,7 @@ class PlayerController extends Controller
                 // 'club_id.required'   => 'Club harus diisi',
                 // 'club_id.exists'     => 'Club tidak ditemukan',
                 'category.required'  => 'Kategori harus diisi',
+                'position.required'  => 'Posisi harus diisi',
                 'avatar.image' => 'Avatar harus berupa gambar',
                 'avatar.mimes' => 'Format Avatar harus jpeg, png, jpg, atau bmp',
                 'avatar.max' => 'Ukuran Avatar maksimal 2MB',
@@ -346,6 +351,8 @@ class PlayerController extends Controller
                 'height'    => 'required',
                 'weight'    => 'required',
                 // 'club_id'   => 'required',
+                'category'  => 'required',
+                'position'  => 'required',
                 'avatar.*' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
                 'family_card.*' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
                 'report_grades.*' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
@@ -363,6 +370,8 @@ class PlayerController extends Controller
                 'weight.required'    => 'Berat badan harus diisi',
                 // 'club_id.required'   => 'Club harus diisi',
                 // 'club_id.exists'     => 'Club tidak ditemukan',
+                'category.required'  => 'Kategori harus diisi',
+                'position.required'  => 'Posisi harus diisi',
                 'avatar.*.image' => 'Avatar harus berupa gambar',
                 'avatar.*.mimes' => 'Format Avatar harus jpeg, png, jpg, atau bmp',
                 'avatar.*.max' => 'Ukuran Avatar maksimal 2MB',

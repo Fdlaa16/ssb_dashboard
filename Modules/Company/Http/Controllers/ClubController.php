@@ -24,6 +24,9 @@ class ClubController extends Controller
             $orderByDirection = $request->input('sort') === 'asc' ? 'asc' : 'desc';
         }
 
+        $perPage = $request->input('per_page', 5);
+        $page = $request->input('page', 1);
+
         $clubQuery = Club::query()
             ->with([
                 'profile_club',
@@ -63,7 +66,7 @@ class ClubController extends Controller
 
         $clubQuery->orderBy($orderByColumn, $orderByDirection);
 
-        $clubs = $clubQuery->get();
+        $clubs = $clubQuery->paginate($perPage, ['*'], 'page', $page);
 
         $statusCounts = DB::table('clubs')
             ->selectRaw('
@@ -86,7 +89,7 @@ class ClubController extends Controller
         ];
 
         return response()->json([
-            'data' => $clubs,
+            'data' => $clubs, // ⬅️ ini adalah `LengthAwarePaginator` bawaan Laravel
             'totals' => $responseTotals,
         ]);
     }

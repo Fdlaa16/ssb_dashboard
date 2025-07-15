@@ -1,27 +1,26 @@
 <script setup lang="ts">
+import { onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 
-// const isFlatSnackbarVisible = ref(false)
-// const snackbarMessage = ref('')
-// const snackbarColor = ref<'success' | 'error'>('success')
-
-interface Pricing {
-  title?: string
-  xs?: number | string
-  sm?: number | string
-  md?: string | number
-  lg?: string | number
-  xl?: string | number
-}
-
+// Router (jika nanti ingin navigasi)
 const router = useRouter()
 
-const logisticData = ref<any[]>([])
+// State untuk notifikasi snackbar
+const isFlatSnackbarVisible = ref(false)
+const snackbarMessage = ref('')
+const snackbarColor = ref<'success' | 'error'>('success')
+
+// State data klub
+const clubs = ref<any[]>([])
+
+const currentPage = ref(1)
+const totalPages = ref(1)
+const perPage = 6
+
+const selectedMatch = ref('')
 
 const loading = ref(true)
 const error = ref<string | null>(null)
-const clubs = ref<any[]>([])
-
-const selectedMatch = ref('')
 
 const getScheduleMatchQuery = async () => {
   loading.value = true
@@ -31,22 +30,25 @@ const getScheduleMatchQuery = async () => {
     const response = await $api('company/club', {
       method: 'GET',
       params: {
-        status: selectedMatch.value || 'upcoming',
-      }
+        status: selectedMatch.value,
+        page: currentPage.value,
+        per_page: perPage,
+      },
     })
+    
+    const paginated = response.data  
+    clubs.value = paginated.data 
+    totalPages.value = paginated.last_page
+    currentPage.value = paginated.current_page
 
-    clubs.value = response.data
-
-    // snackbarMessage.value = 'Data berhasil dimuat!'
-    // snackbarColor.value = 'success'
-    // isFlatSnackbarVisible.value = true
-
+    snackbarMessage.value = 'Data berhasil dimuat!'
+    snackbarColor.value = 'success'
+    isFlatSnackbarVisible.value = true
   } catch (err: any) {
     error.value = err.message || 'Gagal memuat data'
-
-    // snackbarMessage.value = error.value
-    // snackbarColor.value = 'error'
-    // isFlatSnackbarVisible.value = true
+    snackbarMessage.value = error.value
+    snackbarColor.value = 'error'
+    isFlatSnackbarVisible.value = true
   } finally {
     loading.value = false
   }
@@ -61,12 +63,6 @@ const formatMatchTime = (date: string, time: string) => {
   }) + ' • ' + time.slice(0, 5) + ' WIB'
 }
 
-onMounted(() => {
-  if (!selectedMatch.value) selectedMatch.value = 'upcoming'
-  
-  getScheduleMatchQuery()
-})
-
 function formatTanggalIndonesia(dateString: string): string {
   const date = new Date(dateString)
   return new Intl.DateTimeFormat('id-ID', {
@@ -76,10 +72,21 @@ function formatTanggalIndonesia(dateString: string): string {
   }).format(date)
 }
 
+onMounted(() => {
+  if (!selectedMatch.value) selectedMatch.value = 'upcoming'
+  getScheduleMatchQuery()
+})
+
 watch(selectedMatch, () => {
+  currentPage.value = 1
+  getScheduleMatchQuery()
+})
+
+watch(currentPage, () => {
   getScheduleMatchQuery()
 })
 </script>
+
 
 <template>
   <VContainer id=club>
@@ -95,7 +102,6 @@ watch(selectedMatch, () => {
       </VRow>
 
       <VRow>
-        <!-- Tampilkan jika ada data -->
         <template v-if="clubs.length > 0">
           <VCol
             v-for="(data, index) in clubs"
@@ -118,7 +124,6 @@ watch(selectedMatch, () => {
           </VCol>
         </template>
 
-        <!-- Tampilkan jika data kosong -->
         <template v-else>
           <VCol cols="12" class="text-center py-10">
             <VIcon size="64" color="grey-lighten-1">tabler-calendar-x</VIcon>
@@ -128,18 +133,29 @@ watch(selectedMatch, () => {
           </VCol>
         </template>
       </VRow>
+
+      <VRow v-if="totalPages > 1">
+        <VCol class="d-flex justify-end mt-4 mb-3 mr-2">
+          <VPagination
+            v-model="currentPage"
+            :length="totalPages"
+            total-visible="5"
+            color="primary"
+          />
+        </VCol>
+      </VRow>
     </div>    
+
+    <VSnackbar
+      v-model="isFlatSnackbarVisible"
+      :color="snackbarColor"
+      location="bottom start"
+      variant="flat"
+      timeout="3000"
+    >
+      {{ snackbarMessage }}
+    </VSnackbar>
   </VContainer>
-  
-  <!-- <VSnackbar
-    v-model="isFlatSnackbarVisible"
-    :color="snackbarColor"
-    location="bottom start"
-    variant="flat"
-    timeout="3000"
-  >
-    {{ snackbarMessage }}
-  </VSnackbar> -->
 </template>
 
 

@@ -23,6 +23,10 @@ const scheduleMatchs = ref<any[]>([])
 
 const selectedMatch = ref('upcoming')
 
+const currentPage = ref(1)
+const totalPages = ref(1)
+const perPage = 5
+
 const getScheduleMatchQuery = async () => {
   loading.value = true
   error.value = null
@@ -32,12 +36,18 @@ const getScheduleMatchQuery = async () => {
       method: 'GET',
       params: {
         status: selectedMatch.value || 'upcoming',
+        page: currentPage.value,
+        per_page: perPage,
       }
     })
 
     const matches = response.data
+    scheduleMatchs.value = matches.data
 
-    logisticData.value = matches.map((item: any) => ({
+    totalPages.value = matches.last_page
+    currentPage.value = matches.current_page
+
+    logisticData.value = matches.data.map((item: any) => ({
       icon: 'tabler-calendar-event',
       color: 'primary',
       title: `${item.first_club.name} vs ${item.secound_club.name}`,
@@ -47,15 +57,11 @@ const getScheduleMatchQuery = async () => {
       ...item
     }))
 
-    scheduleMatchs.value = matches
-
     snackbarMessage.value = 'Data berhasil dimuat!'
     snackbarColor.value = 'success'
     isFlatSnackbarVisible.value = true
-
   } catch (err: any) {
     error.value = err.message || 'Gagal memuat data'
-
     snackbarMessage.value = error.value
     snackbarColor.value = 'error'
     isFlatSnackbarVisible.value = true
@@ -79,7 +85,16 @@ onMounted(() => {
   getScheduleMatchQuery()
 })
 
+onMounted(() => {
+  getScheduleMatchQuery()
+})
+
 watch(selectedMatch, () => {
+  currentPage.value = 1
+  getScheduleMatchQuery()
+})
+
+watch(currentPage, () => {
   getScheduleMatchQuery()
 })
 </script>
@@ -133,7 +148,7 @@ watch(selectedMatch, () => {
                   <VCol class="text-center" cols="4">
                     <VAvatar size="80" variant="flat" rounded="lg" class="mb-2">
                       <img
-                        :src="data.first_club.profile_club.url"
+                        :src="data?.first_club?.profile_club?.url"
                         alt="Club A"
                         style="width: 100%; height: 100%; object-fit: contain"
                       />
@@ -188,6 +203,17 @@ watch(selectedMatch, () => {
             </p>
           </VCol>
         </template>
+      </VRow>
+
+      <VRow v-if="totalPages > 1">
+        <VCol class="d-flex justify-end mt-4 mb-3 mr-2">
+          <VPagination
+            v-model="currentPage"
+            :length="totalPages"
+            total-visible="5"
+            color="primary"
+          />
+        </VCol>
       </VRow>
     </div>    
   </VContainer>

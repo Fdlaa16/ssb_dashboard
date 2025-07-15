@@ -5,8 +5,8 @@ export interface MediaData {
   title: string;
   description: string;
   link: string;
-  start_date: string;
-  end_date: string;
+  // start_date: string;
+  // end_date: string;
   type_media: string;
   document_media: (File | MediaFile | string)[];
   removed_media_ids?: number[]; // Add this property

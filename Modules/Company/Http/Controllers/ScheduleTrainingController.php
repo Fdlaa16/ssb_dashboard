@@ -140,6 +140,9 @@ class ScheduleTrainingController extends Controller
             $orderByDirection = $request->input('sort') === 'asc' ? 'asc' : 'desc';
         }
 
+        $perPage = $request->input('per_page', 5);
+        $page = $request->input('page', 1);
+
         $scheduleTrainingQuery = ScheduleTraining::query();
 
         $jakartaTime = now()->setTimezone('Asia/Jakarta');
@@ -210,7 +213,7 @@ class ScheduleTrainingController extends Controller
 
         $scheduleTrainingQuery->orderBy($orderByColumn, $orderByDirection);
 
-        $scheduleTraining = $scheduleTrainingQuery->get();
+        $scheduleTraining = $scheduleTrainingQuery->paginate($perPage, ['*'], 'page', $page);
 
         // Count statistics based on time, not status
         $statusCounts = DB::table('schedule_trainings')
@@ -244,7 +247,7 @@ class ScheduleTrainingController extends Controller
         ];
 
         return response()->json([
-            'data' => $scheduleTraining,
+            'data' => $scheduleTraining, // ⬅️ ini adalah `LengthAwarePaginator` bawaan Laravel
             'totals' => $responseTotals,
         ]);
     }

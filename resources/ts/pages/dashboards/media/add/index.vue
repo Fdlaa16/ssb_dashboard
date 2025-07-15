@@ -18,8 +18,8 @@ const mediaData = ref<MediaData>({
   // hashtag: '',
   description: '',
   link: '',
-  start_date: '',
-  end_date: '',
+  // start_date: '',
+  // end_date: '',
   type_media: '',
   document_media: [], 
 })
@@ -30,8 +30,8 @@ const handleSubmit = async () => {
   formData.append('type_media', mediaData.value.type_media);
   formData.append('description', mediaData.value.description);
   formData.append('link', mediaData.value.link);
-  formData.append('start_date', mediaData.value.start_date);
-  formData.append('end_date', mediaData.value.end_date);
+  // formData.append('start_date', mediaData.value.start_date);
+  // formData.append('end_date', mediaData.value.end_date);
 
   if (mediaData.value.document_media && Array.isArray(mediaData.value.document_media)) {
     mediaData.value.document_media.forEach((file, index) => {

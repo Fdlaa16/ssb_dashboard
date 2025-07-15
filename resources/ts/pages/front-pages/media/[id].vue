@@ -65,7 +65,7 @@ function formatTanggalIndonesia(dateString: string): string {
             <VCardText>
               <h1 class="text-h5 font-weight-bold mb-4">{{ detail?.title }}</h1>
               <div class="text-caption text-grey mb-2">
-                {{ formatTanggalIndonesia(detail?.start_date) }}
+                {{ formatTanggalIndonesia(detail.created_at) }}
               </div>
               <v-carousel
                 show-arrows="hover"
@@ -87,7 +87,19 @@ function formatTanggalIndonesia(dateString: string): string {
               </v-carousel>
 
 
-              <div class="body-1 mt-5" v-html="detail?.description"></div>
+              <div class="body-1 mt-5 px-5" v-html="detail?.description"></div>
+
+              <div v-if="detail?.link" class="mt-4">
+                <span class="font-weight-medium">Tautan terkait: </span>
+                <a
+                  :href="detail.link.startsWith('http') ? detail.link : 'https://' + detail.link"
+                  target="_blank"
+                  rel="noopener"
+                  class="text-primary"
+                >
+                  {{ detail.link }}
+                </a>
+              </div>
             </VCardText>
           </VCard>
         </template>

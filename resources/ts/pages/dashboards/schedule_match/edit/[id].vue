@@ -68,10 +68,9 @@ const handleSubmit = async () => {
     formData.append('schedule_date', scheduleMatchData.value.schedule_date); 
     formData.append('schedule_start_at', scheduleMatchData.value.schedule_start_at);
     formData.append('schedule_end_at', scheduleMatchData.value.schedule_end_at);
-    formData.append('score', scheduleMatchData.value.score ?? '');
-    formData.append('first_club_score', scheduleMatchData.value.first_club_score);
-    formData.append('secound_club_score', scheduleMatchData.value.secound_club_score);
-    formData.append('status', String(scheduleMatchData.value.status));
+    formData.append('first_club_score', scheduleMatchData.value.first_club_score ?? '');
+    formData.append('secound_club_score', scheduleMatchData.value.secound_club_score ?? '');
+    formData.append('status', scheduleMatchData.value.status ?? '');
     
     const res = await $api(`schedule-match/${scheduleMatchId}`, {
       method: 'POST',

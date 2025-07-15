@@ -18,8 +18,8 @@ class Media extends Model
         'description',
         'link',
         'thumbnail',
-        'start_date',
-        'end_date',
+        // 'start_date',
+        // 'end_date',
         'digital_platform',
         'status',
     ];

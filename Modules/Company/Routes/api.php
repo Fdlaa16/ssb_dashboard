@@ -51,6 +51,7 @@ Route::prefix('company')->group(function () {
     Route::put('club/{id}/reject', [ClubController::class, 'reject'])->name('club.reject');
 
     Route::get('media', [MediaController::class, 'index'])->name('media.index');
+    Route::get('nearest-media', [MediaController::class, 'nearestMedia'])->name('nearest-media.index');
     Route::get('media/create', [MediaController::class, 'create'])->name('media.create');
     Route::post('media/store', [MediaController::class, 'store'])->name('media.store');
     Route::get('media/{id}', [MediaController::class, 'show'])->name('media.show');

@@ -133,12 +133,15 @@ class ScheduleMatchController extends Controller
 
     public function listMatches(Request $request)
     {
-        $orderByColumn = 'created_at';
-        $orderByDirection = 'desc';
+        $orderByColumn = 'schedule_date';
+        $orderByDirection = 'asc';
 
         if ($request->has('sort')) {
             $orderByDirection = $request->input('sort') === 'asc' ? 'asc' : 'desc';
         }
+
+        $perPage = $request->input('per_page', 5);
+        $page = $request->input('page', 1);
 
         $scheduleMatchQuery = ScheduleMatch::query();
 
@@ -208,7 +211,7 @@ class ScheduleMatchController extends Controller
 
         $scheduleMatchQuery->orderBy($orderByColumn, $orderByDirection);
 
-        $scheduleMatch = $scheduleMatchQuery->get();
+        $scheduleMatch = $scheduleMatchQuery->paginate($perPage, ['*'], 'page', $page);
 
         $statusCounts = DB::table('schedule_matches')
             ->selectRaw('
@@ -241,7 +244,7 @@ class ScheduleMatchController extends Controller
         ];
 
         return response()->json([
-            'data' => $scheduleMatch,
+            'data' => $scheduleMatch, // ⬅️ ini adalah `LengthAwarePaginator` bawaan Laravel
             'totals' => $responseTotals,
         ]);
     }

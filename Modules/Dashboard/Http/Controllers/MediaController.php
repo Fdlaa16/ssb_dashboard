@@ -121,25 +121,25 @@ class MediaController extends Controller
             $postData = $request->all();
             $rules = [
                 'type_media' => 'required',
-                'start_date' => 'required_if:type_media,documentation',
-                'end_date' => 'required_if:type_media,documentation',
+                // 'start_date' => 'required_if:type_media,documentation',
+                // 'end_date' => 'required_if:type_media,documentation',
                 // 'name' => 'required',
                 'title' => 'required',
                 // 'hashtag' => 'required',
                 'description' => 'required',
-                'link' => 'required',
+                // 'link' => 'required',
                 'document_media.*' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
             ];
 
             $messages = [
                 'type_media.required' => 'Tipe Media harus diisi',
-                'start_date.required_if' => 'Tanggal mulai harus diisi',
-                'end_date.required_if' => 'Tanggal akhir harus diisi',
+                // 'start_date.required_if' => 'Tanggal mulai harus diisi',
+                // 'end_date.required_if' => 'Tanggal akhir harus diisi',
                 // 'name.required' => 'Nama harus diisi',
                 'title.required' => 'Judul harus diisi',
                 // 'hashtag.required' => 'Hashtag harus diisi',
                 'description.required' => 'Deskripsi harus diisi',
-                'link.required' => 'Link harus diisi',
+                // 'link.required' => 'Link harus diisi',
                 'document_media.*.image' => 'File harus berupa gambar',
                 'document_media.*.mimes' => 'Format gambar harus jpeg, png, jpg, atau bmp',
                 'document_media.*.max' => 'Ukuran gambar maksimal 2MB',
@@ -160,13 +160,13 @@ class MediaController extends Controller
                 return response()->json(['errors' => $validator->messages()->toArray()], 422);
             } else {
                 $media = Media::create([
-                    'type_media' => $request->type_media,
-                    'title' => $request->title,
-                    // 'hashtag' => $request->hashtag,
-                    'description' => $request->description,
-                    'link' => $request->link,
-                    'start_date' => Carbon::parse($request->start_date)->format('Y-m-d'),
-                    'end_date' => Carbon::parse($request->end_date)->format('Y-m-d'),
+                    'type_media' => $request->type_media ?? '',
+                    'title' => $request->title ?? '',
+                    // 'hashtag' => $request->hashtag ?? '',
+                    'description' => $request->description ?? '',
+                    'link' => $request->link ?? '',
+                    // 'start_date' => $request->start_date ? Carbon::parse($request->start_date)->format('Y-m-d') : '',
+                    // 'end_date' => $request->end_date ? Carbon::parse($request->end_date)->format('Y-m-d') : '',
                 ]);
 
                 // Handle multiple file uploads
@@ -259,21 +259,21 @@ class MediaController extends Controller
 
             $rules = [
                 'type_media' => 'required',
-                'start_date' => 'required_if:type_media,documentation',
-                'end_date' => 'required_if:type_media,documentation',
+                // 'start_date' => 'required_if:type_media,documentation',
+                // 'end_date' => 'required_if:type_media,documentation',
                 'title' => 'required',
                 'description' => 'required',
-                'link' => 'required',
+                // 'link' => 'required',
                 'document_media.*' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
                 'removed_media_ids.*' => 'integer|exists:files,id',
             ];
 
             $messages = [
-                'start_date.required_if' => 'Tanggal mulai harus diisi',
-                'end_date.required_if' => 'Tanggal akhir harus diisi',
+                // 'start_date.required_if' => 'Tanggal mulai harus diisi',
+                // 'end_date.required_if' => 'Tanggal akhir harus diisi',
                 'title.required' => 'Judul harus diisi',
                 'description.required' => 'Deskripsi harus diisi',
-                'link.required' => 'Link harus diisi',
+                // 'link.required' => 'Link harus diisi',
                 'document_media.*.image' => 'File harus berupa gambar',
                 'document_media.*.mimes' => 'Format gambar harus jpeg, png, jpg, atau bmp',
                 'document_media.*.max' => 'Ukuran gambar maksimal 2MB',
@@ -298,12 +298,12 @@ class MediaController extends Controller
             }
 
             $media->update([
-                'type_media' => $request->type_media,
-                'title' => $request->title,
-                'description' => $request->description,
-                'link' => $request->link,
-                'start_date' => Carbon::parse($request->start_date)->format('Y-m-d'),
-                'end_date' => Carbon::parse($request->end_date)->format('Y-m-d'),
+                'type_media' => $request->type_media ?? '',
+                'title' => $request->title ?? '',
+                'description' => $request->description ?? '',
+                'link' => $request->link ?? '',
+                // 'start_date' => $request->start_date ? Carbon::parse($request->start_date)->format('Y-m-d') : '',
+                // 'end_date' => $request->end_date ? Carbon::parse($request->end_date)->format('Y-m-d') : '',
             ]);
 
             // Handle removed files

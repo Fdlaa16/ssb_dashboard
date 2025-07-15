@@ -24,6 +24,11 @@ const scheduleMatchs = ref<any[]>([])
 
 const selectedMatch = ref('')
 
+// pagination state
+const currentPage = ref(1)
+const totalPages = ref(1)
+const perPage = 5
+
 const getScheduleMatchQuery = async () => {
   loading.value = true
   error.value = null
@@ -34,10 +39,16 @@ const getScheduleMatchQuery = async () => {
       params: {
         position: selectedPosition.value.value || '',
         category: category.value.value || '', 
+        page: currentPage.value,
+        per_page: perPage,
       },
     })
-    
-    scheduleMatchs.value = response.data
+
+    const paginated = response.data  // <-- ini objek pagination
+    scheduleMatchs.value = paginated.data // <-- ini array player
+    totalPages.value = paginated.last_page
+    currentPage.value = paginated.current_page
+
     snackbarMessage.value = 'Data berhasil dimuat!'
     snackbarColor.value = 'success'
     isFlatSnackbarVisible.value = true
@@ -56,7 +67,7 @@ const groupedByPosition = computed(() => {
   const groups: Record<string, any[]> = {}
 
   for (const player of scheduleMatchs.value) {
-    const position = player.position ?? 'unknown'
+    const position = player.position ?? 'Tanpa Kategori'
     if (!groups[position]) {
       groups[position] = []
     }
@@ -117,7 +128,16 @@ const getPositionTitle = (value: string) => {
   return match ? match.title : value
 }
 
+onMounted(() => {
+  getScheduleMatchQuery()
+})
+
 watch([category, selectedPosition], () => {
+  currentPage.value = 1
+  getScheduleMatchQuery()
+})
+
+watch(currentPage, () => {
   getScheduleMatchQuery()
 })
 </script>
@@ -164,8 +184,8 @@ watch([category, selectedPosition], () => {
       </VRow>
 
       <VRow>
-        <template v-if="Object.keys(groupedByPosition).length > 0">
-          <VCol v-for="(players, positionKey) in groupedByPosition" :key="positionKey">
+        <template  v-if="Object.keys(groupedByPosition).length > 0">
+          <template v-for="(players, positionKey) in groupedByPosition" :key="positionKey">
             <VCol cols="12">
               <h5 class="text-h5 font-weight-bold mb-3 mt-6">
                 {{ getPositionTitle(positionKey) }}
@@ -174,7 +194,7 @@ watch([category, selectedPosition], () => {
 
             <VCol
               v-for="(data, index) in players"
-              :key="`${positionKey}-${index}`"
+              :key="index"
               cols="12"
               sm="6"
               md="4"
@@ -207,7 +227,7 @@ watch([category, selectedPosition], () => {
                 </VCard>
               </router-link>  
             </VCol>
-          </VCol>
+          </template>
         </template>
 
         <template v-else>
@@ -220,6 +240,16 @@ watch([category, selectedPosition], () => {
         </template>
       </VRow>
 
+      <VRow v-if="totalPages > 1">
+        <VCol class="d-flex justify-end mt-4 mb-3 mr-2">
+          <VPagination
+            v-model="currentPage"
+            :length="totalPages"
+            total-visible="5"
+            color="primary"
+          />
+        </VCol>
+      </VRow>
     </div>    
   </VContainer>
   

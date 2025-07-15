@@ -1,27 +1,20 @@
 <script setup lang="ts">
-
 const isFlatSnackbarVisible = ref(false)
 const snackbarMessage = ref('')
 const snackbarColor = ref<'success' | 'error'>('success')
 
-interface Pricing {
-  title?: string
-  xs?: number | string
-  sm?: number | string
-  md?: string | number
-  lg?: string | number
-  xl?: string | number
-}
-
 const router = useRouter()
-
-const logisticData = ref<any[]>([])
 
 const loading = ref(true)
 const error = ref<string | null>(null)
 const scheduleMatchs = ref<any[]>([])
 
 const selectedTypeMedia = ref('documentation')
+
+// pagination state
+const currentPage = ref(1)
+const totalPages = ref(1)
+const perPage = 5
 
 const getScheduleMatchQuery = async () => {
   loading.value = true
@@ -32,10 +25,14 @@ const getScheduleMatchQuery = async () => {
       method: 'GET',
       params: {
         type: selectedTypeMedia.value || 'documentation',
+        page: currentPage.value,
+        per_page: perPage,
       }
     })
-
+        
+    // Assign paginated data
     scheduleMatchs.value = response.data
+    totalPages.value = response.last_page
 
     snackbarMessage.value = 'Data berhasil dimuat!'
     snackbarColor.value = 'success'
@@ -43,7 +40,6 @@ const getScheduleMatchQuery = async () => {
 
   } catch (err: any) {
     error.value = err.message || 'Gagal memuat data'
-
     snackbarMessage.value = error.value
     snackbarColor.value = 'error'
     isFlatSnackbarVisible.value = true
@@ -52,22 +48,7 @@ const getScheduleMatchQuery = async () => {
   }
 }
 
-const formatMatchTime = (date: string, time: string) => {
-  const d = new Date(`${date}T${time}`)
-  return d.toLocaleDateString('id-ID', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  }) + ' • ' + time.slice(0, 5) + ' WIB'
-}
-
-onMounted(() => {
-  if (!selectedTypeMedia.value) selectedTypeMedia.value = 'documentation'
-  
-  getScheduleMatchQuery()
-})
-
-function formatTanggalIndonesia(dateString: string): string {
+const formatTanggalIndonesia = (dateString: string): string => {
   const date = new Date(dateString)
   return new Intl.DateTimeFormat('id-ID', {
     day: 'numeric',
@@ -76,7 +57,16 @@ function formatTanggalIndonesia(dateString: string): string {
   }).format(date)
 }
 
+onMounted(() => {
+  getScheduleMatchQuery()
+})
+
 watch(selectedTypeMedia, () => {
+  currentPage.value = 1
+  getScheduleMatchQuery()
+})
+
+watch(currentPage, () => {
   getScheduleMatchQuery()
 })
 </script>
@@ -84,14 +74,12 @@ watch(selectedTypeMedia, () => {
 <template>
   <VContainer id="team">
     <div class="our-team pa-">
-      <VRow class="align-center my-6">
-        
-      </VRow>
+      <VRow class="align-center my-6" />
 
       <VRow class="align-center my-6">
         <VCol>
           <VChip label color="primary" size="small">Media Sepakbola Terbaru</VChip>
-          <h4  class="text-h4 mt-2 mb-1">Sorotan dan Laporan Sepak Bola Terbaru</h4>
+          <h4 class="text-h4 mt-2 mb-1">Sorotan dan Laporan Sepak Bola Terbaru</h4>
           <p class="text-body-1 mb-0">Tetap terinformasi dengan berita sepak bola terkini, cuplikan pertandingan, wawancara eksklusif, dan analisis ahli dari seluruh lapangan.</p>
         </VCol>
 
@@ -127,17 +115,15 @@ watch(selectedTypeMedia, () => {
                   cover
                   class="media-img"
                 />
-
                 <VCardItem>
                   <VCardTitle>{{ data.title }}</VCardTitle>
                 </VCardItem>
-
                 <VCardText>
                   <p class="line-clamp">
                     {{ data.description }}
                   </p>
                   <span class="text-caption text-disabled">
-                    {{ formatTanggalIndonesia(data.start_date) }}
+                    {{ formatTanggalIndonesia(data.created_at) }}
                   </span>
                 </VCardText>
               </VCard>
@@ -145,7 +131,6 @@ watch(selectedTypeMedia, () => {
           </VCol>
         </template>
 
-        <!-- Tampilkan jika data kosong -->
         <template v-else>
           <VCol cols="12" class="text-center py-10">
             <VIcon size="64" color="grey-lighten-1">tabler-calendar-x</VIcon>
@@ -154,6 +139,17 @@ watch(selectedTypeMedia, () => {
             </p>
           </VCol>
         </template>
+      </VRow>
+
+      <VRow v-if="totalPages > 1">
+        <VCol class="d-flex justify-end mt-4 mb-3 mr-2">
+          <VPagination
+            v-model="currentPage"
+            :length="totalPages"
+            total-visible="5"
+            color="primary"
+          />
+        </VCol>
       </VRow>
     </div>    
   </VContainer>
@@ -168,6 +164,7 @@ watch(selectedTypeMedia, () => {
     {{ snackbarMessage }}
   </VSnackbar>
 </template>
+
 
 
 <style lang="scss" scoped>

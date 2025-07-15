@@ -12,8 +12,6 @@ import logo5dark from '@images/front-pages/branding/logo-5-dark.png'
 import logo5light from '@images/front-pages/branding/logo-5-light.png'
 import { register } from 'swiper/element/bundle'
 
-
-
 register()
 const router = useRouter()
 
@@ -38,7 +36,7 @@ const getMediaQuery = async () => {
   error.value = null
 
   try {
-    const response = await $api('company/media', {
+    const response = await $api('company/nearest-media', {
       method: 'GET',
       params: {
         search: searchQuery.value,
@@ -49,7 +47,11 @@ const getMediaQuery = async () => {
       },
     })
     
-    medias.value = response.data 
+    console.log('Response:', response)
+
+    // Gabungkan semua array dari response.data
+    medias.value = Object.values(response.data).flat()
+
     const totals = response.totals
 
   } catch (err: any) {
@@ -67,7 +69,8 @@ const slide = (dir: string) => {
   if (dir === 'prev')
     swiper.slidePrev()
 
-  swiper.slideNext()
+  else
+    swiper.slideNext()
 }
 
 function formatTanggalIndonesia(dateString: string): string {
@@ -216,7 +219,7 @@ onMounted(() => {
                           {{ data.description }}
                         </p>
                         <span class="text-caption text-disabled">
-                          {{ formatTanggalIndonesia(data.start_date) }}
+                          <!-- {{ formatTanggalIndonesia(data.created_at) }} -->
                         </span>
                       </VCardText>
                     </VCard>

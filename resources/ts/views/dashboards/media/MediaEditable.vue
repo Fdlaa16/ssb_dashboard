@@ -197,7 +197,7 @@ const typeMedia = ref([
                     class="mb-4"
                   />
 
-                  <template v-if="localData.type_media === 'documentation'">
+                  <!-- <template v-if="localData.type_media === 'documentation'">
                     <VRow>
                       <VCol cols="6">
                         <AppDateTimePicker
@@ -217,7 +217,7 @@ const typeMedia = ref([
                         />
                       </VCol>
                     </VRow>       
-                  </template>
+                  </template> -->
 
                   <AppTextField
                     v-model="localData.title"

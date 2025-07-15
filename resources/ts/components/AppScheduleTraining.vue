@@ -23,6 +23,10 @@ const scheduleTranings = ref<any[]>([])
 
 const selectedTraining = ref('upcoming')
 
+const currentPage = ref(1)
+const totalPages = ref(1)
+const perPage = 5
+
 const getScheduleTrainingQuery = async () => {
   loading.value = true
   error.value = null
@@ -32,12 +36,18 @@ const getScheduleTrainingQuery = async () => {
       method: 'GET',
       params: {
         status: selectedTraining.value || 'upcoming',
+        page: currentPage.value,
+        per_page: perPage,
       }
     })
 
     const trainings = response.data
+    scheduleTranings.value = trainings.data
 
-    logisticData.value = trainings.map((item: any) => ({
+    totalPages.value = trainings.last_page
+    currentPage.value = trainings.current_page
+
+    logisticData.value = trainings.data.map((item: any) => ({
       icon: 'tabler-calendar-event',
       color: 'primary',
       value: formatTrainingTime(item.schedule_date, item.schedule_start_at),
@@ -78,7 +88,16 @@ onMounted(() => {
   getScheduleTrainingQuery()
 })
 
+onMounted(() => {
+  getScheduleTrainingQuery()
+})
+
 watch(selectedTraining, () => {
+  currentPage.value = 1
+  getScheduleTrainingQuery()
+})
+
+watch(currentPage, () => {
   getScheduleTrainingQuery()
 })
 
@@ -121,65 +140,75 @@ function formatIndoDate(dateStr: string): string {
       </VRow>
 
       <VRow>
-  <!-- Tampilkan jika ada data -->
-  <template v-if="logisticData.length > 0">
-    <VCol
-      v-for="(data, index) in logisticData"
-      :key="index"
-      cols="12"
-      md="12"
-      sm="6"
-    >
-      <!-- CARD latihan -->
-      <VCard
-        class="logistics-card-statistics cursor-pointer"
-        :style="data.isHover ? `border-block-end-color: rgb(var(--v-theme-${data.color}))` : `border-block-end-color: rgba(var(--v-theme-${data.color}),0.38)`"
-        @mouseenter="data.isHover = true"
-        @mouseleave="data.isHover = false"
-      >
-        <VCardText>
-          <div class="text-center text-caption mb-8 text-grey"> 
-            
-          </div>
-          <VRow class="align-center justify-space-between">
+        <!-- Tampilkan jika ada data -->
+        <template v-if="logisticData.length > 0">
+          <VCol
+            v-for="(data, index) in logisticData"
+            :key="index"
+            cols="12"
+            md="12"
+            sm="6"
+          >
+            <!-- CARD latihan -->
+            <VCard
+              class="logistics-card-statistics cursor-pointer"
+              :style="data.isHover ? `border-block-end-color: rgb(var(--v-theme-${data.color}))` : `border-block-end-color: rgba(var(--v-theme-${data.color}),0.38)`"
+              @mouseenter="data.isHover = true"
+              @mouseleave="data.isHover = false"
+            >
+              <VCardText>
+                <div class="text-center text-caption mb-8 text-grey"> 
+                  
+                </div>
+                <VRow class="align-center justify-space-between">
 
-            <VCol class="text-center" cols="4">
-              🗓️ {{ formatIndoDate(data.schedule_date) }}
-            </VCol>
+                  <VCol class="text-center" cols="4">
+                    🗓️ {{ formatIndoDate(data.schedule_date) }}
+                  </VCol>
 
-            <VCol class="text-center" cols="4">
-              <img
-                src="/storage/logo/LOGOSSB.png"
-                alt="Logo SSB"
-                style="height: 90px;"
-                class="me-2"
-              />
-             
-            </VCol>
+                  <VCol class="text-center" cols="4">
+                    <img
+                      src="/storage/logo/LOGOSSB.png"
+                      alt="Logo SSB"
+                      style="height: 90px;"
+                      class="me-2"
+                    />
+                  
+                  </VCol>
 
-            <VCol class="text-center" cols="4">
-              ⏰ {{ data.schedule_start_at }}
-            </VCol>
-          </VRow>
-          <div class="text-center mt-4">
-              📍 {{ data.stadium.name }} - {{ data.stadium.area }}
-          </div>
-        </VCardText>
-      </VCard>
-    </VCol>
-  </template>
+                  <VCol class="text-center" cols="4">
+                    ⏰ {{ data.schedule_start_at }}
+                  </VCol>
+                </VRow>
+                <div class="text-center mt-4">
+                    📍 {{ data.stadium.name }} - {{ data.stadium.area }}
+                </div>
+              </VCardText>
+            </VCard>
+          </VCol>
+        </template>
 
-  <!-- Tampilkan jika data kosong -->
-  <template v-else>
-    <VCol cols="12" class="text-center py-10">
-      <VIcon size="64" color="grey-lighten-1">tabler-calendar-x</VIcon>
-      <p class="text-body-1 mt-2 text-grey">
-        Belum ada jadwal latihan ditemukan.
-      </p>
-    </VCol>
-  </template>
-</VRow>
+        <!-- Tampilkan jika data kosong -->
+        <template v-else>
+          <VCol cols="12" class="text-center py-10">
+            <VIcon size="64" color="grey-lighten-1">tabler-calendar-x</VIcon>
+            <p class="text-body-1 mt-2 text-grey">
+              Belum ada jadwal latihan ditemukan.
+            </p>
+          </VCol>
+        </template>
+      </VRow>
 
+      <VRow v-if="totalPages > 1">
+        <VCol class="d-flex justify-end mt-4 mb-3 mr-2">
+          <VPagination
+            v-model="currentPage"
+            :length="totalPages"
+            total-visible="5"
+            color="primary"
+          />
+        </VCol>
+      </VRow>
     </div>    
   </VContainer>
   
