@@ -7,6 +7,17 @@ const ability = useAbility()
 // TODO: Get type from backend
 const userData = useCookie<any>('userData')
 
+// const {logout} = useAuth()
+console.log('userProfiel')
+
+const loggingOut = async() => {
+  console.log('Logging out...')
+  try {
+    // await logout()
+  } catch (error) {
+    console.error('Logout failed:', error)
+  }
+}
 const logout = async () => {
   // Remove "accessToken" from cookie
   useCookie('accessToken').value = null
@@ -151,7 +162,7 @@ const userProfileList = [
                 append-icon="tabler-logout"
                 @click="logout"
               >
-                Logout
+                Logoutt
               </VBtn>
             </div>
           </PerfectScrollbar>

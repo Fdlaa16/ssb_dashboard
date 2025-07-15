@@ -13,12 +13,11 @@ class AuthController extends Controller
      * Display a listing of the resource.
      * @return Renderable
      */
-
     public function apiLogin(Request $request)
     {
         $request->validate([
             'email' => 'required|email',
-            'password' => 'required|min:6'
+            'password' => 'required|min:8'
         ]);
 
         $credentials = $request->only('email', 'password');
@@ -26,19 +25,19 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $user = auth()->user();
 
-            // Optional: Check if user has dashboard access
-            if (!in_array($user->role, ['admin', 'super_admin'])) {
+            // Optional: Check if user has company access
+            if (!in_array($user->role, ['admin'])) {
                 Auth::logout();
                 return response()->json([
-                    'message' => 'Unauthorized access to dashboard',
+                    'message' => 'Unauthorized access to Dashboard portal',
                 ], 403);
             }
 
             // Revoke existing tokens
             $user->tokens()->delete();
 
-            // Create new token with dashboard scope
-            $token = $user->createToken('dashboard_auth_token', ['dashboard'])->plainTextToken;
+            // Create new token with company scope
+            $token = $user->createToken('company_auth_token', ['company'])->plainTextToken;
 
             return response()->json([
                 'message' => 'Dashboard login berhasil',
@@ -48,7 +47,7 @@ class AuthController extends Controller
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
-                    'role' => $user->role
+                    'role' => $user->role,
                 ],
                 'login_type' => 'dashboard'
             ], 200);
@@ -58,6 +57,7 @@ class AuthController extends Controller
             'message' => 'Dashboard login gagal, data tidak ditemukan atau salah',
         ], 401);
     }
+
 
     public function logout(Request $request)
     {

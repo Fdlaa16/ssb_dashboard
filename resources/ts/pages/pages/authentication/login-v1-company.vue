@@ -8,6 +8,7 @@ definePage({
   meta: {
     layout: 'blank',
     public: true,
+    x: 'login'
   },
 })
 

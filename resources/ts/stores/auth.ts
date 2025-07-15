@@ -67,10 +67,8 @@ export const useAuthStore = defineStore('auth', () => {
     hasRole,
   }
 }, {
-  persist: {
-    key: 'auth',
-    storage: localStorage,
-    // Specify which state should be persisted
-    paths: ['user', 'token', 'role', 'loginType']
-  }
+  persist: true
 })
+
+if (import.meta.hot)
+  import.meta.hot.accept(acceptHMRUpdate(useAuthStore, import.meta.hot))

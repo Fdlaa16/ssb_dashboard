@@ -53,7 +53,6 @@ class AuthController extends Controller
                     'name' => $user->name,
                     'email' => $user->email,
                     'role' => $user->role,
-                    'company_id' => $user->company_id ?? null
                 ],
                 'login_type' => 'company'
             ], 200);
