@@ -1,6 +1,13 @@
 <script setup lang="ts">
+import { useAuthStore } from '@/stores/auth'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+
+const authStore = useAuthStore()
+const user = computed(() => authStore.user)
+
+
+console.log('user', authStore);
 
 // Types
 interface UserData {
@@ -169,6 +176,8 @@ const showNotification = (message: string, type: 'success' | 'error' = 'success'
 
 // API Functions
 const fetchPlayer = async () => {
+  console.log('asd', authStore);
+  
   loading.value = true
   error.value = null
 

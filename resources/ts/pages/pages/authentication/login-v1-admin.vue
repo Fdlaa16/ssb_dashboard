@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useAuthStore } from '@/stores/auth'
 import authV1BottomShape from '@images/svg/auth-v1-bottom-shape.svg?raw'
 import authV1TopShape from '@images/svg/auth-v1-top-shape.svg?raw'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
@@ -10,6 +11,7 @@ definePage({
   },
 })
 
+const authStore = useAuthStore()
 const router = useRouter()
 const isFlatSnackbarVisible = ref(false)
 const snackbarMessage = ref('')
@@ -35,41 +37,65 @@ const localData = ref({
 const isPasswordVisible = ref(false)
 
 const onSubmit = async () => {
-  const formData = new FormData()
-  formData.append('email', localData.value.email)
-  formData.append('password', localData.value.password)
-
-  try {
-    const response = await $api('/login', {
-      method: 'POST',
-      body: formData,
-    });
-
-    const role = response.role
-
-    snackbarMessage.value = 'Login Berhasil!';
-    snackbarColor.value = 'success';
-    isFlatSnackbarVisible.value = true;
-
-    if (role === 'user') {
-      router.push({ name: 'front-pages-landing-page' })
-    } else if (role === 'admin') {
-      router.push({ name: 'dashboards-ecommerce' })
+    const loginData = {
+        email: localData.value.email,
+        password: localData.value.password
     }
+    
+    try {
+        const response = await $api('/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(loginData)
+        });
+        
+        const { role, user, token, message, login_type } = response;
+        
+        // Store dashboard user data
+        authStore.storeUserData({
+            user: user,
+            token: token,
+            role: role,
+            login_type: login_type
+        });
+        
+        snackbarMessage.value = message || 'Dashboard Login Berhasil!';
+        snackbarColor.value = 'success';
+        isFlatSnackbarVisible.value = true;
+        
+        // Dashboard routing
+        if (role === 'admin') {
+            await router.push({ name: 'dashboards-ecommerce' });
+        } else {
+            snackbarMessage.value = 'Unauthorized access to dashboard 123';
+            snackbarColor.value = 'error';
+            isFlatSnackbarVisible.value = true;
+        }
+        
+    } catch (err) {
+        handleLoginError(err);
+    }
+}
 
-  } catch (err: any) {
-    const errors = err?.data?.errors
-
-    if (err?.status === 422 && errors) {
-      const messages = Object.values(errors).flat()
-      snackbarMessage.value = 'Validasi gagal: ' + messages.join(', ')
+const handleLoginError = (err: any) => {
+    console.error('Login error:', err);
+    
+    if (err?.status === 422 && err?.data?.errors) {
+        const messages = Object.values(err.data.errors).flat();
+        snackbarMessage.value = 'Validasi gagal: ' + messages.join(', ');
+    } else if (err?.status === 401) {
+        snackbarMessage.value = 'Email atau password salah';
+    } else if (err?.status === 403) {
+        snackbarMessage.value = err?.data?.message || 'Akses tidak diizinkan';
     } else {
-      snackbarMessage.value = 'Gagal login: ' + (err?.message || 'Unknown error')
+        snackbarMessage.value = 'Gagal login: ' + (err?.data?.message || err?.message || 'Unknown error');
     }
-
-    snackbarColor.value = 'error'
-    isFlatSnackbarVisible.value = true
-  }
+    
+    snackbarColor.value = 'error';
+    isFlatSnackbarVisible.value = true;
 }
 
 </script>

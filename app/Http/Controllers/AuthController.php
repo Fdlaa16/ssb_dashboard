@@ -21,9 +21,14 @@ class AuthController extends Controller
 
             $user = auth()->user();
 
+            // Generate a token for the user
+            $token = $user->createToken('auth_token')->plainTextToken;
+
             return response()->json([
                 'message' => 'Login berhasil',
                 'role' => $user->role, // <-- ini akan dikirim ke Vue
+                'token' => $token,
+                'user' => $user
             ]);
         }
 

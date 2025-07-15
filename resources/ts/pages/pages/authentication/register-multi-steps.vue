@@ -137,7 +137,7 @@ const onSubmit = async () => {
   }
 
   try {
-    const response = await $api('company/player/store', {
+    const response = await $api('company/register', {
       method: 'POST',
       body: formData,
     });

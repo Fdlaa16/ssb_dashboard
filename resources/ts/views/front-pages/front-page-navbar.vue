@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useAuthStore } from '@/stores/auth'
 import { useWindowScroll } from '@vueuse/core'
 import type { RouteLocationRaw } from 'vue-router/auto'
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
@@ -24,6 +25,7 @@ interface MenuItem {
 }
 const { y } = useWindowScroll()
 
+const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
 
@@ -87,6 +89,30 @@ const isCurrentRoute = (to: RouteLocationRaw) => {
 const isPageActive = computed(() => menuItems.some(item => item.navItems.some(listItem => isCurrentRoute(listItem.to))))
 const isPageActive2 = computed(() => menuItems2.some(item => item.navItems.some(listItem => isCurrentRoute(listItem.to))))
 const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(listItem => isCurrentRoute(listItem.to))))
+
+const onLogout = async () => {
+    try {
+        const loginType = authStore.loginType;
+        const endpoint = loginType === 'dashboard' ? '/api/dashboard/logout' : '/api/company/logout';
+        
+        await $api(endpoint, {
+            method: 'POST'
+        });
+        
+        authStore.deleteUserData();
+        
+        // snackbarMessage.value = 'Logout berhasil';
+        // snackbarColor.value = 'success';
+        // isFlatSnackbarVisible.value = true;
+        
+        await router.push({ name: 'pages-authentication-login-v1-company' });
+        
+    } catch (err) {
+        // Clear local data even if API call fails
+        authStore.deleteUserData();
+        await router.push({ name: 'pages-authentication-login-v1-company' });
+    }
+}
 </script>
 
 <template>

@@ -1,4 +1,6 @@
+import { getI18n } from '@/plugins/i18n/index'
 import { deepMerge } from '@antfu/utils'
+import { themeConfig } from '@themeConfig'
 import type { App } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { createVuetify } from 'vuetify'
@@ -7,8 +9,6 @@ import { createVueI18nAdapter } from 'vuetify/locale/adapters/vue-i18n'
 import defaults from './defaults'
 import { icons } from './icons'
 import { staticPrimaryColor, staticPrimaryDarkenColor, themes } from './theme'
-import { getI18n } from '@/plugins/i18n/index'
-import { themeConfig } from '@themeConfig'
 
 // Styles
 import { cookieRef } from '@/@layouts/stores/config'
