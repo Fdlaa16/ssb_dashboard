@@ -40,21 +40,7 @@ interface Pricing {
             <!-- Kolom untuk teks sejarah (col-8) -->
             <VCol cols="12" md="8">
               <div class="text-left">
-                <p class="mb-4">
-                  PERSIB adalah klub sepak bola Indonesia yang berbasis di Kota Bandung, Jawa Barat, dan saat ini merupakan peserta dari kompetisi tertinggi Indonesia, Liga 1.
-                </p>
-                <p class="mb-4">
-                  Cikal bakal PERSIB adalah Bandoeng Inlandsche Voetbal Bond (BIVB) yang didirikan pada 05 Januari 1919. BIVB kala itu dibentuk sebagai perserikatan klub-klub sepakbola bumi putera pertama di Bandung.
-                </p>
-                <p class="mb-4">
-                  Pada 19 April 1930, BIVB tercatat sebagai salah satu dari tujuh klub yang membidani lahirnya PSSI (Persatuan Sepakbola Seluruh Indonesia). Sebagai bagian dari alat perjuangan kemerdekaan Republik Indonesia, BIVB pun mengalami beberapa transformasi dan perubahan nama. Huruf "I" yang semula Indlansche menjadi Indonesische, lalu menjadi Perserikatan Sepakraga Indonesia Bandung (PSIB), hingga melakukan fusi bersama NVB (National Voetball Bond) dan berubah nama menjadi PERSIB pada 18 Maret 1934.
-                </p>
-                <p class="mb-4">
-                  Sejak 9 September 2009, PERSIB kembali bertransformasi dan menjadi klub profesional di bawah pengelolaan PT PERSIB Bandung Bermartabat.
-                </p>
-                <p class="mb-0">
-                  Unduh dan baca selengkapnya terkait Hari Jadi PERSIB 05 Januari 1919 dalam Naskah Akademik berikut.
-                </p>
+                SSB Putra Muda Balaraja didirikan pada 4 Oktober 2020 sebagai wadah pembinaan sepak bola usia dini hingga remaja di wilayah Balaraja, Kabupaten Tangerang. Berbasis di Stadion Mini Balaraja, sekolah sepak bola ini rutin mengadakan latihan setiap hari Rabu dan Minggu. Dengan dukungan tim pelatih yang berpengalaman, SSB Putra Muda aktif mengikuti berbagai turnamen lokal dan nasional, serta berkomitmen membentuk pemain yang tidak hanya unggul secara teknik, tetapi juga berkarakter dan bermental juara.
               </div>
             </VCol>
 

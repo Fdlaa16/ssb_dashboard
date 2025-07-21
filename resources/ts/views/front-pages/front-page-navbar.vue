@@ -99,6 +99,7 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
     width="275"
     data-allow-mismatch
     disable-resize-watcher
+    class="mobile-nav-drawer"
   >
     <PerfectScrollbar
       :options="{ wheelPropagation: false }"
@@ -108,10 +109,10 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
       <div>
         <div class="d-flex flex-column gap-y-4 pa-4">
           <RouterLink
-            v-for="(item, index) in ['Home']"
+            v-for="(item, index) in ['Beranda']"
             :key="index"
             :to="{ name: 'front-pages-landing-page', hash: `#${item.toLowerCase().replace(' ', '-')}` }"
-            class="nav-link font-weight-medium"
+            class="nav-link font-weight-medium mobile-nav-link"
             :class="[props.activeId?.toLocaleLowerCase().replace('-', ' ') === item.toLocaleLowerCase() ? 'active-link' : '']"
           >
             {{ item }}
@@ -120,8 +121,7 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
           <div class="font-weight-medium cursor-pointer">
             <div
               :class="[isMenuOpen ? 'mb-6 active-link' : '', isPageActive ? 'active-link' : '']"
-              style="color: rgba(var(--v-theme-on-surface));"
-              class="page-link"
+              class="page-link mobile-nav-link"
               @click="isMenuOpen = !isMenuOpen"
             >
               Tentang <VIcon :icon="isMenuOpen ? 'tabler-chevron-up' : 'tabler-chevron-down'" />
@@ -172,9 +172,8 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
             </div>
 
             <div
-              :class="[isMenuOpen2 ? 'mb-6 active-link' : '', isPageActive ? 'active-link' : '']"
-              style="color: rgba(var(--v-theme-on-surface));"
-              class="page-link"
+              :class="[isMenuOpen2 ? 'mb-6 active-link' : '', isPageActive2 ? 'active-link' : '']"
+              class="page-link mobile-nav-link"
               @click="isMenuOpen2 = !isMenuOpen2"
             >
               Pertandingan <VIcon :icon="isMenuOpen2 ? 'tabler-chevron-up' : 'tabler-chevron-down'" />
@@ -225,9 +224,8 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
             </div>
 
             <div
-              :class="[isMenuOpen3 ? 'mb-6 active-link' : '', isPageActive ? 'active-link' : '']"
-              style="color: rgba(var(--v-theme-on-surface));"
-              class="page-link"
+              :class="[isMenuOpen3 ? 'mb-6 active-link' : '', isPageActive3 ? 'active-link' : '']"
+              class="page-link mobile-nav-link"
               @click="isMenuOpen3 = !isMenuOpen3"
             >
               Selengkapnya <VIcon :icon="isMenuOpen3 ? 'tabler-chevron-up' : 'tabler-chevron-down'" />
@@ -277,14 +275,6 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
               </div>
             </div>
           </div>
-
-          <!-- <RouterLink
-            to="/"
-            target="_blank"
-            class="font-weight-medium nav-link"
-          >
-            Admin
-          </RouterLink> -->
         </div>
       </div>
 
@@ -300,335 +290,301 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
 
   <!-- 👉 Navbar for desktop devices  -->
   <div class="front-page-navbar">
-    <div class="front-page-navbar">
-      <VAppBar
-        :color="$vuetify.theme.current.dark ? 'rgba(var(--v-theme-surface),0.38)' : 'rgba(var(--v-theme-surface), 0.38)'"
-        :class="y > 10 ? 'app-bar-scrolled' : [$vuetify.theme.current.dark ? 'app-bar-dark' : 'app-bar-light', 'elevation-0']"
-        class="navbar-blur"
+    <VAppBar
+      color="#1793FF"
+      elevation="0"
+      class="new-navbar px-5"
+      height="70"
+    >
+      <!-- toggle icon for mobile device -->
+      <IconBtn
+        id="vertical-nav-toggle-btn"
+        class="ms-n3 me-2 d-inline-block d-md-none"
+        @click="sidebar = !sidebar"
       >
-        <!-- toggle icon for mobile device -->
-        <IconBtn
-          id="vertical-nav-toggle-btn"
-          class="ms-n3 me-2 d-inline-block d-md-none"
-          @click="sidebar = !sidebar"
-        >
-          <VIcon
-            size="26"
-            icon="tabler-menu-2"
-            color="rgba(var(--v-theme-on-surface))"
-          />
-        </IconBtn>
-        <!-- Title and Landing page sections -->
-        <div class="d-flex align-center">
-          <VAppBarTitle class="me-6">
-            <RouterLink
-              :to="{ name: 'front-pages-landing-page', hash: '#home' }"
-              class="d-flex gap-x-4"
-              :class="$vuetify.display.mdAndUp ? 'd-none' : 'd-block'"
-            >
-              <div class="app-logo d-flex align-center d-md-none">
-                <img
-                  src="/storage/logo/LOGOSSB.png"
-                  alt="Logo SSB"
-                  style="height: 40px;"
-                />
-              </div>
+        <VIcon
+          size="26"
+          icon="tabler-menu-2"
+          color="white"
+        />
+      </IconBtn>
 
-              <div class="app-logo d-none d-md-flex align-center">
-                <img
-                  src="/storage/logo/LOGOSSB.png"
-                  alt="Logo SSB"
-                  style="height: 40px;"
-                  class="me-2"
-                />
-                <div class="brand-text d-flex flex-column">
-                  <h5 class="brand-line-1">PUTRA MUDA</h5>
-                  <h5 class="brand-line-2">BALARAJA</h5>
-                </div>
+      <!-- Logo Section -->
+      <div class="d-flex align-center">
+        <VAppBarTitle class="me-6">
+          <RouterLink
+            :to="{ name: 'front-pages-landing-page', hash: '#beranda' }"
+            class="d-flex align-center gap-x-3"
+          >
+            <div class="app-logo d-flex align-center">
+              <img
+                src="/storage/logo/LOGOSSB.png"
+                alt="Logo SSB"
+                style="height: 45px;"
+                class="me-3"
+              />
+              <div class="brand-text d-none d-md-flex flex-column">
+                <h5 class="brand-line-1">PUTRA MUDA</h5>
+                <h5 class="brand-line-2">BALARAJA</h5>
               </div>
-            </RouterLink>
-          </VAppBarTitle>
+            </div>
+          </RouterLink>
+        </VAppBarTitle>
+      </div>
+
+      <VSpacer />
+
+      <!-- Navigation Menu -->
+      <div class="d-flex align-center gap-x-2">
+        <!-- Menu Items -->
+        <div class="d-none d-md-flex align-center">
+          <RouterLink
+            v-for="(item, index) in ['Beranda']"
+            :key="index"
+            :to="{ name: 'front-pages-landing-page', hash: `#${item.toLowerCase().replace(' ', '-')}` }"
+            class="nav-link-new font-weight-medium"
+            :class="[props.activeId?.toLocaleLowerCase().replace('-', ' ') === item.toLocaleLowerCase() ? 'active-link-new' : '']"
+          >
+            {{ item }}
+          </RouterLink>
+
+          <!-- Tentang Menu -->
+          <span
+            class="nav-link-new font-weight-medium cursor-pointer"
+            :class="isPageActive || isMegaMenuOpen ? 'active-link-new' : ''"
+          >
+            Tentang
+            <VIcon
+              icon="tabler-chevron-down"
+              size="16"
+              class="ms-1"
+            />
+            <VMenu
+              v-model="isMegaMenuOpen"
+              open-on-hover
+              activator="parent"
+              transition="slide-y-transition"
+              location="bottom center"
+              offset="16"
+              content-class="mega-menu"
+              location-strategy="connected"
+              close-on-content-click
+            >
+              <VCard max-width="1000">
+                <VCardText class="pa-8">
+                  <div class="nav-menu">
+                    <div
+                      v-for="(item, index) in menuItems"
+                      :key="index"
+                    >
+                      <div class="d-flex align-center gap-x-3 mb-6">
+                        <VAvatar
+                          variant="tonal"
+                          color="primary"
+                          rounded
+                          :icon="item.listIcon"
+                        />
+                        <div class="text-body-1 text-high-emphasis font-weight-medium">
+                          {{ item.listTitle }}
+                        </div>
+                      </div>
+                      <ul>
+                        <li
+                          v-for="listItem in item.navItems"
+                          :key="listItem.name"
+                          style="list-style: none;"
+                          class="text-body-1 mb-4 text-no-wrap"
+                        >
+                          <RouterLink
+                            class="mega-menu-item"
+                            :to="listItem.to"
+                            :target="'_self'"
+                            :class="isCurrentRoute(listItem.to) ? 'active-link' : 'text-high-emphasis'"
+                          >
+                            <div class="d-flex align-center">
+                              <VIcon
+                                icon="tabler-circle"
+                                color="primary"
+                                :size="10"
+                                class="me-2"
+                              />
+                              <span>{{ listItem.name }}</span>
+                            </div>
+                          </RouterLink>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </VCardText>
+              </VCard>
+            </VMenu>
+          </span>
+
+          <!-- Media Menu -->
+          <RouterLink
+            :to="{ name: 'front-pages-media'}"
+            class="nav-link-new font-weight-medium"
+            :class="isMenuOpenMedia || isMegaMenuOpenMedia ? 'active-link-new' : ''"
+          >
+            Media
+          </RouterLink>
+
+          <!-- Pertandingan Menu -->
+          <span
+            class="nav-link-new font-weight-medium cursor-pointer"
+            :class="isPageActive2 || isMegaMenuOpen2 ? 'active-link-new' : ''"
+          >
+            Pertandingan
+            <VIcon
+              icon="tabler-chevron-down"
+              size="16"
+              class="ms-1"
+            />
+            <VMenu
+              v-model="isMegaMenuOpen2"
+              open-on-hover
+              activator="parent"
+              transition="slide-y-transition"
+              location="bottom center"
+              offset="16"
+              content-class="mega-menu"
+              location-strategy="connected"
+              close-on-content-click
+            >
+              <VCard max-width="1000">
+                <VCardText class="pa-8">
+                  <div class="nav-menu">
+                    <div
+                      v-for="(item, index) in menuItems2"
+                      :key="index"
+                    >
+                      <div class="d-flex align-center gap-x-3 mb-6">
+                        <VAvatar
+                          variant="tonal"
+                          color="primary"
+                          rounded
+                          :icon="item.listIcon"
+                        />
+                        <div class="text-body-1 text-high-emphasis font-weight-medium">
+                          {{ item.listTitle }}
+                        </div>
+                      </div>
+                      <ul>
+                        <li
+                          v-for="listItem in item.navItems"
+                          :key="listItem.name"
+                          style="list-style: none;"
+                          class="text-body-1 mb-4 text-no-wrap"
+                        >
+                          <RouterLink
+                            class="mega-menu-item"
+                            :to="listItem.to"
+                            :target="'_self'"
+                            :class="isCurrentRoute(listItem.to) ? 'active-link' : 'text-high-emphasis'"
+                          >
+                            <div class="d-flex align-center">
+                              <VIcon
+                                icon="tabler-circle"
+                                color="primary"
+                                :size="10"
+                                class="me-2"
+                              />
+                              <span>{{ listItem.name }}</span>
+                            </div>
+                          </RouterLink>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </VCardText>
+              </VCard>
+            </VMenu>
+          </span>
+
+          <!-- Selengkapnya Menu -->
+          <span
+            class="nav-link-new font-weight-medium cursor-pointer"
+            :class="isPageActive3 || isMegaMenuOpen3 ? 'active-link-new' : ''"
+          >
+            Selengkapnya
+            <VIcon
+              icon="tabler-chevron-down"
+              size="16"
+              class="ms-1"
+            />
+            <VMenu
+              v-model="isMegaMenuOpen3"
+              open-on-hover
+              activator="parent"
+              transition="slide-y-transition"
+              location="bottom center"
+              offset="16"
+              content-class="mega-menu"
+              location-strategy="connected"
+              close-on-content-click
+            >
+              <VCard max-width="1000">
+                <VCardText class="pa-8">
+                  <div class="nav-menu">
+                    <div
+                      v-for="(item, index) in menuItems3"
+                      :key="index"
+                    >
+                      <div class="d-flex align-center gap-x-3 mb-6">
+                        <VAvatar
+                          variant="tonal"
+                          color="primary"
+                          rounded
+                          :icon="item.listIcon"
+                        />
+                        <div class="text-body-1 text-high-emphasis font-weight-medium">
+                          {{ item.listTitle }}
+                        </div>
+                      </div>
+                      <ul>
+                        <li
+                          v-for="listItem in item.navItems"
+                          :key="listItem.name"
+                          style="list-style: none;"
+                          class="text-body-1 mb-4 text-no-wrap"
+                        >
+                          <RouterLink
+                            class="mega-menu-item"
+                            :to="listItem.to"
+                            :target="'_self'"
+                            :class="isCurrentRoute(listItem.to) ? 'active-link' : 'text-high-emphasis'"
+                          >
+                            <div class="d-flex align-center">
+                              <VIcon
+                                icon="tabler-circle"
+                                color="primary"
+                                :size="10"
+                                class="me-2"
+                              />
+                              <span>{{ listItem.name }}</span>
+                            </div>
+                          </RouterLink>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </VCardText>
+              </VCard>
+            </VMenu>
+          </span>
         </div>
 
-        <VSpacer />
-
-        <div class="d-flex gap-x-4">
-          <!-- landing page sections -->
-          <div class="text-base align-center d-none d-md-flex">
-            <RouterLink
-              v-for="(item, index) in ['Home']"
-              :key="index"
-              :to="{ name: 'front-pages-landing-page', hash: `#${item.toLowerCase().replace(' ', '-')}` }"
-              class="nav-link font-weight-medium py-2 px-2 px-lg-4"
-              :class="[props.activeId?.toLocaleLowerCase().replace('-', ' ') === item.toLocaleLowerCase() ? 'active-link' : '']"
-            >
-              {{ item }}
-            </RouterLink>
-
-            <!-- Pages Menu -->
-            <span
-              class="font-weight-medium cursor-pointer px-2 px-lg-4 py-2"
-              :class="isPageActive || isMegaMenuOpen ? 'active-link' : ''"
-              style="color: rgba(var(--v-theme-on-surface));"
-            >
-              Tentang
-              <VIcon
-                icon="tabler-chevron-down"
-                size="16"
-                class="ms-2"
-              />
-              <VMenu
-                v-model="isMegaMenuOpen"
-                open-on-hover
-                activator="parent"
-                transition="slide-y-transition"
-                location="bottom center"
-                offset="16"
-                content-class="mega-menu"
-                location-strategy="static"
-                close-on-content-click
-              >
-                <VCard max-width="1000">
-                  <VCardText class="pa-8">
-                    <div class="nav-menu">
-                      <div
-                        v-for="(item, index) in menuItems"
-                        :key="index"
-                      >
-                        <div class="d-flex align-center gap-x-3 mb-6">
-                          <VAvatar
-                            variant="tonal"
-                            color="primary"
-                            rounded
-                            :icon="item.listIcon"
-                          />
-                          <div class="text-body-1 text-high-emphasis font-weight-medium">
-                            {{ item.listTitle }}
-                          </div>
-                        </div>
-                        <ul>
-                          <li
-                            v-for="listItem in item.navItems"
-                            :key="listItem.name"
-                            style="list-style: none;"
-                            class="text-body-1 mb-4 text-no-wrap"
-                          >
-                            <RouterLink
-                              class="mega-menu-item"
-                              :to="listItem.to"
-                              :target="'_self'"
-                              :class="isCurrentRoute(listItem.to) ? 'active-link' : 'text-high-emphasis'"
-                            >
-                              <div class="d-flex align-center">
-                                <VIcon
-                                  icon="tabler-circle"
-                                  color="primary"
-                                  :size="10"
-                                  class="me-2"
-                                />
-                                <span>{{ listItem.name }}</span>
-                              </div>
-                            </RouterLink>
-                          </li>
-                        </ul>
-                      </div>
-                      <!-- <img
-                        :src="navImg"
-                        alt="Navigation Image"
-                        class="d-inline-block rounded-lg"
-                        style="border: 10px solid rgb(var(--v-theme-background));"
-                        :width="$vuetify.display.lgAndUp ? '330' : '250'"
-                        :height="$vuetify.display.lgAndUp ? '330' : '250'"
-                      > -->
-                    </div>
-                  </VCardText>
-                </VCard>
-              </VMenu>
-            </span>
-
-            <RouterLink
-              :to="{ name: 'front-pages-media'}"
-              class="nav-link font-weight-medium py-2 px-2 px-lg-4"
-              :class="isMenuOpenMedia || isMegaMenuOpenMedia ? 'active-link' : ''"
-            >
-              Media
-            </RouterLink>
-
-            <span
-              class="font-weight-medium cursor-pointer px-2 px-lg-4 py-2"
-              :class="isPageActive2 || isMegaMenuOpen2 ? 'active-link' : ''"
-              style="color: rgba(var(--v-theme-on-surface));"
-            >
-              Pertandingan
-              <VIcon
-                icon="tabler-chevron-down"
-                size="16"
-                class="ms-2"
-              />
-              <VMenu
-                v-model="isMegaMenuOpen2"
-                open-on-hover
-                activator="parent"
-                transition="slide-y-transition"
-                location="bottom center"
-                offset="16"
-                content-class="mega-menu"
-                location-strategy="static"
-                close-on-content-click
-              >
-                <VCard max-width="1000">
-                  <VCardText class="pa-8">
-                    <div class="nav-menu">
-                      <div
-                        v-for="(item, index) in menuItems2"
-                        :key="index"
-                      >
-                        <div class="d-flex align-center gap-x-3 mb-6">
-                          <VAvatar
-                            variant="tonal"
-                            color="primary"
-                            rounded
-                            :icon="item.listIcon"
-                          />
-                          <div class="text-body-1 text-high-emphasis font-weight-medium">
-                            {{ item.listTitle }}
-                          </div>
-                        </div>
-                        <ul>
-                          <li
-                            v-for="listItem in item.navItems"
-                            :key="listItem.name"
-                            style="list-style: none;"
-                            class="text-body-1 mb-4 text-no-wrap"
-                          >
-                            <RouterLink
-                              class="mega-menu-item"
-                              :to="listItem.to"
-                              :target="'_self'"
-                              :class="isCurrentRoute(listItem.to) ? 'active-link' : 'text-high-emphasis'"
-                            >
-                              <div class="d-flex align-center">
-                                <VIcon
-                                  icon="tabler-circle"
-                                  color="primary"
-                                  :size="10"
-                                  class="me-2"
-                                />
-                                <span>{{ listItem.name }}</span>
-                              </div>
-                            </RouterLink>
-                          </li>
-                        </ul>
-                      </div>
-                      <!-- <img
-                        :src="navImg"
-                        alt="Navigation Image"
-                        class="d-inline-block rounded-lg"
-                        style="border: 10px solid rgb(var(--v-theme-background));"
-                        :width="$vuetify.display.lgAndUp ? '330' : '250'"
-                        :height="$vuetify.display.lgAndUp ? '330' : '250'"
-                      > -->
-                    </div>
-                  </VCardText>
-                </VCard>
-              </VMenu>
-            </span>
-
-            <span
-              class="font-weight-medium cursor-pointer px-2 px-lg-4 py-2"
-              :class="isPageActive3 || isMegaMenuOpen3 ? 'active-link' : ''"
-              style="color: rgba(var(--v-theme-on-surface));"
-            >
-              Selengkapnya
-              <VIcon
-                icon="tabler-chevron-down"
-                size="16"
-                class="ms-2"
-              />
-              <VMenu
-                v-model="isMegaMenuOpen3"
-                open-on-hover
-                activator="parent"
-                transition="slide-y-transition"
-                location="bottom center"
-                offset="16"
-                content-class="mega-menu"
-                location-strategy="static"
-                close-on-content-click
-              >
-                <VCard max-width="1000">
-                  <VCardText class="pa-8">
-                    <div class="nav-menu">
-                      <div
-                        v-for="(item, index) in menuItems3"
-                        :key="index"
-                      >
-                        <div class="d-flex align-center gap-x-3 mb-6">
-                          <VAvatar
-                            variant="tonal"
-                            color="primary"
-                            rounded
-                            :icon="item.listIcon"
-                          />
-                          <div class="text-body-1 text-high-emphasis font-weight-medium">
-                            {{ item.listTitle }}
-                          </div>
-                        </div>
-                        <ul>
-                          <li
-                            v-for="listItem in item.navItems"
-                            :key="listItem.name"
-                            style="list-style: none;"
-                            class="text-body-1 mb-4 text-no-wrap"
-                          >
-                            <RouterLink
-                              class="mega-menu-item"
-                              :to="listItem.to"
-                              :target="'_self'"
-                              :class="isCurrentRoute(listItem.to) ? 'active-link' : 'text-high-emphasis'"
-                            >
-                              <div class="d-flex align-center">
-                                <VIcon
-                                  icon="tabler-circle"
-                                  color="primary"
-                                  :size="10"
-                                  class="me-2"
-                                />
-                                <span>{{ listItem.name }}</span>
-                              </div>
-                            </RouterLink>
-                          </li>
-                        </ul>
-                      </div>
-                      <!-- <img
-                        :src="navImg"
-                        alt="Navigation Image"
-                        class="d-inline-block rounded-lg"
-                        style="border: 10px solid rgb(var(--v-theme-background));"
-                        :width="$vuetify.display.lgAndUp ? '330' : '250'"
-                        :height="$vuetify.display.lgAndUp ? '330' : '250'"
-                      > -->
-                    </div>
-                  </VCardText>
-                </VCard>
-              </VMenu>
-            </span>
-
-            <!-- <RouterLink
-              to="/"
-              target="_blank"
-              class="font-weight-medium nav-link"
-            >
-              Admin
-            </RouterLink> -->
-          </div>
-
+        <!-- Action Buttons -->
+        <div class="d-flex align-center gap-x-3 ms-4">
           <NavbarThemeSwitcher />
 
-           <VBtn
+          <!-- Login Button -->
+          <VBtn
             v-if="$vuetify.display.lgAndUp"
-            variant="elevated"
-            color="primary"
+            variant="outlined"
+            color="white"
+            class="text-white btn-navbar"
+            size="small"
             @click="$router.push({ name: 'pages-authentication-login-v1-company' })"
           >
             Login
@@ -638,17 +594,21 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
             v-else
             rounded
             icon
-            variant="elevated"
-            color="primary"
+            variant="outlined"
+            color="white"
+            size="small"
             @click="$router.push({ name: 'pages-authentication-login-v1-company' })"
           >
-            <VIcon icon="tabler-login" />
+            <VIcon icon="tabler-login" color="white" />
           </VBtn>
 
+          <!-- Register Button -->
           <VBtn
             v-if="$vuetify.display.lgAndUp"
-            variant="elevated"
-            color="primary"
+            variant="flat"
+            color="white"
+            class="text-primary btn-navbar"
+            size="small"
             @click="$router.push({ name: 'pages-authentication-register-multi-steps' })"
           >
             Register Now
@@ -658,146 +618,173 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
             v-else
             rounded
             icon
-            variant="elevated"
-            color="primary"
+            variant="flat"
+            color="white"
+            size="small"
             @click="$router.push({ name: 'pages-authentication-register-multi-steps' })"
           >
-            <VIcon icon="tabler-registered" />
+            <VIcon icon="tabler-registered" color="#1793FF" />
           </VBtn>
-
-          <!-- <VBtn
-            v-if="$vuetify.display.lgAndUp"
-            variant="elevated"
-            color="primary"
-            @click="$router.push({ name: 'front-pages-profile' })"
-          >
-            Profile
-          </VBtn>
-
-          <VBtn
-            v-else
-            rounded
-            icon
-            variant="elevated"
-            color="primary"
-            @click="$router.push({ name: 'front-pages-profile' })"
-          >
-            <VIcon icon="tabler-user" />
-          </VBtn> -->
         </div>
-      </VAppBar>
-    </div>
+      </div>
+    </VAppBar>
   </div>
 </template>
 
 <style lang="scss" scoped>
+// Brand Text Styling
 .brand-line-1,
 .brand-line-2 {
   margin: 0;
-  line-height: 1.2;
-  font-size: 1rem; 
+  line-height: 1.1;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
+// New Navbar Styling
+.new-navbar {
+  background: #1793FF !important;
+  box-shadow: 0 2px 10px rgba(23, 147, 255, 0.2);
+  position: fixed !important;
+  width: 100% !important;
+  z-index: 1000;
+  
+  .v-toolbar__content {
+    padding: 0 20px !important;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
+
+// Navigation Links
+.nav-link-new {
+  color: white !important;
+  text-decoration: none !important;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+  }
+  
+  &.active-link-new {
+    background: rgba(255, 255, 255, 0.15);
+    font-weight: 600;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30px;
+      height: 2px;
+      background: white;
+      border-radius: 2px;
+    }
+  }
+}
+
+// Button Styling
+.btn-navbar {
+  text-transform: none !important;
+  font-weight: 500 !important;
+  border-radius: 6px !important;
+  
+  &.v-btn--variant-outlined {
+    border: 1.5px solid white !important;
+    
+    &:hover {
+      background: white !important;
+      color: #1793FF !important;
+    }
+  }
+  
+  &.v-btn--variant-flat {
+    &:hover {
+      background: rgba(255, 255, 255, 0.9) !important;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+    }
+  }
+}
+
+// Mobile Navigation
+.mobile-nav-drawer {
+  background: #1793FF !important;
+  
+  .mobile-nav-link {
+    color: white !important;
+    
+    &:hover {
+      color: rgba(255, 255, 255, 0.8) !important;
+    }
+  }
+}
+
+// Mega Menu Styling
 .nav-menu {
   display: flex;
   gap: 2rem;
 }
 
-.nav-link {
-  &:not(:hover) {
-    color: rgb(var(--v-theme-on-surface));
-  }
-}
-
-.page-link {
+.mega-menu-item {
   &:hover {
-    color: rgb(var(--v-theme-primary)) !important;
+    color: #1793FF !important;
   }
 }
 
-@media (max-width: 1280px) {
-  .nav-menu {
-    gap: 2.25rem;
-  }
-}
-
-@media (min-width: 1920px) {
-  .front-page-navbar {
-    .v-toolbar {
-      max-inline-size: calc(1440px - 32px);
+// Responsive Design
+@media (max-width: 960px) {
+  .new-navbar {
+    .v-toolbar__content {
+      padding: 0 16px !important;
     }
   }
-}
-
-@media (min-width: 1280px) and (max-width: 1919px) {
-  .front-page-navbar {
-    .v-toolbar {
-      max-inline-size: calc(1200px - 32px);
-    }
-  }
-}
-
-@media (min-width: 960px) and (max-width: 1279px) {
-  .front-page-navbar {
-    .v-toolbar {
-      max-inline-size: calc(900px - 32px);
-    }
-  }
-}
-
-@media (min-width: 600px) and (max-width: 959px) {
-  .front-page-navbar {
-    .v-toolbar {
-      max-inline-size: calc(100% - 64px);
-    }
+  
+  .brand-line-1,
+  .brand-line-2 {
+    font-size: 0.85rem;
   }
 }
 
 @media (max-width: 600px) {
-  .front-page-navbar {
-    .v-toolbar {
-      max-inline-size: calc(100% - 32px);
+  .new-navbar {
+    .v-toolbar__content {
+      padding: 0 12px !important;
     }
   }
 }
 
-.nav-item-img {
-  border: 10px solid rgb(var(--v-theme-background));
-  border-radius: 10px;
+// Navigation Drawer Close Button
+#navigation-drawer-close-btn {
+  position: absolute;
+  cursor: pointer;
+  top: 0.5rem;
+  right: 1rem;
+  color: white !important;
 }
 
+// Page Link Styling
+.page-link {
+  color: white !important;
+  
+  &:hover {
+    color: rgba(255, 255, 255, 0.8) !important;
+  }
+}
+
+// Active Link Styling
 .active-link {
-  color: rgb(var(--v-theme-primary)) !important;
-}
-
-.app-bar-light {
-  border: 2px solid rgba(var(--v-theme-surface), 68%);
-  border-radius: 0.5rem;
-  background-color: rgba(var(--v-theme-surface), 38%);
-  transition: all 0.1s ease-in-out;
-}
-
-.app-bar-dark {
-  border: 2px solid rgba(var(--v-theme-surface), 68%);
-  border-radius: 0.5rem;
-  background-color: rgba(255, 255, 255, 4%);
-  transition: all 0.1s ease-in-out;
-}
-
-.app-bar-scrolled {
-  border: 2px solid rgb(var(--v-theme-surface));
-  border-radius: 0.5rem;
-  background-color: rgb(var(--v-theme-surface)) !important;
-  transition: all 0.1s ease-in-out;
-}
-
-.front-page-navbar::after {
-  position: fixed;
-  z-index: 2;
-  backdrop-filter: saturate(100%) blur(6px);
-  block-size: 5rem;
-  content: "";
-  inline-size: 100%;
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 600 !important;
 }
 </style>
 
@@ -805,38 +792,30 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
 @use "@layouts/styles/mixins" as layoutMixins;
 
 .mega-menu {
-  position: fixed !important;
-  inset-block-start: 5.4rem;
-  inset-inline-start: 50%;
-  transform: translateX(-50%);
+  border-radius: 8px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
 
-  @include layoutMixins.rtl {
-    transform: translateX(50%);
-  }
+  // Hapus ini:
+  // position: fixed !important;
+  // top: 70px !important;
+  // left: 50% !important;
+  // transform: translateX(-50%) !important;
 }
 
 .front-page-navbar {
-  .v-toolbar__content {
-    padding-inline: 30px !important;
-  }
-
   .v-toolbar {
-    inset-inline: 0 !important;
-    margin-block-start: 1rem !important;
-    margin-inline: auto !important;
+    margin: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
   }
 }
 
-.mega-menu-item {
+// Override theme switcher for navbar
+.front-page-navbar .v-btn--icon {
+  color: white !important;
+  
   &:hover {
-    color: rgb(var(--v-theme-primary)) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
   }
-}
-
-#navigation-drawer-close-btn {
-  position: absolute;
-  cursor: pointer;
-  inset-block-start: 0.5rem;
-  inset-inline-end: 1rem;
 }
 </style>
