@@ -75,6 +75,17 @@ const onSubmit = async () => {
 </script>
 
 <template>
+  <VBtn
+    :to="{ name: 'front-pages-landing-page'}"
+    variant="text"
+    color="primary"
+    class="mb-4 position-absolute"
+    style="left: 32px; top: 32px; z-index: 2;"
+  >
+    <VIcon start icon="tabler-arrow-left" />
+    Kembali ke Beranda
+  </VBtn>
+  
   <div class="auth-wrapper d-flex align-center justify-center pa-4">
     <div class="position-relative my-sm-16">
       <!-- 👉 Top shape -->

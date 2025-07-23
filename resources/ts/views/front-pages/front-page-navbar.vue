@@ -377,7 +377,7 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
                       v-for="(item, index) in menuItems"
                       :key="index"
                     >
-                      <div class="d-flex align-center gap-x-3 mb-6">
+                      <!-- <div class="d-flex align-center gap-x-3 mb-6">
                         <VAvatar
                           variant="tonal"
                           color="primary"
@@ -387,7 +387,7 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
                         <div class="text-body-1 text-high-emphasis font-weight-medium">
                           {{ item.listTitle }}
                         </div>
-                      </div>
+                      </div> -->
                       <ul>
                         <li
                           v-for="listItem in item.navItems"
@@ -458,7 +458,7 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
                       v-for="(item, index) in menuItems2"
                       :key="index"
                     >
-                      <div class="d-flex align-center gap-x-3 mb-6">
+                      <!-- <div class="d-flex align-center gap-x-3 mb-6">
                         <VAvatar
                           variant="tonal"
                           color="primary"
@@ -468,7 +468,7 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
                         <div class="text-body-1 text-high-emphasis font-weight-medium">
                           {{ item.listTitle }}
                         </div>
-                      </div>
+                      </div> -->
                       <ul>
                         <li
                           v-for="listItem in item.navItems"
@@ -530,7 +530,7 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
                       v-for="(item, index) in menuItems3"
                       :key="index"
                     >
-                      <div class="d-flex align-center gap-x-3 mb-6">
+                      <!-- <div class="d-flex align-center gap-x-3 mb-6">
                         <VAvatar
                           variant="tonal"
                           color="primary"
@@ -540,7 +540,7 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
                         <div class="text-body-1 text-high-emphasis font-weight-medium">
                           {{ item.listTitle }}
                         </div>
-                      </div>
+                      </div> -->
                       <ul>
                         <li
                           v-for="listItem in item.navItems"
@@ -783,7 +783,6 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
 
 // Active Link Styling
 .active-link {
-  color: rgba(255, 255, 255, 0.9) !important;
   font-weight: 600 !important;
 }
 </style>
