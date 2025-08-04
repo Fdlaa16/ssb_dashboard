@@ -25,7 +25,7 @@ const pagesList: Menu[] = [
   { name: 'Payment', to: { name: 'front-pages-payment' }, isNew: true },
   { name: 'Checkout', to: { name: 'front-pages-checkout' } },
   { name: 'Help Center', to: { name: 'front-pages-help-center' } },
-  { name: 'Login/Register', to: { name: 'pages-authentication-login-v2' } },
+  { name: 'Login/Register', to: { name: 'authentication-login-v2' } },
 ]
 
 const demoList = [

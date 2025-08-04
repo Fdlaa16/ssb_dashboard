@@ -395,27 +395,27 @@ export const db: DB = {
           title: 'Not Authorized - 401',
         },
         {
-          url: { name: 'pages-authentication-login-v1' },
+          url: { name: 'authentication-login' },
           icon: 'tabler-login',
           title: 'Login V1',
         },
         {
-          url: { name: 'pages-authentication-login-v1-admin' },
+          url: { name: 'authentication-login-v1-admin' },
           icon: 'tabler-login',
           title: 'Login V1 Admin',
         },
         {
-          url: { name: 'pages-authentication-login-v1-company' },
+          url: { name: 'authentication-login' },
           icon: 'tabler-login',
           title: 'Login V1 Company',
         },
         {
-          url: { name: 'pages-authentication-login-v2' },
+          url: { name: 'authentication-login-v2' },
           icon: 'tabler-login',
           title: 'Login V2',
         },
         {
-          url: { name: 'pages-authentication-register-v1' },
+          url: { name: 'authentication-register-v1' },
           icon: 'tabler-user-plus',
           title: 'Register V1',
         },
@@ -435,7 +435,7 @@ export const db: DB = {
           url: { name: 'pages-authentication-verify-email-v2' },
         },
         {
-          url: { name: 'pages-authentication-forgot-password-v1' },
+          url: { name: 'authentication-forgot-password-v1' },
           icon: 'tabler-lock-exclamation',
           title: 'Forgot Password V1',
         },
@@ -470,7 +470,7 @@ export const db: DB = {
           title: 'Dialog Examples',
         },
         {
-          url: { name: 'pages-authentication-register-multi-steps' },
+          url: { name: 'authentication-register' },
           icon: 'tabler-user-plus',
           title: 'Register Multi-Steps',
         },

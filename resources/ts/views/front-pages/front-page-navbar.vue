@@ -108,12 +108,12 @@ const onLogout = async () => {
         // snackbarColor.value = 'success';
         // isFlatSnackbarVisible.value = true;
         
-        await router.push({ name: 'pages-authentication-login-v1-company' });
+        await router.push({ name: 'authentication-login' });
         
     } catch (err) {
         // Clear local data even if API call fails
         authStore.deleteUserData();
-        await router.push({ name: 'pages-authentication-login-v1-company' });
+        await router.push({ name: 'authentication-login' });
     }
 }
 </script>
@@ -578,7 +578,7 @@ const onLogout = async () => {
             color="white"
             class="text-white btn-navbar"
             size="default"
-            @click="$router.push({ name: 'pages-authentication-login-v1-company' })"
+            @click="$router.push({ name: 'authentication-login' })"
           >
             Login
           </VBtn>
@@ -590,7 +590,7 @@ const onLogout = async () => {
             variant="outlined"
             color="white"
             size="default"
-            @click="$router.push({ name: 'pages-authentication-login-v1-company' })"
+            @click="$router.push({ name: 'authentication-login' })"
           >
             <VIcon icon="tabler-login" color="white" />
           </VBtn>
@@ -602,7 +602,7 @@ const onLogout = async () => {
             color="white"
             class="text-primary btn-navbar"
             size="default"
-            @click="$router.push({ name: 'pages-authentication-register-multi-steps' })"
+            @click="$router.push({ name: 'authentication-register' })"
           >
             Register Now
           </VBtn>
@@ -614,7 +614,7 @@ const onLogout = async () => {
             variant="flat"
             color="white"
             size="default"
-            @click="$router.push({ name: 'pages-authentication-register-multi-steps' })"
+            @click="$router.push({ name: 'authentication-register' })"
           >
             <VIcon icon="tabler-registered" color="#1793FF" />
           </VBtn>

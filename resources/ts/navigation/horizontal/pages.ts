@@ -33,18 +33,18 @@ export default [
           {
             title: 'Login',
             children: [
-              { title: 'Login v1', to: 'pages-authentication-login-v1', target: '_blank' },
-              { title: 'Login v1 Admin', to: 'pages-authentication-login-v1-admin', target: '_blank' },
-              { title: 'Login v1 Company', to: 'pages-authentication-login-v1-company', target: '_blank' },
-              { title: 'Login v2', to: 'pages-authentication-login-v2', target: '_blank' },
+              { title: 'Login v1', to: 'authentication-login', target: '_blank' },
+              { title: 'Login v1 Admin', to: 'authentication-login-v1-admin', target: '_blank' },
+              { title: 'Login v1 Company', to: 'authentication-login', target: '_blank' },
+              { title: 'Login v2', to: 'authentication-login-v2', target: '_blank' },
             ],
           },
           {
             title: 'Register',
             children: [
-              { title: 'Register v1', to: 'pages-authentication-register-v1', target: '_blank' },
+              { title: 'Register v1', to: 'authentication-register-v1', target: '_blank' },
               { title: 'Register v2', to: 'pages-authentication-register-v2', target: '_blank' },
-              { title: 'Register Multi-Steps', to: 'pages-authentication-register-multi-steps', target: '_blank' },
+              { title: 'Register Multi-Steps', to: 'authentication-register', target: '_blank' },
             ],
           },
           {
@@ -57,7 +57,7 @@ export default [
           {
             title: 'Forgot Password',
             children: [
-              { title: 'Forgot Password v1', to: 'pages-authentication-forgot-password-v1', target: '_blank' },
+              { title: 'Forgot Password v1', to: 'authentication-forgot-password-v1', target: '_blank' },
               { title: 'Forgot Password v2', to: 'pages-authentication-forgot-password-v2', target: '_blank' },
             ],
           },

@@ -120,7 +120,7 @@ const pricingPlans = [
             <div class="cta-section">
               <button 
                 class="cta-button"
-                @click="$router.push({ name: 'pages-authentication-register-multi-steps' })"
+                @click="$router.push({ name: 'authentication-register' })"
               >
                 Daftar Sekarang
               </button>

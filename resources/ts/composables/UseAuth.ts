@@ -27,7 +27,7 @@ export const useAuth = () => {
       authStore.deleteUserData();
       
       // Redirect to login page
-      await router.push({ name: 'pages-authentication-login-v1' });
+      await router.push({ name: 'authentication-login' });
     }
   }
 

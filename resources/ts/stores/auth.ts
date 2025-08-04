@@ -122,9 +122,9 @@ export const useAuthStore = defineStore('auth', () => {
       // Redirect ke halaman login sesuai dengan role sebelumnya
       const router = useRouter()
       if (role.value === 'admin') {
-        await router.push({ name: 'pages-authentication-login-v1-admin' })
+        await router.push({ name: 'authentication-login' })
       } else {
-        await router.push({ name: 'pages-authentication-login-v1' })
+        await router.push({ name: 'authentication-login' })
       }
     } catch (error) {
       console.error('Logout error:', error)

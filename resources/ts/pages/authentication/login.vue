@@ -1,17 +1,18 @@
 <script setup lang="ts">
-import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
+import { useAuthStore } from '@/stores/auth'
 import authV1BottomShape from '@images/svg/auth-v1-bottom-shape.svg?raw'
 import authV1TopShape from '@images/svg/auth-v1-top-shape.svg?raw'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
-import { themeConfig } from '@themeConfig'
 
 definePage({
   meta: {
     layout: 'blank',
     public: true,
+    x: 'login'
   },
 })
 
+const authStore = useAuthStore()
 const router = useRouter()
 const isFlatSnackbarVisible = ref(false)
 const snackbarMessage = ref('')
@@ -37,41 +38,65 @@ const localData = ref({
 const isPasswordVisible = ref(false)
 
 const onSubmit = async () => {
-  const formData = new FormData()
-  formData.append('email', localData.value.email)
-  formData.append('password', localData.value.password)
-
-  try {
-    const response = await $api('/login', {
-      method: 'POST',
-      body: formData,
-    });
-
-    const role = response.role
-
-    snackbarMessage.value = 'Login Berhasil!';
-    snackbarColor.value = 'success';
-    isFlatSnackbarVisible.value = true;
-
-    if (role === 'user') {
-      router.push({ name: 'front-pages-landing-page' })
-    } else if (role === 'admin') {
-      router.push({ name: 'dashboards-ecommerce' })
+    const loginData = {
+        email: localData.value.email,
+        password: localData.value.password
     }
+    
+    try {
+        const response = await $api('/company/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(loginData)
+        });
+        
+        const { role, user, token, message, login_type } = response;
+        
+        // Store company user data
+        authStore.storeUserData({
+            user: user,
+            token: token,
+            role: role,
+            login_type: login_type
+        });
+        
+        snackbarMessage.value = message || 'Company Login Berhasil!';
+        snackbarColor.value = 'success';
+        isFlatSnackbarVisible.value = true;
+        
+        // Company routing
+        if (role === 'user') {
+            await router.push({ name: 'front-pages-landing-page' });
+        } else {
+            snackbarMessage.value = 'Unauthorized access to company portal';
+            snackbarColor.value = 'error';
+            isFlatSnackbarVisible.value = true;
+        }
+        
+    } catch (err) {
+        handleLoginError(err);
+    }
+}
 
-  } catch (err: any) {
-    const errors = err?.data?.errors
-
-    if (err?.status === 422 && errors) {
-      const messages = Object.values(errors).flat()
-      snackbarMessage.value = 'Validasi gagal: ' + messages.join(', ')
+const handleLoginError = (err: any) => {
+    console.error('Login error:', err);
+    
+    if (err?.status === 422 && err?.data?.errors) {
+        const messages = Object.values(err.data.errors).flat();
+        snackbarMessage.value = 'Validasi gagal: ' + messages.join(', ');
+    } else if (err?.status === 401) {
+        snackbarMessage.value = 'Email atau password salah';
+    } else if (err?.status === 403) {
+        snackbarMessage.value = err?.data?.message || 'Akses tidak diizinkan';
     } else {
-      snackbarMessage.value = 'Gagal login: ' + (err?.message || 'Unknown error')
+        snackbarMessage.value = 'Gagal login: ' + (err?.data?.message || err?.message || 'Unknown error');
     }
-
-    snackbarColor.value = 'error'
-    isFlatSnackbarVisible.value = true
-  }
+    
+    snackbarColor.value = 'error';
+    isFlatSnackbarVisible.value = true;
 }
 
 </script>
@@ -99,23 +124,23 @@ const onSubmit = async () => {
       >
         <VCardItem class="justify-center">
           <VCardTitle>
-            <RouterLink to="/">
-              <div class="app-logo">
-                <VNodeRenderer :nodes="themeConfig.app.logo" />
-                <h1 class="app-logo-title">
-                  {{ themeConfig.app.title }}
-                </h1>
-              </div>
-            </RouterLink>
+            <div class="app-logo">
+              <img
+                src="/storage/logo/LOGOSSB.png"
+                alt="Logo SSB"
+                class="app-logo-img"
+                style="height: 70px;"
+              />
+            </div>
           </VCardTitle>
         </VCardItem>
 
         <VCardText>
-          <h4 class="text-h4 mb-1">
-            Welcome to <span class="text-capitalize">{{ themeConfig.app.title }}</span>! 👋🏻
+          <h4 class="text-h4 text-center mb-1">
+            PUTRA MUDA BALARAJA
           </h4>
-          <p class="mb-0">
-            Please sign-in to your account and start the adventure
+          <p class="text-center mb-0">
+            Silakan masuk ke akun Anda dan mulai petualangan
           </p>
         </VCardText>
 
@@ -127,9 +152,9 @@ const onSubmit = async () => {
                 <AppTextField
                   v-model="localData.email"
                   autofocus
-                  label="Email or Username"
+                  label="Email"
                   type="email"
-                  placeholder="johndoe@email.com"
+                  placeholder="budi@email.com"
                 />
               </VCol>
 
@@ -143,10 +168,11 @@ const onSubmit = async () => {
                   autocomplete="password"
                   :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
                   @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                  :rules="[rulesPassword.required, rulesPassword.minLength]"
                 />
 
                 <!-- remember me checkbox -->
-                <div class="d-flex align-center justify-space-between flex-wrap my-6">
+                <!-- <div class="d-flex align-center justify-space-between flex-wrap my-6">
                   <VCheckbox
                     v-model="localData.remember"
                     label="Remember me"
@@ -154,16 +180,17 @@ const onSubmit = async () => {
 
                   <RouterLink
                     class="text-primary"
-                    :to="{ name: 'pages-authentication-forgot-password-v1' }"
+                    :to="{ name: 'authentication-forgot-password-v1' }"
                   >
                     Forgot Password?
                   </RouterLink>
-                </div>
+                </div> -->
 
                 <!-- login button -->
                 <VBtn
                   block
                   type="submit"
+                  class="mt-5"
                 >
                   Login
                 </VBtn>
@@ -175,32 +202,32 @@ const onSubmit = async () => {
                 class="text-body-1 text-center"
               >
                 <span class="d-inline-block">
-                  New on our platform?
+                 Baru di platform kami?
                 </span>
                 <RouterLink
                   class="text-primary ms-1 d-inline-block text-body-1"
-                  :to="{ name: 'pages-authentication-register-v1' }"
+                  :to="{ name: 'authentication-register' }"
                 >
-                  Create an account
+                  Buat akun
                 </RouterLink>
               </VCol>
 
-              <VCol
+              <!-- <VCol
                 cols="12"
                 class="d-flex align-center"
               >
                 <VDivider />
                 <span class="mx-4 text-high-emphasis">or</span>
                 <VDivider />
-              </VCol>
+              </VCol> -->
 
               <!-- auth providers -->
-              <VCol
+              <!-- <VCol
                 cols="12"
                 class="text-center"
               >
                 <AuthProvider />
-              </VCol>
+              </VCol> -->
             </VRow>
           </VForm>
         </VCardText>

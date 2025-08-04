@@ -11,18 +11,9 @@ definePage({
   },
 })
 
-const router = useRouter()
-const otp = ref('')
-const isOtpInserted = ref(false)
-
-const onFinish = () => {
-  isOtpInserted.value = true
-
-  setTimeout(() => {
-    isOtpInserted.value = false
-    router.push('/')
-  }, 2000)
-}
+const form = ref({
+  email: '',
+})
 </script>
 
 <template>
@@ -61,14 +52,11 @@ const onFinish = () => {
 
         <VCardText>
           <h4 class="text-h4 mb-1">
-            Two Step Verification 💬
+            Forgot Password? 🔒
           </h4>
-          <p class="mb-1">
-            We sent a verification code to your mobile. Enter the code from the mobile in the field below.
+          <p class="mb-0">
+            Enter your email and we'll send you instructions to reset your password
           </p>
-          <h6 class="text-h6">
-            ******1234
-          </h6>
         </VCardText>
 
         <VCardText>
@@ -76,36 +64,38 @@ const onFinish = () => {
             <VRow>
               <!-- email -->
               <VCol cols="12">
-                <h6 class="text-body-1">
-                  Type your 6 digit security code
-                </h6>
-                <VOtpInput
-                  v-model="otp"
-                  :disabled="isOtpInserted"
-                  type="number"
-                  class="pa-0"
-                  @finish="onFinish"
+                <AppTextField
+                  v-model="form.email"
+                  autofocus
+                  label="Email"
+                  type="email"
+                  placeholder="johndoe@email.com"
                 />
               </VCol>
 
               <!-- reset password -->
               <VCol cols="12">
                 <VBtn
-                  :loading="isOtpInserted"
-                  :disabled="isOtpInserted"
                   block
                   type="submit"
                 >
-                  Verify my account
+                  Send Reset Link
                 </VBtn>
               </VCol>
 
               <!-- back to login -->
               <VCol cols="12">
-                <div class="d-flex justify-center align-center flex-wrap">
-                  <span class="me-1">Didn't get the code?</span>
-                  <a href="#">Resend</a>
-                </div>
+                <RouterLink
+                  class="d-flex align-center justify-center"
+                  :to="{ name: 'authentication-login' }"
+                >
+                  <VIcon
+                    icon="tabler-chevron-left"
+                    size="20"
+                    class="me-1 flip-in-rtl"
+                  />
+                  <span>Back to login</span>
+                </RouterLink>
               </VCol>
             </VRow>
           </VForm>
@@ -117,10 +107,4 @@ const onFinish = () => {
 
 <style lang="scss">
 @use "@core-scss/template/pages/page-auth";
-
-.v-otp-input {
-  .v-otp-input__content {
-    padding-inline: 0;
-  }
-}
 </style>
