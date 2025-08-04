@@ -294,7 +294,7 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
       color="#1793FF"
       elevation="0"
       class="new-navbar px-5"
-      height="70"
+      height="95"
     >
       <!-- toggle icon for mobile device -->
       <IconBtn
@@ -320,7 +320,7 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
               <img
                 src="/storage/logo/LOGOSSB.png"
                 alt="Logo SSB"
-                style="height: 45px;"
+                style="height: 50px;"
                 class="me-3"
               />
               <div class="brand-text d-none d-md-flex flex-column">
@@ -356,7 +356,7 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
             Tentang
             <VIcon
               icon="tabler-chevron-down"
-              size="16"
+              size="18"
               class="ms-1"
             />
             <VMenu
@@ -365,35 +365,24 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
               activator="parent"
               transition="slide-y-transition"
               location="bottom center"
-              offset="16"
+              offset="20"
               content-class="mega-menu"
               location-strategy="connected"
               close-on-content-click
             >
-              <VCard max-width="1000">
-                <VCardText class="pa-8">
+              <VCard max-width="1200">
+                <VCardText class="pa-10">
                   <div class="nav-menu">
                     <div
                       v-for="(item, index) in menuItems"
                       :key="index"
                     >
-                      <!-- <div class="d-flex align-center gap-x-3 mb-6">
-                        <VAvatar
-                          variant="tonal"
-                          color="primary"
-                          rounded
-                          :icon="item.listIcon"
-                        />
-                        <div class="text-body-1 text-high-emphasis font-weight-medium">
-                          {{ item.listTitle }}
-                        </div>
-                      </div> -->
                       <ul>
                         <li
                           v-for="listItem in item.navItems"
                           :key="listItem.name"
                           style="list-style: none;"
-                          class="text-body-1 mb-4 text-no-wrap"
+                          class="text-h6 mb-5 text-no-wrap"
                         >
                           <RouterLink
                             class="mega-menu-item"
@@ -405,8 +394,8 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
                               <VIcon
                                 icon="tabler-circle"
                                 color="primary"
-                                :size="10"
-                                class="me-2"
+                                :size="12"
+                                class="me-3"
                               />
                               <span>{{ listItem.name }}</span>
                             </div>
@@ -437,7 +426,7 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
             Pertandingan
             <VIcon
               icon="tabler-chevron-down"
-              size="16"
+              size="18"
               class="ms-1"
             />
             <VMenu
@@ -446,35 +435,24 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
               activator="parent"
               transition="slide-y-transition"
               location="bottom center"
-              offset="16"
+              offset="20"
               content-class="mega-menu"
               location-strategy="connected"
               close-on-content-click
             >
-              <VCard max-width="1000">
-                <VCardText class="pa-8">
+              <VCard max-width="1200">
+                <VCardText class="pa-10">
                   <div class="nav-menu">
                     <div
                       v-for="(item, index) in menuItems2"
                       :key="index"
                     >
-                      <!-- <div class="d-flex align-center gap-x-3 mb-6">
-                        <VAvatar
-                          variant="tonal"
-                          color="primary"
-                          rounded
-                          :icon="item.listIcon"
-                        />
-                        <div class="text-body-1 text-high-emphasis font-weight-medium">
-                          {{ item.listTitle }}
-                        </div>
-                      </div> -->
                       <ul>
                         <li
                           v-for="listItem in item.navItems"
                           :key="listItem.name"
                           style="list-style: none;"
-                          class="text-body-1 mb-4 text-no-wrap"
+                          class="text-h6 mb-5 text-no-wrap"
                         >
                           <RouterLink
                             class="mega-menu-item"
@@ -486,8 +464,8 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
                               <VIcon
                                 icon="tabler-circle"
                                 color="primary"
-                                :size="10"
-                                class="me-2"
+                                :size="12"
+                                class="me-3"
                               />
                               <span>{{ listItem.name }}</span>
                             </div>
@@ -509,7 +487,7 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
             Selengkapnya
             <VIcon
               icon="tabler-chevron-down"
-              size="16"
+              size="18"
               class="ms-1"
             />
             <VMenu
@@ -518,35 +496,24 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
               activator="parent"
               transition="slide-y-transition"
               location="bottom center"
-              offset="16"
+              offset="20"
               content-class="mega-menu"
               location-strategy="connected"
               close-on-content-click
             >
-              <VCard max-width="1000">
-                <VCardText class="pa-8">
+              <VCard max-width="1200">
+                <VCardText class="pa-10">
                   <div class="nav-menu">
                     <div
                       v-for="(item, index) in menuItems3"
                       :key="index"
                     >
-                      <!-- <div class="d-flex align-center gap-x-3 mb-6">
-                        <VAvatar
-                          variant="tonal"
-                          color="primary"
-                          rounded
-                          :icon="item.listIcon"
-                        />
-                        <div class="text-body-1 text-high-emphasis font-weight-medium">
-                          {{ item.listTitle }}
-                        </div>
-                      </div> -->
                       <ul>
                         <li
                           v-for="listItem in item.navItems"
                           :key="listItem.name"
                           style="list-style: none;"
-                          class="text-body-1 mb-4 text-no-wrap"
+                          class="text-h6 mb-5 text-no-wrap"
                         >
                           <RouterLink
                             class="mega-menu-item"
@@ -558,8 +525,8 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
                               <VIcon
                                 icon="tabler-circle"
                                 color="primary"
-                                :size="10"
-                                class="me-2"
+                                :size="12"
+                                class="me-3"
                               />
                               <span>{{ listItem.name }}</span>
                             </div>
@@ -584,7 +551,7 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
             variant="outlined"
             color="white"
             class="text-white btn-navbar"
-            size="small"
+            size="default"
             @click="$router.push({ name: 'pages-authentication-login-v1-company' })"
           >
             Login
@@ -596,7 +563,7 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
             icon
             variant="outlined"
             color="white"
-            size="small"
+            size="default"
             @click="$router.push({ name: 'pages-authentication-login-v1-company' })"
           >
             <VIcon icon="tabler-login" color="white" />
@@ -608,7 +575,7 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
             variant="flat"
             color="white"
             class="text-primary btn-navbar"
-            size="small"
+            size="default"
             @click="$router.push({ name: 'pages-authentication-register-multi-steps' })"
           >
             Register Now
@@ -620,7 +587,7 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
             icon
             variant="flat"
             color="white"
-            size="small"
+            size="default"
             @click="$router.push({ name: 'pages-authentication-register-multi-steps' })"
           >
             <VIcon icon="tabler-registered" color="#1793FF" />
@@ -637,7 +604,7 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
 .brand-line-2 {
   margin: 0;
   line-height: 1.1;
-  font-size: 0.95rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: white;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
@@ -652,7 +619,7 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
   z-index: 1000;
   
   .v-toolbar__content {
-    padding: 0 20px !important;
+    padding: 0 24px !important;
     max-width: 1200px;
     margin: 0 auto;
   }
@@ -662,9 +629,9 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
 .nav-link-new {
   color: white !important;
   text-decoration: none !important;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 0.95rem;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 1.1rem;
   font-weight: 500;
   transition: all 0.3s ease;
   position: relative;
@@ -696,7 +663,9 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
 .btn-navbar {
   text-transform: none !important;
   font-weight: 500 !important;
-  border-radius: 6px !important;
+  border-radius: 8px !important;
+  font-size: 1rem !important;
+  padding: 10px 20px !important;
   
   &.v-btn--variant-outlined {
     border: 1.5px solid white !important;
@@ -722,6 +691,7 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
   
   .mobile-nav-link {
     color: white !important;
+    font-size: 1.1rem !important;
     
     &:hover {
       color: rgba(255, 255, 255, 0.8) !important;
@@ -732,10 +702,13 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
 // Mega Menu Styling
 .nav-menu {
   display: flex;
-  gap: 2rem;
+  gap: 3rem;
 }
 
 .mega-menu-item {
+  font-size: 1.1rem !important;
+  font-weight: 500 !important;
+  
   &:hover {
     color: #1793FF !important;
   }
@@ -745,21 +718,31 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
 @media (max-width: 960px) {
   .new-navbar {
     .v-toolbar__content {
-      padding: 0 16px !important;
+      padding: 0 20px !important;
     }
   }
   
   .brand-line-1,
   .brand-line-2 {
-    font-size: 0.85rem;
+    font-size: 1rem;
+  }
+  
+  .nav-link-new {
+    font-size: 1rem;
+    padding: 10px 16px;
   }
 }
 
 @media (max-width: 600px) {
   .new-navbar {
     .v-toolbar__content {
-      padding: 0 12px !important;
+      padding: 0 16px !important;
     }
+  }
+  
+  .brand-line-1,
+  .brand-line-2 {
+    font-size: 0.9rem;
   }
 }
 
@@ -775,6 +758,7 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
 // Page Link Styling
 .page-link {
   color: white !important;
+  font-size: 1.1rem !important;
   
   &:hover {
     color: rgba(255, 255, 255, 0.8) !important;
@@ -791,14 +775,17 @@ const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(
 @use "@layouts/styles/mixins" as layoutMixins;
 
 .mega-menu {
-  border-radius: 8px !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
-
-  // Hapus ini:
-  // position: fixed !important;
-  // top: 70px !important;
-  // left: 50% !important;
-  // transform: translateX(-50%) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15) !important;
+  
+  .v-card-text {
+    padding: 40px !important;
+  }
+  
+  .text-h6 {
+    font-size: 1.2rem !important;
+    font-weight: 500 !important;
+  }
 }
 
 .front-page-navbar {

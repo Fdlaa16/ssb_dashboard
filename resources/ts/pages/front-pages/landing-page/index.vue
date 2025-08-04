@@ -40,44 +40,15 @@ useIntersectionObserver(
   <div class="landing-page-wrapper">
     <Navbar :active-id="activeSectionId" />
 
-    <!-- 👉 Hero Section  -->
     <HeroSection ref="refHome" />
 
-    <!-- 👉 Our Team -->
     <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
       <OurTeam ref="refTeam" />
     </div>
 
-    <!-- 👉 Useful features  -->
-    <!-- <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
-      <Features ref="refFeatures" />
-    </div> -->
-
-    <!-- 👉 Customer Review -->
     <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
       <CustomersReview />
     </div>
-
-    <!-- 👉 Pricing Plans -->
-    <!-- <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
-      <PricingPlans />
-    </div> -->
-
-    <!-- 👉 Product stats -->
-    <!-- <ProductStats /> -->
-
-    <!-- 👉 FAQ Section -->
-    <!-- <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
-      <FaqSection ref="refFaq" />
-    </div> -->
-
-    <!-- 👉 Banner  -->
-    <!-- <Banner /> -->
-
-    <!-- 👉 Contact Us  -->
-    <!-- <ContactUs ref="refContact" /> -->
-
-    <!-- 👉 Footer -->
     <Footer />
   </div>
 </template>
