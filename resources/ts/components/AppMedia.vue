@@ -119,9 +119,7 @@ watch(currentPage, () => {
                   <VCardTitle>{{ data.title }}</VCardTitle>
                 </VCardItem>
                 <VCardText>
-                  <p class="line-clamp">
-                    {{ data.description }}
-                  </p>
+                  <div class="line-clamp" v-html="data.description"></div>
                   <span class="text-caption text-disabled">
                     {{ formatTanggalIndonesia(data.created_at) }}
                   </span>
@@ -255,19 +253,22 @@ watch(currentPage, () => {
 
 .media-img {
   width: 100%;
-  height: 200px;
+  height: 300px;
   object-fit: cover;
 }
 
 .line-clamp {
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2; // Tampilkan 2 baris
+  -webkit-line-clamp: 2; /* Jumlah baris */
   overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.4rem; // Sesuaikan line-height
-  max-height: 2.8rem;  // line-height * line-clamp
-  margin: 0;
+
+  /* Untuk memastikan tag seperti <p>, <strong> tidak merusak clamp */
+  p, strong, em, span {
+    display: inline;
+    margin: 0;
+    padding: 0;
+  }
 }
 </style>
 

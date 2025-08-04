@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { useConfigStore } from '@/@core/stores/config'
+import Footer from '@/views/front-pages/front-page-footer.vue'
+import Navbar from '@/views/front-pages/front-page-navbar.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -8,6 +11,16 @@ const playerId = computed(() => route.params.id)
 const detail = ref<any>(null)
 const loading = ref(true)
 const error = ref<string | null>(null)
+
+const store = useConfigStore()
+store.skin = 'default'
+definePage({
+  meta: {
+    layout: 'blank',
+    public: true,
+  },
+})
+
 const currentTab = ref('biodata')
 
 const fetchPlayerDetail = async () => {
@@ -76,7 +89,8 @@ const getCategoryLabel = (category: string) => {
 </script>
 
 <template>
-  <VContainer>
+  <Navbar />
+  <VContainer style="margin-top: 100px;">
     <VRow justify="center">
       <VCol cols="12" md="10">
         <template v-if="loading">
@@ -194,4 +208,5 @@ const getCategoryLabel = (category: string) => {
       </VCol>
     </VRow>
   </VContainer>
+  <Footer />
 </template>

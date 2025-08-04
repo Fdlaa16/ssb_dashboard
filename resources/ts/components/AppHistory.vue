@@ -16,52 +16,66 @@ interface Pricing {
 <template>
   <div class="d-flex align-center justify-center">
     <div class="position-relative my-sm-16">
+      
+      <!-- Shape Atas -->
       <VNodeRenderer
         :nodes="h('div', { innerHTML: authV1TopShape })"
         class="text-primary auth-v1-top-shape d-none d-sm-block"
       />
+
+      <!-- Shape Bawah -->
       <VNodeRenderer
-      :nodes="h('div', { innerHTML: authV1BottomShape })"
-      class="text-primary auth-v1-bottom-shape d-none d-sm-block"
-    />
+        :nodes="h('div', { innerHTML: authV1BottomShape })"
+        class="text-primary auth-v1-bottom-shape d-none d-sm-block"
+      />
+
+      <!-- Kartu Utama -->
       <VCard
         class="auth-card"
         :class="$vuetify.display.smAndUp ? 'pa-6' : 'pa-0'"
       >
+        <!-- Judul -->
         <div class="text-center mb-6">
-          <h3 class="text-h3 pricing-title">
-          Sejarah
-          </h3>
+          <h3 class="text-h3 pricing-title">Sejarah</h3>
         </div>
 
-        <!-- Grid System untuk layout 2 kolom -->
+        <!-- Layout Grid -->
         <VContainer fluid>
           <VRow>
-            <!-- Kolom untuk teks sejarah (col-8) -->
+
+            <!-- Kolom Teks (8) -->
             <VCol cols="12" md="8">
-              <div class="text-left">
-                <p class="mb-4">
-                  PERSIB adalah klub sepak bola Indonesia yang berbasis di Kota Bandung, Jawa Barat, dan saat ini merupakan peserta dari kompetisi tertinggi Indonesia, Liga 1.
+              <div class="text-left mb-4">
+                <p>
+                  Sekolah Sepak Bola (SSB) Putra Muda Balaraja resmi didirikan pada tanggal 10 Oktober 2020 di kawasan Balaraja, Kabupaten Tangerang, sebagai wujud nyata kepedulian terhadap pembinaan generasi muda melalui jalur olahraga.
+                  SSB ini hadir dengan tujuan utama untuk mengarahkan anak-anak pada kegiatan positif, membangun karakter, kedisiplinan, dan semangat kompetitif sejak dini melalui pelatihan sepak bola yang terstruktur.
+                  Berangkat dari visi untuk mencetak anak-anak yang berprestasi di bidang sepak bola, SSB Putra Muda Balaraja berkomitmen menjadi tempat pembinaan yang konsisten dalam melatih pemain usia dini agar tumbuh menjadi pesepakbola handal dan profesional di masa depan.
                 </p>
-                <p class="mb-4">
-                  Cikal bakal PERSIB adalah Bandoeng Inlandsche Voetbal Bond (BIVB) yang didirikan pada 05 Januari 1919. BIVB kala itu dibentuk sebagai perserikatan klub-klub sepakbola bumi putera pertama di Bandung.
-                </p>
-                <p class="mb-4">
-                  Pada 19 April 1930, BIVB tercatat sebagai salah satu dari tujuh klub yang membidani lahirnya PSSI (Persatuan Sepakbola Seluruh Indonesia). Sebagai bagian dari alat perjuangan kemerdekaan Republik Indonesia, BIVB pun mengalami beberapa transformasi dan perubahan nama. Huruf "I" yang semula Indlansche menjadi Indonesische, lalu menjadi Perserikatan Sepakraga Indonesia Bandung (PSIB), hingga melakukan fusi bersama NVB (National Voetball Bond) dan berubah nama menjadi PERSIB pada 18 Maret 1934.
-                </p>
-                <p class="mb-4">
-                  Sejak 9 September 2009, PERSIB kembali bertransformasi dan menjadi klub profesional di bawah pengelolaan PT PERSIB Bandung Bermartabat.
-                </p>
-                <p class="mb-0">
-                  Unduh dan baca selengkapnya terkait Hari Jadi PERSIB 05 Januari 1919 dalam Naskah Akademik berikut.
+              </div>
+
+              <!-- VISI -->
+              <h4 class="text-h6 font-weight-medium mb-2">VISI</h4>
+              <div class="mb-4 ml-3">
+                <ul>
+                  <li>Mengajak anak-anak untuk diarahkan berkegiatan positif tentunya untuk dididik menjadi anak yang berprestasi di bidang sepak bola.</li>
+                  <li>Membina dan mencetak pemain sepak bola usia dini yang handal agar kelak menjadi pemain profesional.</li>
+                </ul>
+              </div>
+
+              <!-- MISI -->
+              <div>
+                <h4 class="text-h6 font-weight-medium mb-2">MISI</h4>
+                <p>
+                  Berpartisipasi di bidang olahraga yang kami mudahkan sarana sepak bola bagi anak-anak yang cinta dengan sepak bola,
+                  sehingga terciptanya pemain sepak bola yang profesional dan handal serta menjadi pemain terbaik di berbagai kompetisi
+                  atau ajang pertandingan sepak bola terutama di daerah Kabupaten Tangerang.
                 </p>
               </div>
             </VCol>
 
-            <!-- Kolom untuk gambar (col-4) -->
+            <!-- Kolom Gambar (4) -->
             <VCol cols="12" md="4">
               <div class="d-flex flex-column align-center">
-                <!-- Gambar utama -->
                 <img
                   src="/storage/logo/LOGOSSB.png"
                   alt="Logo SSB"
@@ -70,9 +84,9 @@ interface Pricing {
                 />
               </div>
             </VCol>
+
           </VRow>
         </VContainer>
-
       </VCard>
     </div>
   </div>
