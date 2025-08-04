@@ -31,6 +31,7 @@ Route::prefix('company')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
 
     Route::middleware('auth:sanctum')->group(function () {
+        Route::get('user/profile', [AuthController::class, 'profile'])->name('user.profile');
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/me', [AuthController::class, 'me']);
 

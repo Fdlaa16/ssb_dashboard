@@ -182,6 +182,25 @@ class AuthController extends Controller
         }
     }
 
+    public function profile(Request $request)
+    {
+        $user = Auth::user();
+        $players = Player::query()
+            ->with([
+                'user',
+                // 'clubPlayers.club.profile_club',
+                'avatar',
+                'birth_certificate',
+                'family_card',
+                'report_grades',
+            ])
+            ->where('user_id', $user->id);
+
+        $data = [
+            'data' => $players,
+        ];
+    }
+
     public function index()
     {
         return view('company::index');

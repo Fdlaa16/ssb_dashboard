@@ -6,9 +6,6 @@ import { useRouter } from 'vue-router'
 const authStore = useAuthStore()
 const user = computed(() => authStore.user)
 
-
-console.log('user', authStore);
-
 // Types
 interface UserData {
   id: number
@@ -182,7 +179,7 @@ const fetchPlayer = async () => {
   error.value = null
 
   try {
-    const res = await $api(`player/2/edit`)
+    const res = await $api(`company/user/profile`)
     playerData.value = res.data
     
     // Set image previews
