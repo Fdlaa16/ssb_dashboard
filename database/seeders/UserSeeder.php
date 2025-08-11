@@ -2,36 +2,59 @@
 
 namespace Database\Seeders;
 
-use App\Models\Player;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Structure;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $user = User::create([
-            'email' => 'user2@gmail.com',
-            'password' => Hash::make('password'), // Gunakan bcrypt / hash
-        ]);
+        $users = [
+            [
+                'email' => 'chief@gmail.com',
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+            ],
+            [
+                'email' => 'official@gmail.com',
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+            ],
+            [
+                'email' => 'admin@gmail.com',
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+            ],
+        ];
 
-        // Buat player terkait user
-        Player::create([
-            'user_id' => $user->id,
-            'name' => 'John Doe',
-            'nisn' => '1234567890',
-            'height' => 175,
-            'weight' => 68,
-            'back_number' => 10,
-            'position' => 'Forward',
-            'is_captain' => true,
-            'category' => 'U-18',
-            'status' => 1,
-        ]);
+        $structures = [
+            [
+                'name' => 'Ketua Umum',
+                'department' => 'chief',
+                'date_of_birth' => now()->format('Y-m-d'),
+            ],
+            [
+                'name' => 'Official',
+                'department' => 'official',
+                'date_of_birth' => now()->format('Y-m-d'),
+            ],
+            [
+                'name' => 'Admin',
+                'department' => 'official',
+                'date_of_birth' => now()->format('Y-m-d'),
+            ],
+        ];
+
+        foreach ($users as $index => $userData) {
+            $user = User::create($userData);
+
+            Structure::create([
+                'user_id' => $user->id,
+                'name' => $structures[$index]['name'],
+                'department' => $structures[$index]['department'],
+            ]);
+        }
     }
 }

@@ -34,18 +34,17 @@ const getScheduleMatchQuery = async () => {
   error.value = null
 
   try {
-    const response = await $api('company/player', {
+    const response = await $api('company/structure', {
       method: 'GET',
       params: {
-        position: selectedPosition.value.value || '',
-        category: category.value.value || '', 
+        department: selectedDepartment.value.value || '',
         page: currentPage.value,
         per_page: perPage,
       },
     })
 
     const paginated = response.data  // <-- ini objek pagination
-    scheduleMatchs.value = paginated.data // <-- ini array player
+    scheduleMatchs.value = paginated.data // <-- ini array structure
     totalPages.value = paginated.last_page
     currentPage.value = paginated.current_page
 
@@ -63,18 +62,39 @@ const getScheduleMatchQuery = async () => {
   }
 }
 
-const groupedByPosition = computed(() => {
+const groupedByDepartment = computed(() => {
   const groups: Record<string, any[]> = {}
 
-  for (const player of scheduleMatchs.value) {
-    const position = player.position ?? 'Tanpa Kategori'
-    if (!groups[position]) {
-      groups[position] = []
+  // Group structures by department
+  for (const structure of scheduleMatchs.value) {
+    const department = structure.department ?? 'Tanpa Kategori'
+    if (!groups[department]) {
+      groups[department] = []
     }
-    groups[position].push(player)
+    groups[department].push(structure)
   }
 
-  return groups
+  // Define priority order for departments
+  const priorityOrder = ['chief', 'official', 'admin']
+  const sortedGroups: Record<string, any[]> = {}
+  
+  // First, add priority departments in order if they exist
+  for (const priorityDept of priorityOrder) {
+    if (groups[priorityDept]) {
+      sortedGroups[priorityDept] = groups[priorityDept]
+    }
+  }
+  
+  // Then add all other departments in alphabetical order
+  const otherDepartments = Object.keys(groups)
+    .filter(key => !priorityOrder.includes(key))
+    .sort()
+  
+  for (const department of otherDepartments) {
+    sortedGroups[department] = groups[department]
+  }
+
+  return sortedGroups
 })
 
 const formatMatchTime = (date: string, time: string) => {
@@ -86,27 +106,13 @@ const formatMatchTime = (date: string, time: string) => {
   }) + ' • ' + time.slice(0, 5) + ' WIB'
 }
 
-const categories = [
-  { title: 'Semua Kategori', value: '' },
-  { title: 'Tim Utama', value: 'main' },
-  { title: 'U-9', value: 'u9' },
-  { title: 'U-10', value: 'u10' },
-  { title: 'U-11', value: 'u11' },
-  { title: 'U-12', value: 'u12' },
-  { title: 'U-13', value: 'u13' },
-  { title: 'U-14', value: 'u14' },
-  { title: 'U-15', value: 'u15' },
-]
-const category = ref(categories[0])
-
-const positions = [
+const departments = [
   { title: 'Semua Posisi', value: '' },
-  { title: 'Penjaga Gawang', value: 'goalkeeper' },
-  { title: 'Bek', value: 'defender' },
-  { title: 'Gelandang', value: 'midfielder' },
-  { title: 'Penyerang', value: 'forward' },
+  { title: 'Ketua Umum', value: 'chief' },
+  { title: 'Official', value: 'official' }, 
+  { title: 'Admin', value: 'admin' }, 
 ];
-const selectedPosition = ref(positions[0])
+const selectedDepartment = ref(departments[0])
 
 onMounted(() => {
   if (!selectedMatch.value) selectedMatch.value = ''
@@ -123,8 +129,8 @@ function formatTanggalIndonesia(dateString: string): string {
   }).format(date)
 }
 
-const getPositionTitle = (value: string) => {
-  const match = positions.find(pos => pos.value === value)
+const getDepartmentTitle = (value: string) => {
+  const match = departments.find(pos => pos.value === value)
   return match ? match.title : value
 }
 
@@ -132,7 +138,7 @@ onMounted(() => {
   getScheduleMatchQuery()
 })
 
-watch([category, selectedPosition], () => {
+watch([selectedDepartment], () => {
   currentPage.value = 1
   getScheduleMatchQuery()
 })
@@ -147,29 +153,29 @@ watch(currentPage, () => {
     <div class="our-team pa-">
       <VRow class="align-center my-6">
         <VCol>
-          <VChip label color="primary" size="small">Player</VChip>
+          <VChip label color="primary" size="small">structure</VChip>
 
           <h4 class="text-h4 mt-2 mb-1">
             {{
-              category?.value
-                ? `Pemain di Kategori ${category.title}`
-                  : 'Semua Kategori Pemain'
+              selectedDepartment?.value
+                ? `Struktur organisasi di departemen ${selectedDepartment.title}`
+                  : 'Semua departemen struktur organisasi'
             }}
           </h4>
 
           <p class="text-body-1 mb-0">
             {{
-              category?.value
-                  ? `Lihat daftar pemain dalam kategori ${category.title}.`
-                  : 'Jelajahi pemain dari semua kategori umur.'
+              selectedDepartment?.value
+                  ? `Lihat daftar struktur organisasi dalam departemen ${selectedDepartment.title}.`
+                  : 'Jelajahi pemain dari semua departemen umur.'
             }}
           </p>
         </VCol>
 
         <VCol class="text-end" cols="12" sm="4" md="3">
           <AppSelect
-            v-model="category"
-            :items="categories"
+            v-model="selectedDepartment"
+            :items="departments"
             item-title="title"
             item-value="value"
             return-object
@@ -178,28 +184,28 @@ watch(currentPage, () => {
             clear-icon="tabler-x"
             single-line
             class="w-100"
-            @update:modelValue="val => category = val ?? categories[0]"
+            @update:modelValue="val => selectedDepartment = val ?? departments[0]"
           />
         </VCol>
       </VRow>
 
       <VRow>
-        <template  v-if="Object.keys(groupedByPosition).length > 0">
-          <template v-for="(players, positionKey) in groupedByPosition" :key="positionKey">
+        <template  v-if="Object.keys(groupedByDepartment).length > 0">
+          <template v-for="(structures, departmentKey) in groupedByDepartment" :key="departmentKey">
             <VCol cols="12">
               <h5 class="text-h5 font-weight-bold mb-3 mt-6">
-                {{ getPositionTitle(positionKey) }}
+                {{ getDepartmentTitle(departmentKey) }}
               </h5>
             </VCol>
 
             <VCol
-              v-for="(data, index) in players"
+              v-for="(data, index) in structures"
               :key="index"
               cols="12"
               sm="6"
               md="4"
             >
-              <router-link :to="{ name: 'player-id', params: { id: String(data.id) } }">
+              <router-link :to="{ name: 'structure-id', params: { id: String(data.id) } }">
                 <VCard>
                   <VImg
                     :src="data?.avatar?.url"
@@ -221,7 +227,7 @@ watch(currentPage, () => {
 
                   <VCardText class="pt-1 pb-2"> 
                     <div class="d-flex justify-space-between text-caption text-grey-darken-1">
-                      <span>{{ getPositionTitle(data.position) }}</span>
+                      <span>{{ getDepartmentTitle(data.position) }}</span>
                     </div>
                   </VCardText>
                 </VCard>

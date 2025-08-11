@@ -17,17 +17,17 @@ interface Menu {
 const footerBg = useGenerateImageVariant(footerLightBg, footerDarkBg)
 
 const pagesList: Menu[] = [
-  { name: 'History', to: { name: 'front-pages-history' } },
-  { name: 'About', to: { name: 'front-pages-about' } },
-  { name: 'Player', to: { name: 'front-pages-player' } },
-  { name: 'Club', to: { name: 'front-pages-club' } },
-  { name: 'Schedule Match', to: { name: 'front-pages-schedule-match' } },
-  { name: 'Schedule Training', to: { name: 'front-pages-schedule-training' } },
-  { name: 'Standing', to: { name: 'front-pages-standing' } },
-  { name: 'Pricing', to: { name: 'front-pages-pricing' } },
-  { name: 'Payment', to: { name: 'front-pages-payment' }, isNew: true },
-  { name: 'Checkout', to: { name: 'front-pages-checkout' } },
-  { name: 'Help Center', to: { name: 'front-pages-help-center' } },
+  { name: 'History', to: { name: 'history' } },
+  { name: 'About', to: { name: 'about' } },
+  { name: 'Player', to: { name: 'player' } },
+  { name: 'Club', to: { name: 'club' } },
+  { name: 'Schedule Match', to: { name: 'schedule-match' } },
+  { name: 'Schedule Training', to: { name: 'schedule-training' } },
+  { name: 'Standing', to: { name: 'standing' } },
+  { name: 'Pricing', to: { name: 'pricing' } },
+  { name: 'Payment', to: { name: 'payment' }, isNew: true },
+  { name: 'Checkout', to: { name: 'checkout' } },
+  { name: 'Help Center', to: { name: 'help-center' } },
   { name: 'Login/Register', to: { name: 'pages-authentication-login-v2' } },
 ]
 

@@ -323,9 +323,21 @@ onBeforeUnmount(() => {
     <VCol
       cols="12"
       md="8"
-      class="auth-card-v2 d-flex align-center justify-center pa-10"
+      class="auth-card-v2 d-flex align-center justify-center pa-10 position-relative"
       style="background-color: rgb(var(--v-theme-surface));"
     >
+      <!-- Tombol Kembali -->
+      <VBtn
+        :to="{ name: 'landing-page'}"
+        variant="text"
+        color="primary"
+        class="mb-4 position-absolute"
+        style="left: 32px; top: 32px; z-index: 2;"
+      >
+        <VIcon start icon="tabler-arrow-left" />
+        Kembali ke Beranda
+      </VBtn>
+
       <VCard
         flat
         class="mt-12 mt-sm-10"
@@ -592,17 +604,18 @@ onBeforeUnmount(() => {
 
         <div class="d-flex flex-wrap justify-space-between gap-x-4 mt-6">
           <VBtn
-            color="secondary"
+            color="primary"
             :disabled="currentStep === 0"
             variant="tonal"
             @click="currentStep--"
-          >
+            >
+            <!-- variant="tonal" -->
             <VIcon
               icon="tabler-arrow-left"
               start
               class="flip-in-rtl"
             />
-            Previous
+            Sebelumnya
           </VBtn>
 
           <VBtn
@@ -610,14 +623,14 @@ onBeforeUnmount(() => {
             color="success"
             @click="onSubmit"
           >
-            submit
+            Kirim
           </VBtn>
 
           <VBtn
             v-else
             @click="currentStep++"
           >
-            Next
+            Selanjutnya
 
             <VIcon
               icon="tabler-arrow-right"

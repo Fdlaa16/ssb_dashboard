@@ -12,6 +12,10 @@ export default [
             to: 'dashboards-player-list',
           },
           {
+            title: 'Structure',
+            to: 'dashboards-structure-list',
+          },
+          {
             title: 'Club',
             to: 'dashboards-club-list',
           },

@@ -113,11 +113,11 @@ function formatIndoDate(dateStr: string): string {
 }
 
 const goToAllMatches = () => {
-  router.push({ name: 'front-pages-schedule-match' }) 
+  router.push({ name: 'schedule-match' }) 
 }
 
 const goToAllTrainings = () => {
-  router.push({ name: 'front-pages-schedule-training' }) 
+  router.push({ name: 'schedule-training' }) 
 }
 
 onMounted(() => {

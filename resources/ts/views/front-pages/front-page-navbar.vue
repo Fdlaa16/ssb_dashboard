@@ -5,7 +5,6 @@ import type { RouteLocationRaw } from 'vue-router/auto'
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
 import { useDisplay } from 'vuetify'
 
-import NavbarThemeSwitcher from '@/layouts/components/NavbarThemeSwitcher.vue'
 
 const props = defineProps({
   activeId: String,
@@ -31,6 +30,9 @@ const router = useRouter()
 
 const sidebar = ref(false)
 
+// Profile menu state
+const isProfileMenuOpen = ref(false)
+
 watch(() => display, () => {
   return display.mdAndUp ? sidebar.value = false : sidebar.value
 }, { deep: true })
@@ -52,8 +54,9 @@ const menuItems: MenuItem[] = [
     listTitle: 'Sejarah',
     listIcon: 'tabler-layout-dashboard',
     navItems: [
-      { name: 'Sejarah', to: { name: 'front-pages-history' }},
-      { name: 'Pemain', to: { name: 'front-pages-player' } },
+      { name: 'Sejarah', to: { name: 'history' }},
+      { name: 'Struktural', to: { name: 'structure' }},
+      { name: 'Pemain', to: { name: 'player' } },
     ],
   },
 ]
@@ -63,9 +66,9 @@ const menuItems2: MenuItem[] = [
     listTitle: 'Pertandingan',
     listIcon: 'tabler-ball-football',
     navItems: [
-      { name: 'Jadwal Pertandingan', to: { name: 'front-pages-schedule-match' } },
-      { name: 'Jadwal Latihan', to: { name: 'front-pages-schedule-training' } },
-      { name: 'Klasemen', to: { name: 'front-pages-standing' } },
+      { name: 'Jadwal Pertandingan', to: { name: 'schedule-match' } },
+      { name: 'Jadwal Latihan', to: { name: 'schedule-training' } },
+      { name: 'Klasemen', to: { name: 'standing' } },
     ],
   },
 ]
@@ -75,9 +78,9 @@ const menuItems3: MenuItem[] = [
     listTitle: 'Selengkapnya',
     listIcon: 'tabler-list',
     navItems: [
-      { name: 'Klub', to: { name: 'front-pages-club' } },
-      // { name: 'Berita', to: { name: 'front-pages-media' } },
-      { name: 'Biaya Pendaftaran', to: { name: 'front-pages-pricing' } },
+      { name: 'Klub', to: { name: 'club' } },
+      // { name: 'Berita', to: { name: 'media' } },
+      { name: 'Biaya Pendaftaran', to: { name: 'pricing' } },
     ],
   },
 ]
@@ -93,10 +96,123 @@ const isPageActive = computed(() => menuItems.some(item => item.navItems.some(li
 const isPageActive2 = computed(() => menuItems2.some(item => item.navItems.some(listItem => isCurrentRoute(listItem.to))))
 const isPageActive3 = computed(() => menuItems3.some(item => item.navItems.some(listItem => isCurrentRoute(listItem.to))))
 
+// Check if user is authenticated
+const isAuthenticated = computed(() => authStore.isLoggedIn)
+const userProfile = computed(() => authStore.userData)
+
+interface UserData {
+  id: number
+  fullName: string
+  firstName: string
+  lastName: string
+  company: string
+  username: string
+  role: string
+  country: string
+  contact: string
+  email: string
+  currentPlan: string
+  status: string
+  avatar: string
+  taskDone: number
+  projectDone: number
+  taxId: string
+  language: string
+}
+
+interface PlayerData {
+  id: number
+  name: string
+  user: {
+    id: number
+    email: string
+    new_password: string
+    confirm_password: string
+  }
+  nisn: string
+  height: string
+  weight: string
+  back_number: string
+  position: string
+  category: string
+  is_captain: boolean
+  status: boolean
+  sport_players: any[]
+  club: {
+    id: number
+    code: string
+    name: string
+  }
+  avatar: File | { url: string } | null
+  family_card: File | { url: string } | null
+  report_grades: File | { url: string } | null
+  birth_certificate: File | { url: string } | null
+}
+
+interface Props {
+  userData?: UserData
+  playerId?: number
+}
+
+
+const currentTab = ref('biodata')
+const loading = ref(false)
+const error = ref<string | null>(null)
+const isFlatSnackbarVisible = ref(false)
+const snackbarMessage = ref('')
+const snackbarColor = ref<'success' | 'error'>('success')
+
+const isPasswordVisible = ref(false)
+const isConfirmPasswordVisible = ref(false)
+const avatarPreview = ref<string | null>(null)
+
+// Player Data
+const playerData = ref<PlayerData>({
+  id: 0,
+  name: '',
+  user: {
+    id: 0,
+    email: '',
+    new_password: '',
+    confirm_password: ''
+  },
+  nisn: '',
+  height: '',
+  weight: '',
+  back_number: '',
+  position: '',
+  category: '',
+  is_captain: false,
+  status: false,
+  sport_players: [],
+  club: {
+    id: 0,
+    code: '',
+    name: '',
+  },
+  avatar: null,
+  family_card: null,
+  report_grades: null,
+  birth_certificate: null,
+})
+
+const fetchPlayer = async () => {  
+    const res = await $api(`company/profile`)
+    playerData.value = res.data    
+
+    if (playerData.value.avatar?.url) {
+      avatarPreview.value = getImageUrl(playerData.value.avatar?.url)
+    }
+}
+
+const getImageUrl = (path: string) => {
+  return import.meta.env.VITE_APP_URL + path
+}
+
 const onLogout = async () => {
     try {
         const loginType = authStore.loginType;
-        const endpoint = loginType === 'dashboard' ? '/api/dashboard/logout' : '/api/company/logout';
+        const endpoint = loginType === 'dashboard' ? '/logout' : '/company/logout';
         
         await $api(endpoint, {
             method: 'POST'
@@ -104,18 +220,23 @@ const onLogout = async () => {
         
         authStore.deleteUserData();
         
-        // snackbarMessage.value = 'Logout berhasil';
-        // snackbarColor.value = 'success';
-        // isFlatSnackbarVisible.value = true;
-        
         await router.push({ name: 'authentication-login' });
         
     } catch (err) {
-        // Clear local data even if API call fails
         authStore.deleteUserData();
         await router.push({ name: 'authentication-login' });
     }
 }
+
+const goToProfile = () => {
+  router.push({ name: 'profile' }); 
+}
+
+onMounted(() => {
+  if (isAuthenticated.value) {
+    fetchPlayer();
+  }
+});
 </script>
 
 <template>
@@ -137,7 +258,7 @@ const onLogout = async () => {
           <RouterLink
             v-for="(item, index) in ['Beranda']"
             :key="index"
-            :to="{ name: 'front-pages-landing-page', hash: `#${item.toLowerCase().replace(' ', '-')}` }"
+            :to="{ name: 'landing-page', hash: `#${item.toLowerCase().replace(' ', '-')}` }"
             class="nav-link font-weight-medium mobile-nav-link"
             :class="[props.activeId?.toLocaleLowerCase().replace('-', ' ') === item.toLocaleLowerCase() ? 'active-link' : '']"
           >
@@ -161,17 +282,6 @@ const onLogout = async () => {
                 v-for="(item, index) in menuItems"
                 :key="index"
               >
-                <div class="d-flex align-center gap-x-3 mb-4">
-                  <VAvatar
-                    variant="tonal"
-                    color="primary"
-                    rounded
-                    :icon="item.listIcon"
-                  />
-                  <div class="text-body-1 text-high-emphasis font-weight-medium">
-                    {{ item.listTitle }}
-                  </div>
-                </div>
                 <ul class="mb-6">
                   <li
                     v-for="listItem in item.navItems"
@@ -197,6 +307,15 @@ const onLogout = async () => {
               </div>
             </div>
 
+            <!-- Media Menu -->
+            <RouterLink
+              :to="{ name: 'media'}"
+              class="page-link mobile-nav-link"
+              :class="isMenuOpenMedia || isMegaMenuOpenMedia ? 'active-link-new' : ''"
+            >
+              Media
+            </RouterLink>
+
             <div
               :class="[isMenuOpen2 ? 'mb-6 active-link' : '', isPageActive2 ? 'active-link' : '']"
               class="page-link mobile-nav-link"
@@ -213,17 +332,6 @@ const onLogout = async () => {
                 v-for="(item, index) in menuItems2"
                 :key="index"
               >
-                <div class="d-flex align-center gap-x-3 mb-4">
-                  <VAvatar
-                    variant="tonal"
-                    color="primary"
-                    rounded
-                    :icon="item.listIcon"
-                  />
-                  <div class="text-body-1 text-high-emphasis font-weight-medium">
-                    {{ item.listTitle }}
-                  </div>
-                </div>
                 <ul class="mb-6">
                   <li
                     v-for="listItem in item.navItems"
@@ -265,17 +373,6 @@ const onLogout = async () => {
                 v-for="(item, index) in menuItems3"
                 :key="index"
               >
-                <div class="d-flex align-center gap-x-3 mb-4">
-                  <VAvatar
-                    variant="tonal"
-                    color="primary"
-                    rounded
-                    :icon="item.listIcon"
-                  />
-                  <div class="text-body-1 text-high-emphasis font-weight-medium">
-                    {{ item.listTitle }}
-                  </div>
-                </div>
                 <ul class="mb-6">
                   <li
                     v-for="listItem in item.navItems"
@@ -300,6 +397,35 @@ const onLogout = async () => {
                 </ul>
               </div>
             </div>
+          </div>
+
+          <!-- Mobile Profile and Logout Section (when authenticated) -->
+          <div v-if="isAuthenticated" class="mobile-auth-section mt-auto">
+            <VDivider class="mb-4" color="rgba(255,255,255,0.2)" />
+            
+            <!-- Logout Button for Mobile -->
+            <div 
+              class="mobile-nav-link d-flex align-center justify-center cursor-pointer"
+              style="border: 1px solid white; border-radius: 6px; padding: 0.5rem 1rem;"
+              @click="onLogout"
+            >
+              <VIcon icon="tabler-logout" class="me-3" />
+              Logout
+            </div>
+          </div>
+
+          <div v-if="!isAuthenticated" class="mobile-auth-section mt-auto">
+            <VDivider class="mb-4" color="rgba(255,255,255,0.2)" />
+            
+            <!-- Logout Button for Mobile -->
+            <div 
+              class="mobile-nav-link d-flex align-center justify-center cursor-pointer"
+              style="border: 1px solid white; border-radius: 6px; padding: 0.5rem 1rem;"
+              @click="$router.push({ name: 'authentication-register' })"
+            >
+              Daftar Sekarang
+            </div>
+
           </div>
         </div>
       </div>
@@ -339,7 +465,7 @@ const onLogout = async () => {
       <div class="d-flex align-center">
         <VAppBarTitle class="me-6">
           <RouterLink
-            :to="{ name: 'front-pages-landing-page', hash: '#beranda' }"
+            :to="{ name: 'landing-page', hash: '#beranda' }"
             class="d-flex align-center gap-x-3"
           >
             <div class="app-logo d-flex align-center">
@@ -367,7 +493,7 @@ const onLogout = async () => {
           <RouterLink
             v-for="(item, index) in ['Beranda']"
             :key="index"
-            :to="{ name: 'front-pages-landing-page', hash: `#${item.toLowerCase().replace(' ', '-')}` }"
+            :to="{ name: 'landing-page', hash: `#${item.toLowerCase().replace(' ', '-')}` }"
             class="nav-link-new font-weight-medium"
             :class="[props.activeId?.toLocaleLowerCase().replace('-', ' ') === item.toLocaleLowerCase() ? 'active-link-new' : '']"
           >
@@ -437,7 +563,7 @@ const onLogout = async () => {
 
           <!-- Media Menu -->
           <RouterLink
-            :to="{ name: 'front-pages-media'}"
+            :to="{ name: 'media'}"
             class="nav-link-new font-weight-medium"
             :class="isMenuOpenMedia || isMegaMenuOpenMedia ? 'active-link-new' : ''"
           >
@@ -569,55 +695,124 @@ const onLogout = async () => {
 
         <!-- Action Buttons -->
         <div class="d-flex align-center gap-x-3 ms-4">
-          <NavbarThemeSwitcher />
+          <!-- <NavbarThemeSwitcher /> -->
 
-          <!-- Login Button -->
-          <VBtn
-            v-if="$vuetify.display.lgAndUp"
-            variant="outlined"
-            color="white"
-            class="text-white btn-navbar"
-            size="default"
-            @click="$router.push({ name: 'authentication-login' })"
-          >
-            Login
-          </VBtn>
+          <!-- Authentication Buttons - Desktop -->
+          <template v-if="!isAuthenticated">
+            <!-- Login Button -->
+            <VBtn
+              v-if="$vuetify.display.lgAndUp"
+              variant="outlined"
+              color="white"
+              class="text-white btn-navbar"
+              size="default"
+              @click="$router.push({ name: 'authentication-login' })"
+            >
+              Masuk
+            </VBtn>
 
-          <VBtn
-            v-else
-            rounded
-            icon
-            variant="outlined"
-            color="white"
-            size="default"
-            @click="$router.push({ name: 'authentication-login' })"
-          >
-            <VIcon icon="tabler-login" color="white" />
-          </VBtn>
+            <VBtn
+              v-else
+              variant="outlined"
+              color="white"
+              class="text-white btn-navbar"
+              size="default"
+              @click="$router.push({ name: 'authentication-login' })"
+            >
+              Masuk
+            </VBtn>
 
-          <!-- Register Button -->
-          <VBtn
-            v-if="$vuetify.display.lgAndUp"
-            variant="flat"
-            color="white"
-            class="text-primary btn-navbar"
-            size="default"
-            @click="$router.push({ name: 'authentication-register' })"
-          >
-            Register Now
-          </VBtn>
+            <!-- Register Button -->
+            <VBtn
+              v-if="$vuetify.display.lgAndUp"
+              variant="outlined"
+              color="white"
+              class="text-white btn-navbar"
+              size="default"
+              @click="$router.push({ name: 'authentication-register' })"
+            >
+              Daftar Sekarang
+            </VBtn>
+          </template>
 
-          <VBtn
-            v-else
-            rounded
-            icon
-            variant="flat"
-            color="white"
-            size="default"
-            @click="$router.push({ name: 'authentication-register' })"
-          >
-            <VIcon icon="tabler-registered" color="#1793FF" />
-          </VBtn>
+          <!-- Profile Menu - Desktop (when authenticated) -->
+          <template v-else>
+            <!-- Profile Dropdown Menu - Desktop -->
+            <VMenu
+              v-model="isProfileMenuOpen"
+              offset="10"
+              location="bottom end"
+              transition="slide-y-transition"
+            >
+              <template #activator="{ props }">
+                <VBtn
+                  v-bind="props"
+                  icon
+                  variant="text"
+                  size="default"
+                  class="profile-menu-btn"
+                >
+                  <VAvatar
+                    size="32"
+                    color="white"
+                    class="text-primary"
+                  >
+                    <VIcon icon="tabler-user" color="white" />
+                  </VAvatar>
+                </VBtn>
+            </template>
+
+              <VCard min-width="200">
+                <VList>
+                  <!-- User Info -->
+                  <VListItem class="pa-4">
+                    <template #prepend>
+                      <VAvatar size="40" color="primary">
+                        <template v-if="avatarPreview">
+                          <img
+                            :src="avatarPreview"
+                            alt="Avatar"
+                            style="width: 100%; height: 100%; object-fit: cover;"
+                          />
+                        </template>
+                        <VIcon v-else icon="tabler-user" />
+                      </VAvatar>
+                    </template>
+
+                    <VListItemTitle class="font-weight-medium">
+                      {{ playerData?.name || 'User' }}
+                    </VListItemTitle>
+                  </VListItem>
+
+                  <VDivider />
+
+                  <!-- Profile Link -->
+                  <VListItem
+                    @click="goToProfile"
+                    class="cursor-pointer"
+                  >
+                    <template #prepend>
+                      <VIcon icon="tabler-user" />
+                    </template>
+                    <VListItemTitle>Profile</VListItemTitle>
+                  </VListItem>
+
+                  <VDivider />
+
+                  <!-- Logout Button - appears at bottom of popup -->
+                  <VListItem
+                    @click="onLogout"
+                    class="cursor-pointer logout-item"
+                  >
+                    <template #prepend>
+                      <VIcon icon="tabler-logout" color="error" />
+                    </template>
+                    <VListItemTitle class="text-error">Logout</VListItemTitle>
+                  </VListItem>
+                </VList>
+              </VCard>
+            </VMenu>
+          </template>
         </div>
       </div>
     </VAppBar>
@@ -691,7 +886,6 @@ const onLogout = async () => {
   font-weight: 500 !important;
   border-radius: 8px !important;
   font-size: 1rem !important;
-  padding: 10px 20px !important;
   
   &.v-btn--variant-outlined {
     border: 1.5px solid white !important;
@@ -711,6 +905,13 @@ const onLogout = async () => {
   }
 }
 
+// Profile Menu Button
+.profile-menu-btn {
+  &:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
+}
+
 // Mobile Navigation
 .mobile-nav-drawer {
   background: #1793FF !important;
@@ -721,6 +922,26 @@ const onLogout = async () => {
     
     &:hover {
       color: rgba(255, 255, 255, 0.8) !important;
+    }
+  }
+}
+
+// Mobile Auth Section
+.mobile-auth-section {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  
+  .mobile-nav-link {
+    padding: 12px 0;
+    border-radius: 8px;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      padding-left: 8px;
+      transition: all 0.2s ease;
     }
   }
 }
@@ -795,39 +1016,11 @@ const onLogout = async () => {
 .active-link {
   font-weight: 600 !important;
 }
-</style>
 
-<style lang="scss">
-@use "@layouts/styles/mixins" as layoutMixins;
-
-.mega-menu {
-  border-radius: 12px !important;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15) !important;
-  
-  .v-card-text {
-    padding: 40px !important;
-  }
-  
-  .text-h6 {
-    font-size: 1.2rem !important;
-    font-weight: 500 !important;
-  }
-}
-
-.front-page-navbar {
-  .v-toolbar {
-    margin: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-  }
-}
-
-// Override theme switcher for navbar
-.front-page-navbar .v-btn--icon {
-  color: white !important;
-  
+// Logout Item Styling
+.logout-item {
   &:hover {
-    background: rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 0, 0, 0.1) !important;
   }
 }
 </style>

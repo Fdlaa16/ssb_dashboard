@@ -179,7 +179,7 @@ const fetchPlayer = async () => {
   error.value = null
 
   try {
-    const res = await $api(`company/user/profile`)
+    const res = await $api(`company/profile`)
     playerData.value = res.data
     
     // Set image previews
@@ -235,7 +235,7 @@ const updatePlayer = async () => {
       formData.append('birth_certificate', playerData.value.birth_certificate)
     }
 
-    const res = await $api(`company/player/profile-update/2`, {
+    const res = await $api(`company/profile-update`, {
       method: 'POST',
       body: formData,
     })
@@ -518,16 +518,17 @@ onBeforeUnmount(() => {
 
                   <!-- Files Tab -->
                   <VWindowItem value="files">
-                    <VRow>
-                      <VCol cols="12" md="6">
-                        <div class="mb-6">
+                    <VRow class="px-3">
+                      <VCol class="text-no-wrap">
+                        <div class="text-h6 mt-2">
                           <h6 class="text-h6 mb-2">Kartu Keluarga</h6>
                           <img
                             v-if="familyCardPreview"
                             :src="familyCardPreview"
                             alt="Preview Family Card"
-                            style="width: 100%; max-width: 300px; border-radius: 8px; margin-bottom: 1rem;"
+                            style="width: 30%; border-radius: 8px; margin-bottom: 1rem;"
                           />
+
                           <VFileInput
                             v-model="playerData.family_card"
                             label="Upload Kartu Keluarga"
@@ -536,14 +537,15 @@ onBeforeUnmount(() => {
                           />
                         </div>
 
-                        <div class="mb-6">
+                        <div class="text-h6 mt-4">
                           <h6 class="text-h6 mb-2">Rapor Terakhir</h6>
                           <img
                             v-if="reportGradesPreview"
                             :src="reportGradesPreview"
                             alt="Preview Report Grades"
-                            style="width: 100%; max-width: 300px; border-radius: 8px; margin-bottom: 1rem;"
+                            style="width: 30%; border-radius: 8px; margin-bottom: 1rem;"
                           />
+
                           <VFileInput
                             v-model="playerData.report_grades"
                             label="Upload Rapor Terakhir"
@@ -551,17 +553,16 @@ onBeforeUnmount(() => {
                             density="comfortable"
                           />
                         </div>
-                      </VCol>
 
-                      <VCol cols="12" md="6">
-                        <div class="mb-6">
+                        <div class="text-h6 mt-4">
                           <h6 class="text-h6 mb-2">Akte Kelahiran</h6>
                           <img
                             v-if="birthCertificatePreview"
                             :src="birthCertificatePreview"
                             alt="Preview Birth Certificate"
-                            style="width: 100%; max-width: 300px; border-radius: 8px; margin-bottom: 1rem;"
+                            style="width: 30%; border-radius: 8px; margin-bottom: 1rem;"
                           />
+
                           <VFileInput
                             v-model="playerData.birth_certificate"
                             label="Upload Akte Kelahiran"

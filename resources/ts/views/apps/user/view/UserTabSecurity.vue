@@ -83,7 +83,7 @@ const fetchPlayer = async () => {
   error.value = null
 
   try {
-    const res = await $api(`player/2/edit`)
+    const res = await $api(`profile`)
     userData.value = res.data
 
   } catch (err: any) {
@@ -114,7 +114,7 @@ const updatePassword = async () => {
     formData.append('new_password', userData.value.new_password ?? '')
     formData.append('confirm_password', userData.value.confirm_password ?? '')
 
-    const res = await $api(`company/player/password-update/2`, {
+    const res = await $api(`password-update`, {
       method: 'POST',
       body: formData,
     })

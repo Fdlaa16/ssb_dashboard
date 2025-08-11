@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthController as ControllersAuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Modules\Dashboard\Http\Controllers\AuthController;
@@ -12,17 +13,19 @@ use Modules\Dashboard\Http\Controllers\ScheduleTrainingController;
 use Modules\Dashboard\Http\Controllers\SportController;
 use Modules\Dashboard\Http\Controllers\StadiumController;
 use Modules\Dashboard\Http\Controllers\StandingController;
+use Modules\Dashboard\Http\Controllers\StructureController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::post('/login', [AuthController::class, 'apiLogin']);
+Route::post('/login', [ControllersAuthController::class, 'apiLogin']);
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/logout', [DashboardAuthController::class, 'logout']);
+    Route::post('/logout', [AuthController::class, 'apiLogout']);
+    Route::get('profile', [AuthController::class, 'profile'])->name('profile');
+    Route::put('profile-update', [AuthController::class, 'profileUpdate'])->name('profile-update');
 
-    Route::get('hehe', [PlayerController::class, 'hehe'])->name('hehe');
     Route::get('player', [PlayerController::class, 'index'])->name('player.index');
     Route::get('player/create', [PlayerController::class, 'create'])->name('player.create');
     Route::post('player/store', [PlayerController::class, 'store'])->name('player.store');
@@ -33,6 +36,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('player/{id}/active', [PlayerController::class, 'active'])->name('player.active');
     Route::put('player/{id}/approve', [PlayerController::class, 'approve'])->name('player.approve');
     Route::put('player/{id}/reject', [PlayerController::class, 'reject'])->name('player.reject');
+
+    Route::get('structure', [StructureController::class, 'index'])->name('structure.index');
+    Route::get('structure/create', [StructureController::class, 'create'])->name('structure.create');
+    Route::post('structure/store', [StructureController::class, 'store'])->name('structure.store');
+    Route::get('structure/{id}', [StructureController::class, 'show'])->name('structure.show');
+    Route::get('structure/{id}/edit', [StructureController::class, 'edit'])->name('structure.edit');
+    Route::put('structure/{id}', [StructureController::class, 'update'])->name('structure.update');
+    Route::delete('structure/{id}', [StructureController::class, 'destroy'])->name('structure.destroy');
+    Route::put('structure/{id}/active', [StructureController::class, 'active'])->name('structure.active');
+    Route::put('structure/{id}/approve', [StructureController::class, 'approve'])->name('structure.approve');
+    Route::put('structure/{id}/reject', [StructureController::class, 'reject'])->name('structure.reject');
 
     Route::get('club', [ClubController::class, 'index'])->name('club.index');
     Route::get('club/create', [ClubController::class, 'create'])->name('club.create');

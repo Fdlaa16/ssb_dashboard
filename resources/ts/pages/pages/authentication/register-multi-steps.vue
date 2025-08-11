@@ -285,7 +285,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <RouterLink :to="{ name: 'front-pages-landing-page'}">
+  <RouterLink :to="{ name: 'landing-page'}">
     <div class="auth-logo d-flex align-center gap-x-3">
       <img
         src="/storage/logo/LOGOSSB.png"
@@ -331,7 +331,7 @@ onBeforeUnmount(() => {
     >
       <!-- Tombol Kembali -->
       <VBtn
-        :to="{ name: 'front-pages-landing-page'}"
+        :to="{ name: 'landing-page'}"
         variant="text"
         color="primary"
         class="mb-4 position-absolute"

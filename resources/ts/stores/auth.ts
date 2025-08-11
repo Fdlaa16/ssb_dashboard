@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 interface User {
   id: number
@@ -21,16 +22,18 @@ export const useAuthStore = defineStore('auth', () => {
   const token = ref<string | null>(null)
   const role = ref<string | null>(null)
   const loginType = ref<string | null>(null)
+  const lastActivity = ref<number | null>(null)
+  const sessionTimeout = 10 * 60 * 1000 // 10 minutes in milliseconds
 
   function storeUserData(userData: UserData) {
-    console.log('Storing user data:', userData)
     user.value = userData.user
     token.value = userData.token
     role.value = userData.role
     loginType.value = userData.login_type
-
-    console.log('stored user:', user.value)
-    console.log('stored token:', token.value)
+    lastActivity.value = Date.now()
+    
+    // Start activity tracking
+    startActivityTracking()
   }
 
   function deleteUserData() {
@@ -38,10 +41,105 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = null
     role.value = null
     loginType.value = null
+    lastActivity.value = null
+    
+    // Stop activity tracking
+    stopActivityTracking()
+  }
+
+  function updateLastActivity() {
+    if (isLoggedIn.value) {
+      lastActivity.value = Date.now()
+    }
+  }
+
+  // Activity tracking variables
+  let activityTimer: NodeJS.Timeout | null = null
+  let visibilityTimer: NodeJS.Timeout | null = null
+
+  function startActivityTracking() {
+    // Track user activity (mouse, keyboard, touch)
+    const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click']
+    
+    const handleActivity = () => {
+      updateLastActivity()
+    }
+
+    activityEvents.forEach(event => {
+      document.addEventListener(event, handleActivity, true)
+    })
+
+    // Track page visibility changes
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Page is hidden, start timer
+        visibilityTimer = setTimeout(() => {
+          checkSessionTimeout()
+        }, sessionTimeout)
+      } else {
+        // Page is visible again, cancel timer and update activity
+        if (visibilityTimer) {
+          clearTimeout(visibilityTimer)
+          visibilityTimer = null
+        }
+        updateLastActivity()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    // Periodic check every minute
+    activityTimer = setInterval(() => {
+      checkSessionTimeout()
+    }, 60000) // Check every minute
+  }
+
+  function stopActivityTracking() {
+    // Remove event listeners
+    const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click']
+    
+    const handleActivity = () => {
+      updateLastActivity()
+    }
+
+    activityEvents.forEach(event => {
+      document.removeEventListener(event, handleActivity, true)
+    })
+
+    document.removeEventListener('visibilitychange', () => {})
+
+    // Clear timers
+    if (activityTimer) {
+      clearInterval(activityTimer)
+      activityTimer = null
+    }
+    if (visibilityTimer) {
+      clearTimeout(visibilityTimer)
+      visibilityTimer = null
+    }
+  }
+
+  function checkSessionTimeout(): Promise<boolean> {
+    return new Promise((resolve) => {
+      if (!isLoggedIn.value || !lastActivity.value) {
+        resolve(false)
+        return
+      }
+
+      const now = Date.now()
+      const timeSinceLastActivity = now - lastActivity.value
+
+      if (timeSinceLastActivity > sessionTimeout) {
+        // Session expired
+        logout('session_timeout')
+        resolve(true) // Session was expired
+      } else {
+        resolve(false) // Session still valid
+      }
+    })
   }
 
   // ========== FUNGSI UNTUK MENGAMBIL DATA USER ==========
-  
   // Mendapatkan data user lengkap
   const getCurrentUser = computed(() => {
     return user.value
@@ -73,7 +171,6 @@ export const useAuthStore = defineStore('auth', () => {
   })
 
   // ========== FUNGSI UNTUK CHECKING STATUS LOGIN ==========
-
   // Helper untuk check apakah user sudah login
   const isLoggedIn = computed(() => {
     return !!(user.value && token.value)
@@ -90,7 +187,6 @@ export const useAuthStore = defineStore('auth', () => {
   })
 
   // ========== FUNGSI UNTUK ROLE-BASED ACCESS ==========
-
   // Check apakah user adalah admin
   const isAdmin = computed(() => {
     return role.value === 'admin'
@@ -112,25 +208,34 @@ export const useAuthStore = defineStore('auth', () => {
   })
 
   // Function untuk logout
-  const logout = async () => {
+  const logout = async (reason?: string) => {
     try {
       // Optional: Call API logout endpoint
       // await $api('/logout', { method: 'POST' })
       
+      const currentRole = role.value
       deleteUserData()
-      
-      // Redirect ke halaman login sesuai dengan role sebelumnya
+
+      // Redirect ke halaman login
       const router = useRouter()
-      if (role.value === 'admin') {
-        await router.push({ name: 'authentication-login' })
-      } else {
-        await router.push({ name: 'authentication-login' })
+      
+      if (reason === 'session_timeout') {
+        // Show notification about session timeout
+        console.log('Session expired. Please login again.')
+        // You can add toast notification here
       }
+      
+      await router.push({ name: 'authentication-login' })
     } catch (error) {
       console.error('Logout error:', error)
       // Tetap hapus data lokal meskipun API gagal
       deleteUserData()
     }
+  }
+
+  // Initialize activity tracking if user is already logged in (for page refresh)
+  if (isLoggedIn.value) {
+    startActivityTracking()
   }
 
   return {
@@ -139,6 +244,7 @@ export const useAuthStore = defineStore('auth', () => {
     token,
     role,
     loginType,
+    lastActivity,
     
     // Computed untuk mengambil data user
     getCurrentUser,
@@ -163,9 +269,15 @@ export const useAuthStore = defineStore('auth', () => {
     deleteUserData,
     hasRole,
     logout,
+    updateLastActivity,
+    checkSessionTimeout,
   }
 }, {
-  persist: true
+  persist: {
+    key: 'auth-store',
+    storage: localStorage,
+    paths: ['user', 'token', 'role', 'loginType', 'lastActivity']
+  }
 })
 
 if (import.meta.hot)

@@ -91,79 +91,79 @@ export default [
         children: [
           {
             title: 'History',
-            to: 'front-pages-history',
+            to: 'history',
             target: '_blank',
 
           },
           {
             title: 'Landing',
-            to: 'front-pages-landing-page',
+            to: 'landing-page',
             target: '_blank',
 
           },
           {
             title: 'Pricing',
-            to: 'front-pages-pricing',
+            to: 'pricing',
             target: '_blank',
 
           },
           {
             title: 'Payment',
-            to: 'front-pages-payment',
+            to: 'payment',
             target: '_blank',
 
           },
           {
             title: 'Checkout',
-            to: 'front-pages-checkout',
+            to: 'checkout',
             target: '_blank',
 
           },
           {
             title: 'Help Center',
-            to: 'front-pages-help-center',
+            to: 'help-center',
             target: '_blank',
 
           },
           {
             title: 'About',
-            to: 'front-pages-about',
+            to: 'about',
             target: '_blank',
 
           },
           {
             title: 'Player',
-            to: 'front-pages-player',
+            to: 'player',
             target: '_blank',
 
           },
             {
             title: 'Club',
-            to: 'front-pages-club',
+            to: 'club',
             target: '_blank',
 
           },
           {
             title: 'Schedule Match',
-            to: 'front-pages-schedule-match',
+            to: 'schedule-match',
             target: '_blank',
 
           },
           {
             title: 'Schedule Training',
-            to: 'front-pages-schedule-training',
+            to: 'schedule-training',
             target: '_blank',
 
           },
           {
             title: 'Standing',
-            to: 'front-pages-standing',
+            to: 'standing',
             target: '_blank',
 
           },
           {
             title: 'Media',
-            to: 'front-pages-media',
+            to: 'media',
             target: '_blank',
 
           },

@@ -13,18 +13,18 @@ interface Menu {
 const footerBg = useGenerateImageVariant(footerLightBg, footerDarkBg)
 
 const pagesList: Menu[] = [
-  { name: 'History', to: { name: 'front-pages-history' } },
-  { name: 'About', to: { name: 'front-pages-about' } },
-  { name: 'Player', to: { name: 'front-pages-player' } },
-  { name: 'Club', to: { name: 'front-pages-club' } },
-  { name: 'Schedule Match', to: { name: 'front-pages-schedule-match' } },
-  { name: 'Schedule Training', to: { name: 'front-pages-schedule-training' } },
-  { name: 'Standing', to: { name: 'front-pages-standing' } },
-  { name: 'Media', to: { name: 'front-pages-media' } },
-  { name: 'Pricing', to: { name: 'front-pages-pricing' } },
-  { name: 'Payment', to: { name: 'front-pages-payment' }, isNew: true },
-  { name: 'Checkout', to: { name: 'front-pages-checkout' } },
-  { name: 'Help Center', to: { name: 'front-pages-help-center' } },
+  { name: 'History', to: { name: 'history' } },
+  { name: 'About', to: { name: 'about' } },
+  { name: 'Player', to: { name: 'player' } },
+  { name: 'Club', to: { name: 'club' } },
+  { name: 'Schedule Match', to: { name: 'schedule-match' } },
+  { name: 'Schedule Training', to: { name: 'schedule-training' } },
+  { name: 'Standing', to: { name: 'standing' } },
+  { name: 'Media', to: { name: 'media' } },
+  { name: 'Pricing', to: { name: 'pricing' } },
+  { name: 'Payment', to: { name: 'payment' }, isNew: true },
+  { name: 'Checkout', to: { name: 'checkout' } },
+  { name: 'Help Center', to: { name: 'help-center' } },
   { name: 'Login/Register', to: { name: 'authentication-login-v2' } },
 ]
 
@@ -72,13 +72,13 @@ const demoList = [
                 :class="$vuetify.theme.current.dark ? 'text-body-2' : 'text-white-variant'"
               >
                 <p class="mb-3">
-                  <strong>Address:</strong> Jl. Cipete No. 06, Cipete Selatan, Cilandak, Jakarta Selatan - DKI Jakarta - 12410
+                  <strong>Alamat :</strong> Jl. Cipete No. 06, Cipete Selatan, Cilandak, Jakarta Selatan - DKI Jakarta - 12410
                 </p>
                 <p class="mb-3">
-                  <strong>Phone Number:</strong> 081234567890
+                  <strong>Nomor Telepon :</strong> 081234567890
                 </p>
                 <p class="mb-0">
-                  <strong>Email:</strong> putramuda.balaraja@gmail.com
+                  <strong>Email :</strong> putramuda.balaraja@gmail.com
                 </p>
               </div>
             </div>
@@ -95,7 +95,7 @@ const demoList = [
             >
               <div class="app-logo mb-9 d-flex align-center gap-3">
                 <h3 class="app-logo-title text-white mb-0">
-                  ABOUT US
+                  Tentang Kami
                 </h3>
               </div>
 

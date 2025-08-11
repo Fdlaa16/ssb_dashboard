@@ -10,8 +10,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -50,5 +49,10 @@ class User extends Authenticatable
     public function player()
     {
         return $this->belongsTo(Player::class, 'user_id', 'id');
+    }
+
+    public function structure()
+    {
+        return $this->belongsTo(Structure::class, 'user_id', 'id');
     }
 }

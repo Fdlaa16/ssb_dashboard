@@ -1,55 +1,118 @@
 <script setup lang="ts">
+import { useAuthStore } from '@/stores/auth'
+import { useAbility } from '@casl/vue'
+import { onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
 
+// Store dan Router
+const authStore = useAuthStore()
+const route = useRoute()
 const router = useRouter()
 const ability = useAbility()
+const avatarPreview = ref<string | null>(null)
 
-// TODO: Get type from backend
-const userData = useCookie<any>('userData')
+// ✅ Interface yang disesuaikan dengan struktur API
+interface User {
+  id: number
+  name: string
+  email: string
+  role: string
+}
 
-// const {logout} = useAuth()
-console.log('userProfiel')
+interface Avatar {
+  url: string
+}
 
-const loggingOut = async() => {
-  console.log('Logging out...')
+interface UserData {
+  id: number
+  user_id: number
+  name: string
+  date_of_birth: string
+  department: string
+  avatar: Avatar | null
+  user: User
+}
+
+// Ref user data
+const userData = ref<UserData | null>(null)
+const isLoading = ref(true)
+const error = ref<string | null>(null)
+
+// Fetch data user
+const fetchUserProfile = async () => {
   try {
-    // await logout()
-  } catch (error) {
-    console.error('Logout failed:', error)
+    isLoading.value = true
+    error.value = null
+    
+    const res = await $api('profile')
+    userData.value = res.data
+
+    // Set avatar preview jika ada
+    if (userData.value?.avatar?.url) {
+      avatarPreview.value = getImageUrl(userData.value.avatar.url)
+    }
+  } catch (err) {
+    console.error('Error fetching profile:', err)
+    error.value = 'Gagal memuat data profil'
+  } finally {
+    isLoading.value = false
   }
 }
-const logout = async () => {
-  // Remove "accessToken" from cookie
-  useCookie('accessToken').value = null
 
-  // Remove "userData" from cookie
-  userData.value = null
-
-  // Redirect to login page
-  await router.push('/login')
-
-  // ℹ️ We had to remove abilities in then block because if we don't nav menu items mutation is visible while redirecting user to login page
-  // Remove "userAbilities" from cookie
-  useCookie('userAbilityRules').value = null
-
-  // Reset ability to initial ability
-  ability.update([])
+const getImageUrl = (path: string) => {
+  return import.meta.env.VITE_APP_URL + path
 }
 
+// Ambil data saat komponen dimount
+onMounted(() => {
+  fetchUserProfile()
+})
+
+// Fungsi logout
+const onLogout = async () => {
+  try {
+    const loginType = authStore.loginType
+    const endpoint = loginType === 'dashboard' ? '/logout' : '/company/logout'
+
+    await $api(endpoint, {
+      method: 'POST'
+    })
+
+    authStore.deleteUserData()
+    await router.push({ name: 'authentication-login' })
+
+  } catch (err) {
+    console.error('Logout error:', err)
+    authStore.deleteUserData()
+    await router.push({ name: 'authentication-login' })
+  }
+}
+
+// List menu profil
 const userProfileList = [
   { type: 'divider' },
-  { type: 'navItem', icon: 'tabler-user', title: 'Profile', to: { name: 'apps-user-view-id', params: { id: 21 } } },
-  { type: 'navItem', icon: 'tabler-settings', title: 'Settings', to: { name: 'pages-account-settings-tab', params: { tab: 'account' } } },
-  { type: 'navItem', icon: 'tabler-file-dollar', title: 'Billing Plan', to: { name: 'pages-account-settings-tab', params: { tab: 'billing-plans' } }, badgeProps: { color: 'error', content: '4' } },
-  { type: 'divider' },
-  { type: 'navItem', icon: 'tabler-currency-dollar', title: 'Pricing', to: { name: 'pages-pricing' } },
-  { type: 'navItem', icon: 'tabler-question-mark', title: 'FAQ', to: { name: 'pages-faq' } },
+  { type: 'navItem', icon: 'tabler-user', title: 'Profile', to: { name: 'dashboards-profile' } },
 ]
+
+const departments = [
+  { title: 'Ketua Umum', value: 'chief' },
+  { title: 'Official', value: 'official' }, 
+  { title: 'Admin', value: 'admin' }, 
+]
+
+// Computed properties untuk kemudahan akses data
+const displayName = computed(() => userData.value?.name || userData.value?.user?.name || 'User')
+const displayRole = computed(() => userData.value?.user?.role || 'Unknown Role')
+const displayDepartment = computed(() => {
+  const deptValue = userData.value?.department
+  const found = departments.find(d => d.value === deptValue)
+  return found ? found.title : 'No Department'
+})
 </script>
 
 <template>
   <VBadge
-    v-if="userData"
     dot
     bordered
     location="bottom right"
@@ -60,19 +123,20 @@ const userProfileList = [
     <VAvatar
       size="38"
       class="cursor-pointer"
-      :color="!(userData && userData.avatar) ? 'primary' : undefined"
-      :variant="!(userData && userData.avatar) ? 'tonal' : undefined"
+      color="primary"
+      variant="tonal"
     >
-      <VImg
-        v-if="userData && userData.avatar"
-        :src="userData.avatar"
-      />
-      <VIcon
-        v-else
-        icon="tabler-user"
-      />
-
-      <!-- SECTION Menu -->
+      <VAvatar color="primary" variant="tonal">
+        <template v-if="avatarPreview">
+          <img
+            :src="avatarPreview"
+            alt="Avatar"
+            style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"
+          />
+        </template>
+        <VIcon v-else icon="tabler-user" />
+      </VAvatar>
+      <!-- Menu dropdown -->
       <VMenu
         activator="parent"
         width="240"
@@ -91,67 +155,63 @@ const userProfileList = [
                   color="success"
                   bordered
                 >
-                  <VAvatar
-                    :color="!(userData && userData.avatar) ? 'primary' : undefined"
-                    :variant="!(userData && userData.avatar) ? 'tonal' : undefined"
-                  >
-                    <VImg
-                      v-if="userData && userData.avatar"
-                      :src="userData.avatar"
-                    />
-                    <VIcon
-                      v-else
-                      icon="tabler-user"
-                    />
+                  <VAvatar color="primary" variant="tonal">
+                    <template v-if="avatarPreview">
+                      <img
+                        :src="avatarPreview"
+                        alt="Avatar"
+                        style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"
+                      />
+                    </template>
+                    <VIcon v-else icon="tabler-user" />
                   </VAvatar>
                 </VBadge>
               </VListItemAction>
 
-              <div>
+              <div v-if="!isLoading && userData">
                 <h6 class="text-h6 font-weight-medium">
-                  {{ userData.fullName || userData.username }}
+                  {{ displayName }}
                 </h6>
                 <VListItemSubtitle class="text-capitalize text-disabled">
-                  {{ userData.role }}
+                  Role : {{ displayRole }}
+                </VListItemSubtitle>
+                <VListItemSubtitle class="text-sm text-disabled">
+                  Department : {{ displayDepartment }}
+                </VListItemSubtitle>
+              </div>
+
+              <!-- Loading state -->
+              <div v-else-if="isLoading" class="d-flex flex-column gap-1">
+                <VSkeleton type="text" width="100px" height="16px" />
+                <VSkeleton type="text" width="80px" height="12px" />
+                <VSkeleton type="text" width="90px" height="12px" />
+              </div>
+
+              <!-- Error state -->
+              <div v-else-if="error">
+                <VListItemTitle class="text-error">
+                  Error
+                </VListItemTitle>
+                <VListItemSubtitle class="text-disabled">
+                  {{ error }}
                 </VListItemSubtitle>
               </div>
             </div>
           </VListItem>
 
           <PerfectScrollbar :options="{ wheelPropagation: false }">
-            <template
-              v-for="item in userProfileList"
-              :key="item.title"
-            >
+            <template v-for="item in userProfileList" :key="item.title">
               <VListItem
                 v-if="item.type === 'navItem'"
                 :to="item.to"
               >
                 <template #prepend>
-                  <VIcon
-                    :icon="item.icon"
-                    size="22"
-                  />
+                  <VIcon :icon="item.icon" size="22" />
                 </template>
-
                 <VListItemTitle>{{ item.title }}</VListItemTitle>
-
-                <template
-                  v-if="item.badgeProps"
-                  #append
-                >
-                  <VBadge
-                    rounded="sm"
-                    class="me-3"
-                    v-bind="item.badgeProps"
-                  />
-                </template>
               </VListItem>
 
-              <VDivider
-                v-else
-                class="my-2"
-              />
+              <VDivider v-else class="my-2" />
             </template>
 
             <div class="px-4 py-2">
@@ -160,15 +220,15 @@ const userProfileList = [
                 size="small"
                 color="error"
                 append-icon="tabler-logout"
-                @click="logout"
+                :disabled="isLoading"
+                @click="onLogout"
               >
-                Logoutt
+                Logout
               </VBtn>
             </div>
           </PerfectScrollbar>
         </VList>
       </VMenu>
-      <!-- !SECTION -->
     </VAvatar>
   </VBadge>
 </template>

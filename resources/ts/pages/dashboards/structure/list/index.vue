@@ -8,11 +8,10 @@ const router = useRouter()
 const route = useRoute()
 
 const searchQuery = ref('')
-// const selectedClub = ref('')
 const selectedStatus = ref('')
 const selectedSort = ref('')
 
-const players = ref<any[]>([])
+const structures = ref<any[]>([])
 const clubs = ref<{ title: string; value: string | number }[]>([])
 const sports = ref<{ title: string; value: string | number }[]>([])
 
@@ -36,7 +35,7 @@ onMounted(() => {
 })
 
 const totalPages = computed(() => {
-  return Math.ceil(players.value.length / itemsPerPage)
+  return Math.ceil(structures.value.length / itemsPerPage)
 })
 
 const widgetData = ref([
@@ -48,12 +47,9 @@ const widgetData = ref([
 
 const headers = [
   { title: 'ID', key: 'id' },
+  { title: 'Code', key: 'code' },
   { title: 'Name', key: 'name' },
-  { title: 'NISN', key: 'nisn' },
-  { title: 'Height (cm)', key: 'height' },
-  { title: 'Weight (kg)', key: 'weight' },
-  { title: 'Back Number', key: 'back_number' },
-  { title: 'Status', key: 'status' },
+  { title: 'Department', key: 'department' },
   { title: 'Action', key: 'action', sortable: false },
 ]
 
@@ -63,34 +59,32 @@ const statusColorMap = {
   2: { label: 'Non Active', color: 'error' },
 }
 
-const paginatedPlayers = computed(() => {
+const paginatedStructures = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage
-  return players.value.slice(start, start + itemsPerPage)
+  return structures.value.slice(start, start + itemsPerPage)
 })
 
-async function fetchPlayer() {
+async function fetchStructure() {
   loading.value = true
   error.value = null
 
   try {
-    const response = await $api('player', {
+    const response = await $api('structure', {
       method: 'GET',
       params: {
         search: searchQuery.value,
-        // club_id: selectedClub.value,
         status: selectedStatus.value,
         sort: selectedSort.value,
       },
     })
 
-    players.value = response.data         
+    structures.value = response.data         
     const totals = response.totals
 
     widgetData.value = [
-      { title: 'All', value: totals.all, icon: 'tabler-user', iconColor: 'primary', change: 0, desc: 'Total semua player' },
-      { title: 'Active', value: totals.active, icon: 'tabler-user-check', iconColor: 'success', change: 0, desc: 'Player aktif' },
-      { title: 'In Confirm', value: totals.in_confirm, icon: 'tabler-user-question', iconColor: 'warning', change: 0, desc: 'Menunggu konfirmasi' },
-      { title: 'Non Active', value: totals.in_active, icon: 'tabler-user-x', iconColor: 'error', change: 0, desc: 'Player tidak aktif' },
+      { title: 'All', value: totals.all, icon: 'tabler-user', iconColor: 'primary', change: 0, desc: 'Total semua structure' },
+      { title: 'Active', value: totals.active, icon: 'tabler-user-check', iconColor: 'success', change: 0, desc: 'Structure aktif' },
+      { title: 'Non Active', value: totals.in_active, icon: 'tabler-user-x', iconColor: 'error', change: 0, desc: 'Structure tidak aktif' },
     ]
   } catch (err: any) {
     error.value = err.message || 'Gagal memuat data'
@@ -133,14 +127,14 @@ async function fetchSports() {
   }
 }
 
-function editPlayer(player: any) {
-  router.push({ name: 'dashboards-player-edit-id', params: { id: player.id } })
+function editStructure(structure: any) {
+  router.push({ name: 'dashboards-structure-edit-id', params: { id: structure.id } })
 }
 
-async function deletePlayer(player: any) {
+async function deleteStructure(structure: any) {
   const confirm = await Swal.fire({
     title: 'Apakah kamu yakin?',
-    text: `Data player dengan nama ${player.name} akan dihapus.`,
+    text: `Data structure dengan nama ${structure.name} akan dihapus.`,
     icon: 'warning',
     showCancelButton: true,
     confirmButtonText: 'Ya, hapus!',
@@ -155,17 +149,17 @@ async function deletePlayer(player: any) {
     try {
       loading.value = true
 
-      await $api(`player/${player.id}`, {
+      await $api(`structure/${structure.id}`, {
         method: 'DELETE',
       })
 
-      await fetchPlayer()
+      await fetchStructure()
 
-      snackbarMessage.value = 'Player berhasil dihapus'
+      snackbarMessage.value = 'Structure berhasil dihapus'
       snackbarColor.value = 'success'
       isSnackbarVisible.value = true
     } catch (err: any) {
-      snackbarMessage.value = err?.response?.data?.message || 'Gagal menghapus player'
+      snackbarMessage.value = err?.response?.data?.message || 'Gagal menghapus structure'
       snackbarColor.value = 'error'
       isSnackbarVisible.value = true
     } finally {
@@ -174,10 +168,10 @@ async function deletePlayer(player: any) {
   }
 }
 
-async function activatePlayer(player: any) {
+async function activateStructure(structure: any) {
   const confirm = await Swal.fire({
-    title: 'Aktifkan Player?',
-    text: `Player ${player.name} akan diaktifkan kembali.`,
+    title: 'Aktifkan Structure?',
+    text: `Structure ${structure.name} akan diaktifkan kembali.`,
     icon: 'question',
     showCancelButton: true,
     confirmButtonText: 'Ya, aktifkan!',
@@ -192,17 +186,17 @@ async function activatePlayer(player: any) {
     try {
       loading.value = true
 
-      await $api(`player/${player.id}/active`, {
+      await $api(`structure/${structure.id}/active`, {
         method: 'PUT',
       })
 
-      await fetchPlayer()
+      await fetchStructure()
 
-      snackbarMessage.value = 'Player berhasil diaktifkan kembali'
+      snackbarMessage.value = 'Structure berhasil diaktifkan kembali'
       snackbarColor.value = 'success'
       isSnackbarVisible.value = true
     } catch (err: any) {
-      snackbarMessage.value = err?.response?.data?.message || 'Gagal mengaktifkan player'
+      snackbarMessage.value = err?.response?.data?.message || 'Gagal mengaktifkan structure'
       snackbarColor.value = 'error'
       isSnackbarVisible.value = true
     } finally {
@@ -211,10 +205,10 @@ async function activatePlayer(player: any) {
   }
 }
 
-async function approvePlayer(player: any) {
+async function approveStructure(structure: any) {
   const result = await Swal.fire({
-    title: 'Terima Player?',
-    text: `Player ${player.name} akan diterima?.`,
+    title: 'Terima Structure?',
+    text: `structure ${structure.name} akan diterima?.`,
     icon: 'question',
     showCancelButton: true,
     confirmButtonText: 'Ya, terima!',
@@ -226,27 +220,27 @@ async function approvePlayer(player: any) {
   })
 
   if (result.isConfirmed) {
-    $api(`player/${player.id}/approve`, {
+    $api(`structure/${structure.id}/approve`, {
       method: 'PUT',
     })
       .then(() => {
-        fetchPlayer()
-        snackbarMessage.value = 'Player diterima'
+        fetchStructure()
+        snackbarMessage.value = 'Structure diterima'
         snackbarColor.value = 'success'
         isSnackbarVisible.value = true
       })
       .catch((err: any) => {
-        snackbarMessage.value = err?.response?.data?.message || 'Gagal menerima player'
+        snackbarMessage.value = err?.response?.data?.message || 'Gagal menerima structure'
         snackbarColor.value = 'error'
         isSnackbarVisible.value = true
       })
   }
 }
 
-async function rejectPlayer(player: any) {
+async function rejectStructure(structure: any) {
   const result = await Swal.fire({
-    title: 'Tolak Player?',
-    text: `Player ${player.name} akan ditolak?.`,
+    title: 'Tolak Structure?',
+    text: `structure ${structure.name} akan ditolak?.`,
     icon: 'question',
     showCancelButton: true,
     confirmButtonText: 'Ya, tolak!',
@@ -258,17 +252,17 @@ async function rejectPlayer(player: any) {
   })
 
   if (result.isConfirmed) {
-    $api(`player/${player.id}/reject`, {
+    $api(`structure/${structure.id}/reject`, {
       method: 'PUT',
     })
       .then(() => {
-        fetchPlayer()
-        snackbarMessage.value = 'Player ditolak'
+        fetchStructure()
+        snackbarMessage.value = 'Structure ditolak'
         snackbarColor.value = 'success'
         isSnackbarVisible.value = true
       })
       .catch((err: any) => {
-        snackbarMessage.value = err?.response?.data?.message || 'Gagal menolak player'
+        snackbarMessage.value = err?.response?.data?.message || 'Gagal menolak structure'
         snackbarColor.value = 'error'
         isSnackbarVisible.value = true
       })
@@ -282,11 +276,10 @@ function getQueryParam(param: LocationQueryValue | LocationQueryValue[] | undefi
 
 onMounted(() => {
   searchQuery.value = getQueryParam(route.query.search)
-  // selectedClub.value = getQueryParam(route.query.club_id)
   selectedStatus.value = getQueryParam(route.query.status)
   selectedSort.value = getQueryParam(route.query.sort)
 
-  fetchPlayer()
+  fetchStructure()
   fetchClubs()
   fetchSports()
 })
@@ -296,13 +289,12 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
     query: {
       ...route.query,
       search: searchQuery.value || undefined,
-      // club_id: selectedClub.value || undefined,
       status: selectedStatus.value || undefined,
       sort: selectedSort.value || undefined,
     },
   })
 
-  fetchPlayer()
+  fetchStructure()
 })
 </script>
 
@@ -317,7 +309,7 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
           >
             <VCol
               cols="12"
-              md="3"
+              md="4"
               sm="6"
             >
               <VCard>
@@ -357,7 +349,7 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
 
       <VCard class="mb-6">
         <VCardItem class="pb-4">
-          <VCardTitle>Players</VCardTitle>
+          <VCardTitle>Structures</VCardTitle>
         </VCardItem>
 
         <VCardText>
@@ -376,7 +368,6 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
                   { title: 'Pilih Status', value: '' },
                   { title: 'Semua', value: 'all' },
                   { title: 'Aktif', value: 'active' },
-                  { title: 'Menunggu Konfirmasi', value: 'in_confirm' },
                   { title: 'Tidak Aktif', value: 'in_active' }
                 ]"
               />
@@ -408,11 +399,11 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
           <div style="inline-size: 15.625rem;">
             <AppTextField
                 v-model="searchQuery"
-                placeholder="Search Player"
+                placeholder="Search Structure"
             />
           </div>
-          <VSpacer />
 
+          <VSpacer />
           <div class="app-user-search-filter d-flex align-center flex-wrap gap-4">
             <VBtn
               variant="tonal"
@@ -424,9 +415,9 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
 
             <VBtn
               prepend-icon="tabler-plus"
-              :to="{ name: 'dashboards-player-add' }"
+              :to="{ name: 'dashboards-structure-add' }"
             >
-              Add New User
+              Add New Structure
             </VBtn>
           </div>
         </VCardText>
@@ -435,12 +426,16 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
 
         <VDataTable
           :headers="headers"
-          :items="paginatedPlayers"
+          :items="paginatedStructures"
           :loading="loading"
           class="text-no-wrap"
           :items-per-page="itemsPerPage"
           hide-default-footer
         >
+          <template #item.code="{ item }">
+            <div class="text-body-1">{{ item.code }}</div>
+          </template>
+
           <template #item.name="{ item }">
             <div class="d-flex gap-x-3 align-center">
               <!-- <VAvatar
@@ -455,33 +450,8 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
             </div>
           </template>
 
-          <template #item.nisn="{ item }">
-            <div class="text-body-1">{{ item.nisn }}</div>
-          </template>
-
-          <template #item.height="{ item }">
-            <div class="text-body-1">{{ item.height }}</div>
-          </template>
-
-          <template #item.weight="{ item }">
-            <div class="text-body-1">{{ item.weight }}</div>
-          </template>
-
-          <template #item.back_number="{ item }">
-            <div class="text-body-1">{{ item.back_number || '-' }}</div>
-          </template>
-
-          <template #item.status="{ item }">
-            <VChip
-              label
-              class="text-body-1 font-weight-medium"
-              :color="statusColorMap[item.status]?.color"
-              :text-color="statusColorMap[item.status]?.textColor || 'white'"
-              variant="tonal"
-              size="small"
-            >
-              {{ statusColorMap[item.status]?.label || 'Unknown' }}
-            </VChip>
+          <template #item.department="{ item }">
+            <div class="text-body-1">{{ item.department }}</div>
           </template>
 
           <template #item.action="{ item }">
@@ -491,7 +461,7 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
                 icon
                 size="small"
                 color="primary"
-                @click="editPlayer(item)"
+                @click="editStructure(item)"
                 title="Edit"
               >
                 <VIcon icon="tabler-pencil" />
@@ -502,7 +472,7 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
                 icon
                 size="small"
                 color="error"
-                @click="deletePlayer(item)"
+                @click="deleteStructure(item)"
                 title="Delete"
               >
                 <VIcon icon="tabler-trash" />
@@ -513,7 +483,7 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
                 icon
                 size="small"
                 color="success"
-                @click="activatePlayer(item)"
+                @click="activateStructure(item)"
                 title="Activate"
               >
                 <VIcon icon="tabler-check" />
@@ -524,10 +494,10 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
                 icon
                 size="small"
                 color="warning"
-                @click="approvePlayer(item)"
+                @click="approveStructure(item)"
                 title="Approve"
               >
-                <VIcon icon="tabler-file-check" />
+                <VIcon icon="tabler-help" />
               </VBtn>
 
               <VBtn
@@ -535,7 +505,7 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
                 icon
                 size="small"
                 color="error"
-                @click="rejectPlayer(item)"
+                @click="rejectStructure(item)"
                 title="Reject"
               >
                 <VIcon icon="tabler-x" />

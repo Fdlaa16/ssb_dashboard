@@ -47,8 +47,6 @@ const getMediaQuery = async () => {
       },
     })
     
-    console.log('Response:', response)
-
     // Gabungkan semua array dari response.data
     medias.value = Object.values(response.data).flat()
 
@@ -83,7 +81,7 @@ function formatTanggalIndonesia(dateString: string): string {
 }
 
 const goToMedias = () => {
-  router.push({ name: 'front-pages-media' }) 
+  router.push({ name: 'media' }) 
 }
 
 onMounted(() => {
@@ -202,7 +200,7 @@ onMounted(() => {
                   v-for="(data, index) in medias"
                   :key="index"
                 >
-                  <router-link :to="{ name: 'front-pages-media-id', params: { id: String(data.id) } }">
+                  <router-link :to="{ name: 'media-id', params: { id: String(data.id) } }">
                     <VCard>
                       <VImg
                         :src="data.document_media?.[0]?.url"

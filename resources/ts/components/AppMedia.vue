@@ -108,7 +108,7 @@ watch(currentPage, () => {
             sm="6"
             md="4"
           >
-            <router-link :to="{ name: 'front-pages-media-id', params: { id: String(data.id) } }">
+            <router-link :to="{ name: 'media-id', params: { id: String(data.id) } }">
               <VCard class="cursor-pointer" hover>
                 <VImg
                   :src="data.document_media?.[0]?.url"

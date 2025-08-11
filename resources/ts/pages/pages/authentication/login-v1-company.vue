@@ -44,7 +44,7 @@ const onSubmit = async () => {
     }
     
     try {
-        const response = await $api('/company/login', {
+        const response = await $api('/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -69,9 +69,11 @@ const onSubmit = async () => {
         
         // Company routing
         if (role === 'user') {
-            await router.push({ name: 'front-pages-landing-page' });
+            await router.push({ name: 'landing-page' });
+        } else if (role === 'admin') {
+            await router.push({ name: 'dashboards-player-list' });
         } else {
-            snackbarMessage.value = 'Unauthorized access to company portal';
+            snackbarMessage.value = 'Unauthorized access to company portal2';
             snackbarColor.value = 'error';
             isFlatSnackbarVisible.value = true;
         }
@@ -103,7 +105,7 @@ const handleLoginError = (err: any) => {
 
 <template>
   <VBtn
-    :to="{ name: 'front-pages-landing-page'}"
+    :to="{ name: 'landing-page'}"
     variant="text"
     color="primary"
     class="mb-4 position-absolute"

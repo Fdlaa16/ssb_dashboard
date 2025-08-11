@@ -44,7 +44,7 @@ const onSubmit = async () => {
     }
     
     try {
-        const response = await $api('/company/login', {
+        const response = await $api('/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -69,9 +69,11 @@ const onSubmit = async () => {
         
         // Company routing
         if (role === 'user') {
-            await router.push({ name: 'front-pages-landing-page' });
+            await router.push({ name: 'landing-page' });
+        } else if (role === 'admin') {
+            await router.push({ name: 'dashboards-player-list' });
         } else {
-            snackbarMessage.value = 'Unauthorized access to company portal';
+            snackbarMessage.value = 'Unauthorized access to company portal2';
             snackbarColor.value = 'error';
             isFlatSnackbarVisible.value = true;
         }
@@ -102,6 +104,17 @@ const handleLoginError = (err: any) => {
 </script>
 
 <template>
+  <VBtn
+    :to="{ name: 'landing-page'}"
+    variant="text"
+    color="primary"
+    class="mb-4 position-absolute"
+    style="left: 32px; top: 32px; z-index: 2;"
+  >
+    <VIcon start icon="tabler-arrow-left" />
+    Kembali ke Beranda
+  </VBtn>
+  
   <div class="auth-wrapper d-flex align-center justify-center pa-4">
     <div class="position-relative my-sm-16">
       <!-- 👉 Top shape -->
@@ -180,7 +193,7 @@ const handleLoginError = (err: any) => {
 
                   <RouterLink
                     class="text-primary"
-                    :to="{ name: 'authentication-forgot-password-v1' }"
+                    :to="{ name: 'pages-authentication-forgot-password-v1' }"
                   >
                     Forgot Password?
                   </RouterLink>

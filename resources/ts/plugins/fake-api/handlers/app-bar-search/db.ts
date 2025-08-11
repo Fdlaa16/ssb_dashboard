@@ -42,67 +42,67 @@ export const db: DB = {
       category: 'frontPages',
       children: [
         {
-          url: { name: 'front-pages-history' },
+          url: { name: 'history' },
           icon: 'tabler-file-description',
           title: 'History',
         },
         {
-          url: { name: 'front-pages-landing-page' },
+          url: { name: 'landing-page' },
           icon: 'tabler-file-description',
           title: 'Landing Front',
         },
         {
-          url: { name: 'front-pages-pricing' },
+          url: { name: 'pricing' },
           icon: 'tabler-file-description',
           title: 'Pricing Front',
         },
         {
-          url: { name: 'front-pages-payment' },
+          url: { name: 'payment' },
           icon: 'tabler-file-description',
           title: 'Payment Front',
         },
         {
-          url: { name: 'front-pages-checkout' },
+          url: { name: 'checkout' },
           icon: 'tabler-file-description',
           title: 'Checkout Front',
         },
         {
-          url: { name: 'front-pages-help-center' },
+          url: { name: 'help-center' },
           icon: 'tabler-file-description',
           title: 'Help Center Front',
         },
         {
-          url: { name: 'front-pages-about' },
+          url: { name: 'about' },
           icon: 'tabler-file-description',
           title: 'About',
         },
         {
-          url: { name: 'front-pages-player' },
+          url: { name: 'player' },
           icon: 'tabler-file-description',
           title: 'Player',
         },
         {
-          url: { name: 'front-pages-club' },
+          url: { name: 'club' },
           icon: 'tabler-file-description',
           title: 'Club',
         },
         {
-          url: { name: 'front-pages-schedule-match' },
+          url: { name: 'schedule-match' },
           icon: 'tabler-file-description',
           title: 'Schedule Match',
         },
         {
-          url: { name: 'front-pages-schedule-training' },
+          url: { name: 'schedule-training' },
           icon: 'tabler-file-description',
           title: 'Schedule Training',
         },
         {
-          url: { name: 'front-pages-standing' },
+          url: { name: 'standing' },
           icon: 'tabler-file-description',
           title: 'Standing',
         },
         {
-          url: { name: 'front-pages-media' },
+          url: { name: 'media' },
           icon: 'tabler-file-description',
           title: 'Media',
         },
@@ -121,6 +121,16 @@ export const db: DB = {
           url: { name: 'dashboards-player-edit-id' },
           icon: 'tabler-user',
           title: 'Player',
+        },
+        {
+          url: { name: 'dashboards-structure-list' },
+          icon: 'tabler-user',
+          title: 'Structure',
+        },
+        {
+          url: { name: 'dashboards-structure-edit-id' },
+          icon: 'tabler-user',
+          title: 'Structure',
         },
         {
           url: { name: 'dashboards-club-list' },
