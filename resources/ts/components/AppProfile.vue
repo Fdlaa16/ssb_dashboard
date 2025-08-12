@@ -243,6 +243,10 @@ const updatePlayer = async () => {
     snackbarMessage.value = 'Profile Berhasil Diperbarui!'
     snackbarColor.value = 'success'
     isFlatSnackbarVisible.value = true
+
+    setTimeout(() => {
+      window.location.reload()
+    }, 1000)
   } catch (err: any) {
     const errors = err?.data?.errors
 

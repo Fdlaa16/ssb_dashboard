@@ -133,7 +133,6 @@ const fetchProfile = async () => {
 
 // Form submission
 const submitForm = async () => {
-  // Validate form first
   const isValid = await validateForm()
   if (!isValid) {
     showNotification('Harap perbaiki kesalahan pada form', 'error')
@@ -147,7 +146,6 @@ const submitForm = async () => {
     const formData = new FormData()
     formData.append('_method', 'PUT')
 
-    // Append form data
     formData.append('email', localData.value.user.email || '')
     if (localData.value.user.new_password) {
       formData.append('new_password', localData.value.user.new_password)
@@ -156,7 +154,6 @@ const submitForm = async () => {
     formData.append('date_of_birth', localData.value.date_of_birth || '')
     formData.append('department', localData.value.department || '')
 
-    // Append file if changed
     if (localData.value.avatar instanceof File) {
       formData.append('avatar', localData.value.avatar)
     }
@@ -166,14 +163,15 @@ const submitForm = async () => {
       body: formData,
     })
 
-    // Update original data after successful save
     originalData.value = JSON.parse(JSON.stringify(localData.value))
     
     showNotification('Profil berhasil diperbarui!', 'success')
     
-    // Emit success event
     emit('submit', res.data)
 
+    setTimeout(() => {
+      window.location.reload()
+    }, 1000)
   } catch (err: any) {
     console.error('Submit Error:', err)
     

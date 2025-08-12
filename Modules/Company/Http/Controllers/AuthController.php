@@ -257,10 +257,15 @@ class AuthController extends Controller
                 return response()->json(array('errors' => $validator->messages()->toArray()), 422);
             } else {
 
-                $player->user()->update([
-                    'email' => $request->email ?? '',
-                    'password' => bcrypt($request->new_password) ?? '',
-                ]);
+                $updateData = [
+                    'email' => $request->email,
+                ];
+
+                if (!empty($request->new_password)) {
+                    $updateData['password'] = bcrypt($request->new_password);
+                }
+
+                $player->user()->update($updateData);
 
                 $player->update([
                     'nisn'   => $request->nisn ?? '',

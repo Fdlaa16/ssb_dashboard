@@ -134,10 +134,15 @@ class AuthController extends Controller
                 return response()->json(array('errors' => $validator->messages()->toArray()), 422);
             } else {
 
-                $structure->user()->update([
+                $updateData = [
                     'email' => $request->email,
-                    'password' => $request->new_password ? bcrypt($request->new_password) : '',
-                ]);
+                ];
+
+                if (!empty($request->new_password)) {
+                    $updateData['password'] = bcrypt($request->new_password);
+                }
+
+                $structure->user()->update($updateData);
 
                 $structure->update([
                     'name'   => $request->name ?? '',
