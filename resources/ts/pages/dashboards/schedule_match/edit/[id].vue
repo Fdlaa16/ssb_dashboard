@@ -39,10 +39,7 @@ const fetchScheduleMatch = async () => {
       first_club_id: res.data.first_club?.id ?? 0,
       secound_club_id: res.data.secound_club?.id ?? 0,
       stadium_id: res.data.stadium?.id ?? 0,
-    }
-
-    console.log('Fetched schedule match data:', scheduleMatchData.value);
-    
+    }    
   } catch (err: any) {
     error.value = err.message || 'Gagal mengambil data schedule match';
   } finally {
@@ -55,10 +52,7 @@ onMounted(async () => {
 });
 
 const handleSubmit = async () => {
-  try {    
-
-    console.log('Submitting schedule match data:', scheduleMatchData.value);
-    
+  try {        
     const formData = new FormData();
     formData.append('_method', 'PUT'); 
 

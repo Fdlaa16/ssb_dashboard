@@ -17,9 +17,6 @@ const localData = ref<SlideHomeData>({
   ...props.data,
 })
 
-console.log('props.data.slide_home', props.data.slide_home);
-
-
 const slideHomePreview = ref<string | null>(
   props.data.slide_home?.url ? getImageUrl(props.data.slide_home.url) : null
 )

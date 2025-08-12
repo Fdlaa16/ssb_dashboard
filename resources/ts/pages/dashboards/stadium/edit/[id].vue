@@ -28,9 +28,6 @@ const fetchstadium = async () => {
     const res = await $api(`stadium/${stadiumId}/edit`);
    
     stadiumData.value = res.data 
-
-    console.log('Fetched stadium data:', stadiumData.value);
-    
   } catch (err: any) {
     error.value = err.message || 'Gagal mengambil data stadium';
   } finally {

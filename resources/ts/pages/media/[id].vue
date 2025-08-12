@@ -27,7 +27,6 @@ const fetchMediaDetail = async () => {
       method: 'GET'
     })
     detail.value = response.data
-    console.log('Media Detail:', response)
   } catch (err: any) {
     error.value = err.message || 'Gagal memuat detail media'
   } finally {

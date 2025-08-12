@@ -29,7 +29,6 @@ const fetchPlayerDetail = async () => {
       method: 'GET'
     })
     detail.value = response.data
-    console.log('player Detail:', response)
   } catch (err: any) {
     error.value = err.message || 'Gagal memuat detail player'
   } finally {
@@ -38,7 +37,6 @@ const fetchPlayerDetail = async () => {
 }
 
 onMounted(() => {
-  console.log('Mounted. playerId:', playerId.value)
   if (playerId.value) {
     fetchPlayerDetail()
   } else {

@@ -63,10 +63,7 @@ const fetchPlayer = async () => {
       status: false,
     }
 
-    playerData.value = data 
-
-    console.log('Fetched player data:', playerData.value);
-    
+    playerData.value = data     
   } catch (err: any) {
     error.value = err.message || 'Gagal mengambil data player';
   } finally {
@@ -79,10 +76,7 @@ onMounted(async () => {
 });
 
 const handleSubmit = async () => {
-  try {    
-
-    console.log('Submitting player data:', playerData.value);
-    
+  try {        
     const formData = new FormData();
     formData.append('_method', 'PUT'); 
 

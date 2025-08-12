@@ -118,10 +118,7 @@ const fetchProfile = async () => {
     // Set avatar preview
     if (profileData.avatar?.url) {
       avatarPreview.value = getImageUrl(profileData.avatar.url)
-    }
-    
-    console.log('Profile Data Loaded:', localData.value)
-    
+    }    
   } catch (err: any) {
     error.value = err.message || 'Gagal mengambil data profil'
     showNotification(error.value, 'error')

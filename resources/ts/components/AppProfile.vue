@@ -172,9 +172,7 @@ const showNotification = (message: string, type: 'success' | 'error' = 'success'
 }
 
 // API Functions
-const fetchPlayer = async () => {
-  console.log('asd', authStore);
-  
+const fetchPlayer = async () => {  
   loading.value = true
   error.value = null
 

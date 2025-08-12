@@ -23,10 +23,7 @@ const structureData = ref<StructureData>({
   avatar: null,
 })
 
-const handleSubmit = async () => {
-
-  console.log('structureData', structureData.value);
-  
+const handleSubmit = async () => {  
   const formData = new FormData();
   formData.append('email', structureData.value.user.email ?? '');
   formData.append('name', structureData.value.name ?? '');

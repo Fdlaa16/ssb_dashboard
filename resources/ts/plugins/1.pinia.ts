@@ -7,6 +7,5 @@ export const store = createPinia()
 store.use(piniaPluginPersistedstate)
 
 export default function (app: App) {
-  console.log('registering Pinia')
   app.use(store)
 }
