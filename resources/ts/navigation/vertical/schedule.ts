@@ -1,12 +1,12 @@
 export default [
-{ heading: 'Schedule' },
+{ heading: 'Jadwal' },
   {
-    title: 'Schedule',
+    title: 'Jadwal',
     icon: { icon: 'tabler-checkbox' },
     children: [
-      { title: 'Schedule Match', to: 'dashboards-schedule-match-list', },
-      { title: 'Schedule Training', to: 'dashboards-schedule-training-list', },
-      { title: 'Standings', to: 'dashboards-standing-list', },
+      { title: 'Jadwal Pertandingan', to: 'dashboards-schedule-match-list', },
+      { title: 'Jadwal Latihan', to: 'dashboards-schedule-training-list', },
+      { title: 'Klasemen', to: 'dashboards-standing-list', },
     ],
   },
 ]

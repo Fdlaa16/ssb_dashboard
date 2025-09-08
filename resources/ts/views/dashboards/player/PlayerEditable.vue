@@ -191,7 +191,7 @@ const downloadBiodata = async () => {
     const link = document.createElement('a');
 
     link.href = downloadUrl;
-    link.download = `${localData.value.code}_${Date.now()}.pdf`;
+    link.download = `${localData.value.code}_${localData.value.name}.pdf`;
 
     document.body.appendChild(link);
     link.click();

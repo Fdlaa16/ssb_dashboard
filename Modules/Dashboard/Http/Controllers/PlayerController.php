@@ -702,6 +702,44 @@ class PlayerController extends Controller
                 }
             }
 
+            $attachments = [];
+
+            if ($player->family_card && $player->family_card->path) {
+                $familyCardPath = public_path('storage/' . $player->family_card->path);
+                if (file_exists($familyCardPath)) {
+                    $familyCardType = pathinfo($familyCardPath, PATHINFO_EXTENSION);
+                    $familyCardData = file_get_contents($familyCardPath);
+                    $attachments['family_card'] = [
+                        'title' => 'Kartu Keluarga',
+                        'data' => 'data:image/' . $familyCardType . ';base64,' . base64_encode($familyCardData)
+                    ];
+                }
+            }
+
+            if ($player->report_grades && $player->report_grades->path) {
+                $reportGradesPath = public_path('storage/' . $player->report_grades->path);
+                if (file_exists($reportGradesPath)) {
+                    $reportGradesType = pathinfo($reportGradesPath, PATHINFO_EXTENSION);
+                    $reportGradesData = file_get_contents($reportGradesPath);
+                    $attachments['report_grades'] = [
+                        'title' => 'Rapor',
+                        'data' => 'data:image/' . $reportGradesType . ';base64,' . base64_encode($reportGradesData)
+                    ];
+                }
+            }
+
+            if ($player->birth_certificate && $player->birth_certificate->path) {
+                $birthCertificatePath = public_path('storage/' . $player->birth_certificate->path);
+                if (file_exists($birthCertificatePath)) {
+                    $birthCertificateType = pathinfo($birthCertificatePath, PATHINFO_EXTENSION);
+                    $birthCertificateData = file_get_contents($birthCertificatePath);
+                    $attachments['birth_certificate'] = [
+                        'title' => 'Akte Kelahiran',
+                        'data' => 'data:image/' . $birthCertificateType . ';base64,' . base64_encode($birthCertificateData)
+                    ];
+                }
+            }
+
             $ageText = match ($player->category) {
                 'u9' => 'U-9',
                 'u10' => 'U-10',
@@ -713,7 +751,7 @@ class PlayerController extends Controller
                 default => 'Unknown',
             };
 
-            $positionText = match ($player->category) {
+            $positionText = match ($player->position) {
                 'front' => 'Depan',
                 'center' => 'Tengah',
                 'back' => 'Belakang',
@@ -729,7 +767,8 @@ class PlayerController extends Controller
                 'logo' => $base64Logo,
                 'avatar' => $avatarBase64,
                 'positionText' => $positionText,
-                'ageText' => $ageText
+                'ageText' => $ageText,
+                'attachments' => $attachments
             ];
 
             $pdf = Pdf::loadView('pdf.biodata', $data)

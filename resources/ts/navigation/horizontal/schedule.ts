@@ -1,22 +1,22 @@
 export default [
   {
-    title: 'Schedule',
+    title: 'Jadwal',
     icon: { icon: 'tabler-layout-grid-add' },
     children: [
       {
-        title: 'Schedule',
+        title: 'Jadwal',
         icon: { icon: 'tabler-shopping-cart-plus' },
         children: [
           {
-            title: 'Schedule Match',
+            title: 'Jadwal Pertandingan',
             to: 'dashboards-schedule-match-list',
           },
           {
-            title: 'Schedule Training',
+            title: 'Jadwal Latihan',
             to: 'dashboards-schedule-training-list',
           },
           {
-            title: 'Standings',
+            title: 'Klasemen',
             to: 'dashboards-standing-list',
           },
         ],
