@@ -5,9 +5,16 @@ const currentTab = ref('biodata')
 const clubs = ref<Club[]>([])
 const error = ref<string | null>(null)
 
+const downloading = ref(false)
+const loading = ref(false)
+const isFlatSnackbarVisible = ref(false)
+const snackbarMessage = ref('')
+const snackbarColor = ref<'success' | 'error'>('success')
+
 const rulesNisn = {
   required: (value: string) => !!value || 'Harus diisi.',
-  exactLength: (value: string) => value.length === 10 || 'Harus tepat 10 karakter',
+  maxLength: (value: string) =>
+    (value?.length <= 13) || 'Maksimal 13 karakter',
 };
 
 const props = defineProps<{ data: PlayerData }>()
@@ -46,10 +53,10 @@ watch(
 
 const positions = [
   { title: 'Pilih Posisi', value: '' },
-  { title: 'Penjaga Gawang', value: 'goalkeeper' },
-  { title: 'Bek', value: 'defender' },
-  { title: 'Gelandang', value: 'midfielder' },
-  { title: 'Penyerang', value: 'forward' },
+  { title: 'Depan', value: 'front' },
+  { title: 'Tengah', value: 'center' },
+  { title: 'Belakang', value: 'back' },
+  { title: 'GK', value: 'gk' },
 ];
 
 async function getClubs() {
@@ -163,6 +170,54 @@ onBeforeUnmount(() => {
     URL.revokeObjectURL(birthCertificatePreview.value)
   }
 })
+
+const downloadBiodata = async () => {
+  try {
+    downloading.value = true;
+    const playerId = localData.value.id;
+
+    const response = await $api(`player/${playerId}/download-biodata`, {
+      method: 'GET',
+      responseType: 'blob',
+      headers: {
+        Accept: 'application/pdf',
+      },
+    });
+
+    // Pastikan yang dipakai langsung response (kalau wrapper sudah return blob)
+    const blob = response instanceof Blob ? response : new Blob([response.data], { type: 'application/pdf' });
+
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = downloadUrl;
+    link.download = `${localData.value.code}_${Date.now()}.pdf`;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(downloadUrl);
+
+    snackbarMessage.value = 'Biodata berhasil diunduh!';
+    snackbarColor.value = 'success';
+    isFlatSnackbarVisible.value = true;
+  } catch (err: any) {
+    const errors = err?.data?.errors;
+
+    if (err?.status === 422 && errors) {
+      const messages = Object.values(errors).flat();
+      snackbarMessage.value = 'Validasi gagal: ' + messages.join(', ');
+    } else {
+      snackbarMessage.value = 'Gagal mengunduh biodata: ' + (err?.message || 'Unknown error');
+    }
+
+    snackbarColor.value = 'error';
+    isFlatSnackbarVisible.value = true;
+  } finally {
+    downloading.value = false;
+  }
+};
+
 </script>
 
 <template>
@@ -178,7 +233,7 @@ onBeforeUnmount(() => {
 
           <VTab value="files">
             <VIcon icon="tabler-file" class="mb-2" />
-            <span>Files</span>
+            <span>Dokumen</span>
           </VTab>
         </VTabs>
 
@@ -224,17 +279,35 @@ onBeforeUnmount(() => {
                     placeholder="Contoh: admin@gmail.com"
                     class="mb-4"
                   />
+
+                  <!-- <VSwitch
+                    v-model="toggleSwitch"
+                    :label="capitalizedLabel(toggleSwitch)"
+                  /> -->
                   
-                  <AppTextField
-                    v-model="localData.nisn"
-                    label="NISN"
-                    placeholder="Contoh: 1234567890"
-                    class="mb-4"
-                    maxlength="10"
-                    :rules="[rulesNisn.required, rulesNisn.exactLength]"
-                    hint="Harus tepat 10 karakter"
-                    counter
-                  />
+                  <VRow>
+                    <VCol cols="6">
+                      <AppTextField
+                        v-model="localData.nisn"
+                        label="NISN"
+                        placeholder="Contoh: 1234567890"
+                        class="mb-4"
+                        maxlength="13"
+                        :rules="[rulesNisn.required, rulesNisn.maxLength]"
+                        hint="Maksimal 13 karakter"
+                        counter
+                      />
+                    </VCol>
+
+                    <VCol cols="6">
+                      <AppTextField
+                        v-model="localData.phone"
+                        type="number"
+                        label="Nomor Telepon"
+                        placeholder="081234567890"
+                      />
+                    </VCol>
+                  </VRow>
 
                   <AppTextField
                     v-model="localData.name"
@@ -293,7 +366,7 @@ onBeforeUnmount(() => {
                   </VRow>
                   
                   <AppSelect
-                    label="Position"
+                    label="Posisi"
                     v-model="localData.position"
                     :items="positions"
                     clearable
@@ -366,6 +439,14 @@ onBeforeUnmount(() => {
 
         <!-- Tombol Submit -->
         <VCol cols="12" class="d-flex justify-end">
+          <VBtn
+            v-if="localData.id && localData.status == 1"
+            color="warning"
+            class="mr-2"
+            @click="downloadBiodata"
+          >
+            Download Biodata
+          </VBtn>
           <VBtn
             color="primary"
             @click="submitForm"

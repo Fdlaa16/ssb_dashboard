@@ -39,15 +39,17 @@ export interface SportPlayer {
 
 export interface PlayerData {
   id: number; 
+  code: string;
   name: string;
   nisn: string;
+  phone: string;
   height: string;
   weight: string;
   back_number: string;   
   position: string;
   category: string; 
   is_captain: boolean;   
-  status: boolean;
+  status: number;
   user: User; 
   club: Club;
   sports?: Sport[];

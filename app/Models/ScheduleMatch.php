@@ -40,4 +40,56 @@ class ScheduleMatch extends Model
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
+
+    public function scheduleMatchNotifications()
+    {
+        return $this->hasMany(ScheduleMatchNotification::class);
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($scheduleMatch) {
+            $scheduleMatch->createNotifications();
+        });
+
+        static::updated(function ($scheduleMatch) {
+            if ($scheduleMatch->wasChanged(['schedule_date', 'schedule_start_at'])) {
+                $scheduleMatch->updateNotifications();
+            }
+        });
+    }
+
+    public function createNotifications()
+    {
+        $scheduleDateTime = \Carbon\Carbon::parse($this->schedule_date . ' ' . $this->schedule_start_at);
+
+        $notifications = [
+            [
+                'type' => 'h_minus_7',
+                'scheduled_at' => $scheduleDateTime->copy()->subDays(7)->startOfDay(),
+            ],
+            [
+                'type' => 'h_minus_1',
+                'scheduled_at' => $scheduleDateTime->copy()->subDay()->startOfDay(),
+            ],
+            [
+                'type' => 'day_h',
+                'scheduled_at' => $scheduleDateTime->copy()->startOfDay(),
+            ],
+        ];
+
+        foreach ($notifications as $notification) {
+            ScheduleMatchNotification::create(array_merge($notification, [
+                'schedule_match_id' => $this->id,
+            ]));
+        }
+    }
+
+    public function updateNotifications()
+    {
+        $this->scheduleMatchNotifications()->where('is_sent', false)->delete();
+        $this->createNotifications();
+    }
 }

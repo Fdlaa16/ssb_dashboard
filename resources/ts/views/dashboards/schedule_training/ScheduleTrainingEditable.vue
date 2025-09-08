@@ -79,7 +79,7 @@ const capitalizedLabel = (label: boolean) => {
 <template>
   <form @submit.prevent="$emit('submit')">
     <div class="d-flex flex-column gap-6 mb-6">
-      <VCard :title="props.data.id ? 'Edit Schedule Training' : 'Create Schedule Training'">
+      <VCard :title="props.data.id ? 'Ubah Jadwal Latihan' : 'Tambah Jadwal Latihan'">
         <VCardText>
           <VWindow>
             <VWindowItem>
@@ -90,16 +90,16 @@ const capitalizedLabel = (label: boolean) => {
                     <VCol cols="6">
                       <AppDateTimePicker
                         v-model="localData.schedule_date"
-                        label="Schedule Date"
-                        placeholder="Schedule date"
+                        label="Tanggal"
+                        placeholder="Tanggal"
                       />
                     </VCol>
 
                     <VCol cols="6">
                       <AppDateTimePicker
                         v-model="localData.schedule_start_at"
-                        label="Start At"
-                        placeholder="Select time"
+                        label="Pukul"
+                        placeholder="Pukul"
                         :config="{ enableTime: true, noCalendar: true, dateFormat: 'H:i' }"
                       />
                     </VCol>

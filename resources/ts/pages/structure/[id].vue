@@ -101,6 +101,7 @@ const departments = [
   { title: 'Ketua Umum', value: 'chief' },
   { title: 'Official', value: 'official' }, 
   { title: 'Admin', value: 'admin' }, 
+  { title: 'Pelatih', value: 'coach' }
 ]
 
 const rulesConfirmPassword = computed(() => ({
@@ -147,7 +148,7 @@ const fetchProfile = async () => {
     
   } catch (err: any) {
     console.error('Fetch Structure Error:', err)
-    error.value = err.message || 'Gagal memuat data struktur'
+    error.value = err.message || 'Gagal memuat data pengurus'
     showNotification(error.value, 'error')
     
     if (err.status === 404) {

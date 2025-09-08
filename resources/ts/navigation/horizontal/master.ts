@@ -8,15 +8,15 @@ export default [
         icon: { icon: 'tabler-logs' },
         children: [
           {
-            title: 'Player',
+            title: 'Pemain',
             to: 'dashboards-player-list',
           },
           {
-            title: 'Structure',
+            title: 'Pengurus',
             to: 'dashboards-structure-list',
           },
           {
-            title: 'Club',
+            title: 'Klub',
             to: 'dashboards-club-list',
           },
           {
@@ -28,7 +28,7 @@ export default [
             to: 'dashboards-stadium-list',
           },
           {
-            title: 'Slide Home',
+            title: 'Halaman Slide',
             to: 'dashboards-slide-home-list',
           },
         ],

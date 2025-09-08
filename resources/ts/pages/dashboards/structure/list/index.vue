@@ -23,6 +23,7 @@ const itemsPerPage = 5
 const isSnackbarVisible = ref(false)
 const snackbarMessage = ref('')
 const snackbarColor = ref<'success' | 'error'>('success')
+const exportLoading = ref(false)
 
 onMounted(() => {
   if (route.query.success) {
@@ -47,10 +48,10 @@ const widgetData = ref([
 
 const headers = [
   { title: 'ID', key: 'id' },
-  { title: 'Code', key: 'code' },
-  { title: 'Name', key: 'name' },
-  { title: 'Department', key: 'department' },
-  { title: 'Action', key: 'action', sortable: false },
+  { title: 'Kode', key: 'code' },
+  { title: 'Nama', key: 'name' },
+  { title: 'Departemen', key: 'department' },
+  { title: 'Aksi', key: 'action', sortable: false },
 ]
 
 const statusColorMap = {
@@ -269,6 +270,51 @@ async function rejectStructure(structure: any) {
   }
 }
 
+async function exportStructures() {
+  exportLoading.value = true
+  
+  try {
+    const response = await $api(`structure/export`, {
+      method: 'POST',
+      params: {
+        format: 'xlsx',
+        search: searchQuery.value,
+        status: selectedStatus.value,
+        sort: selectedSort.value,
+      },
+      responseType: 'blob',
+    })
+
+    const blob = new Blob([response], { 
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    })
+    
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-')
+    link.download = `Structure_Export_${timestamp}.xlsx`
+    
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    
+    window.URL.revokeObjectURL(url)
+
+    snackbarMessage.value = 'Data berhasil diekspor'
+    snackbarColor.value = 'success'
+    isSnackbarVisible.value = true
+
+  } catch (err: any) {
+    console.error('Export error:', err)
+    snackbarMessage.value = err?.response?.data?.message || 'Gagal mengekspor data'
+    snackbarColor.value = 'error'
+    isSnackbarVisible.value = true
+  } finally {
+    exportLoading.value = false
+  }
+}
 
 function getQueryParam(param: LocationQueryValue | LocationQueryValue[] | undefined): string {
   return Array.isArray(param) ? param[0] || '' : param || ''
@@ -349,7 +395,7 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
 
       <VCard class="mb-6">
         <VCardItem class="pb-4">
-          <VCardTitle>Structures</VCardTitle>
+          <VCardTitle>Master Pengurus</VCardTitle>
         </VCardItem>
 
         <VCardText>
@@ -384,7 +430,7 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
                 clear-icon="tabler-x"
                 single-line
                 :items="[
-                  { title: 'Pilih Sort', value: '' },
+                  { title: 'Pilih Sortir', value: '' },
                   { title: 'A-Z', value: 'asc' },
                   { title: 'Z-A', value: 'desc' },
                 ]"
@@ -399,25 +445,25 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
           <div style="inline-size: 15.625rem;">
             <AppTextField
                 v-model="searchQuery"
-                placeholder="Search Structure"
+                placeholder="Cari Pengurus"
             />
           </div>
 
           <VSpacer />
           <div class="app-user-search-filter d-flex align-center flex-wrap gap-4">
             <VBtn
-              variant="tonal"
-              color="secondary"
+              color="warning"
               prepend-icon="tabler-upload"
+              @click="exportStructures()"
             >
-              Export
+              Ekspor
             </VBtn>
 
             <VBtn
               prepend-icon="tabler-plus"
               :to="{ name: 'dashboards-structure-add' }"
             >
-              Add New Structure
+              Tambah Pengurus Baru
             </VBtn>
           </div>
         </VCardText>
@@ -462,7 +508,7 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
                 size="small"
                 color="primary"
                 @click="editStructure(item)"
-                title="Edit"
+                title="Ubah"
               >
                 <VIcon icon="tabler-pencil" />
               </VBtn>
@@ -473,7 +519,7 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
                 size="small"
                 color="error"
                 @click="deleteStructure(item)"
-                title="Delete"
+                title="Hapus"
               >
                 <VIcon icon="tabler-trash" />
               </VBtn>
@@ -484,31 +530,9 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
                 size="small"
                 color="success"
                 @click="activateStructure(item)"
-                title="Activate"
+                title="Aktifkan"
               >
                 <VIcon icon="tabler-check" />
-              </VBtn>
-
-              <VBtn
-                v-if="item.status === 0"
-                icon
-                size="small"
-                color="warning"
-                @click="approveStructure(item)"
-                title="Approve"
-              >
-                <VIcon icon="tabler-help" />
-              </VBtn>
-
-              <VBtn
-                v-if="item.status === 0"
-                icon
-                size="small"
-                color="error"
-                @click="rejectStructure(item)"
-                title="Reject"
-              >
-                <VIcon icon="tabler-x" />
               </VBtn>
             </div>
           </template>

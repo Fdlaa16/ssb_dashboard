@@ -28,7 +28,9 @@ watch(
 const departments = [
   { title: 'Pilih Posisi', value: '' },
   { title: 'Ketua Umum', value: 'chief' },
-  { title: 'Official', value: 'official' },
+  { title: 'Official', value: 'official' }, 
+  { title: 'Admin', value: 'admin' }, 
+  { title: 'Pelatih', value: 'coach' }
 ];
 
 watch(localData, (newVal, oldVal) => {
@@ -136,7 +138,7 @@ onBeforeUnmount(() => {
 
                     <VCol cols="6">
                       <AppSelect
-                        label="Department"
+                        label="Departemen"
                         v-model="localData.department"
                         :items="departments"
                         clearable

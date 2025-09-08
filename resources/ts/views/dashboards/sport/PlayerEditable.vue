@@ -9,7 +9,8 @@ const error = ref<string | null>(null)
 
 const rulesNisn = {
   required: (value: string) => !!value || 'Harus diisi.',
-  exactLength: (value: string) => value.length === 10 || 'Harus tepat 10 karakter',
+  maxLength: (value: string) =>
+    (value?.length <= 13) || 'Maksimal 13 karakter',
 };
 
 const rules = [
@@ -131,9 +132,9 @@ const getImageUrl = (path: string) => {
                     label="NISN"
                     placeholder="Contoh: 1234567890"
                     class="mb-4"
-                    maxlength="10"
-                    :rules="[rulesNisn.required, rulesNisn.exactLength]"
-                    hint="Harus tepat 10 karakter"
+                    maxlength="13"
+                    :rules="[rulesNisn.required, rulesNisn.maxLength]"
+                    hint="Maksimal 13 karakter"
                     counter
                   />
 

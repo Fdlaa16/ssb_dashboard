@@ -6,6 +6,8 @@ use App\Helpers\Helper;
 use App\Http\Resources\PlayerResource;
 use App\Http\Resources\PlayerResources;
 use App\Http\Resources\SportResource;
+use App\Mail\ApprovePlayerMail;
+use App\Mail\RejectPlayerMail;
 use App\Models\Club;
 use App\Models\ClubPlayer;
 use App\Models\File;
@@ -13,12 +15,17 @@ use App\Models\Player;
 use App\Models\Sport;
 use App\Models\SportPlayer;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class PlayerController extends Controller
 {
@@ -38,7 +45,6 @@ class PlayerController extends Controller
         $playersQuery = Player::query()
             ->with([
                 'user',
-                // 'clubPlayers.club',
                 'sports' => function ($query) {
                     $query->whereNull('sports.deleted_at');
                 },
@@ -54,14 +60,6 @@ class PlayerController extends Controller
                     ->orWhere('weight', 'like', '%' . $request->search . '%')
                     ->orWhereHas('user', function ($user) use ($request) {
                         $user->where('email', 'like', '%' . $request->search . '%');
-                    })
-                    // ->orWhereHas('club_players', function ($clubPlayers) use ($request) {
-                    //     $clubPlayers->orWhereHas('clubs', function ($club) use ($request) {
-                    //         $club->where('name', 'like', '%' . $request->search . '%');
-                    //     });
-                    // })
-                    ->orWhereHas('sports', function ($sport) use ($request) {
-                        $sport->where('name', 'like', '%' . $request->search . '%');
                     });
             });
         });
@@ -162,6 +160,7 @@ class PlayerController extends Controller
             $rules = [
                 'email'     => 'required|email|unique:users,email',
                 'nisn'      => 'required|unique:players,nisn',
+                'phone'      => 'required|unique:players,phone',
                 'name'      => 'required',
                 'height'    => 'required',
                 'weight'    => 'required',
@@ -180,6 +179,8 @@ class PlayerController extends Controller
                 'email.unique'       => 'Email sudah digunakan',
                 'nisn.required'      => 'NISN harus diisi',
                 'nisn.unique'        => 'NISN sudah digunakan',
+                'phone.required'     => 'Nomor Telepon harus diisi',
+                'phone.unique'       => 'Nomor Telepon sudah digunakan',
                 'name.required'      => 'Nama harus diisi',
                 'height.required'    => 'Tinggi badan harus diisi',
                 'weight.required'    => 'Berat badan harus diisi',
@@ -211,6 +212,7 @@ class PlayerController extends Controller
                 $player = Player::create([
                     'user_id' => $user->id ?? '',
                     'nisn' => $request->nisn ?? '',
+                    'phone' => $request->phone ?? '',
                     'name' => $request->name ?? '',
                     'height' => $request->height ?? '',
                     'weight' => $request->weight ?? '',
@@ -253,7 +255,7 @@ class PlayerController extends Controller
                 DB::commit();
 
                 return response()->json([
-                    'message' => 'Player created successfully.',
+                    'message' => 'Pemain created successfully.',
                     'data' => $player
                 ], 201);
             }
@@ -314,7 +316,7 @@ class PlayerController extends Controller
         $player = Player::find($id);
 
         if (!$player) {
-            return response()->json(['message' => 'Player tidak ditemukan'], 404);
+            return response()->json(['message' => 'Pemain tidak ditemukan'], 404);
         }
 
         try {
@@ -322,6 +324,7 @@ class PlayerController extends Controller
             $rules = [
                 'email'     => 'required|email|unique:users,email,' . $player->user_id,
                 'nisn'      => 'required|unique:players,nisn,' . $player->id,
+                'phone'      => 'required|unique:players,phone,' . $player->id,
                 'name'      => 'required',
                 'height'    => 'required',
                 'weight'    => 'required',
@@ -340,6 +343,8 @@ class PlayerController extends Controller
                 'email.unique'       => 'Email sudah digunakan',
                 'nisn.required'      => 'NISN harus diisi',
                 'nisn.unique'        => 'NISN sudah digunakan',
+                'phone.required'     => 'Nomor Telepon harus diisi',
+                'phone.unique'       => 'Nomor Telepon sudah digunakan',
                 'name.required'      => 'Nama harus diisi',
                 'height.required'    => 'Tinggi badan harus diisi',
                 'weight.required'    => 'Berat badan harus diisi',
@@ -373,6 +378,7 @@ class PlayerController extends Controller
 
                 $player->update([
                     'nisn'   => $request->nisn ?? '',
+                    'phone'   => $request->phone ?? '',
                     'name'   => $request->name ?? '',
                     'height' => $request->height ?? '',
                     'weight' => $request->weight ?? '',
@@ -403,18 +409,10 @@ class PlayerController extends Controller
                     }
                 }
 
-                // $player->clubPlayers()->update([
-                //     'player_id' => $player->id,
-                //     'club_id' => $request->club_id,
-                //     'position' => $request->position,
-                //     'back_number' => $request->back_number,
-                //     'category' => $request->category,
-                // ]);
-
                 DB::commit();
 
                 return response()->json([
-                    'message' => 'Player updated successfully.',
+                    'message' => 'Pemain updated successfully.',
                     'data' => $player,
                 ]);
             }
@@ -422,7 +420,7 @@ class PlayerController extends Controller
             DB::rollBack();
 
             return response()->json([
-                'message' => 'Terjadi kesalahan saat memperbarui player.',
+                'message' => 'Terjadi kesalahan saat memperbarui pemain.',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -446,12 +444,12 @@ class PlayerController extends Controller
         $player->delete();
 
         return response()->json([
-            'message' => 'Player berhasil dihapus.',
+            'message' => 'Pemain berhasil dihapus.',
             'data' => new PlayerResource($player),
         ]);
     }
 
-    public function active(Request $request, $id)
+    public function activate(Request $request, $id)
     {
         $player = Player::withTrashed()->find($id);
 
@@ -469,35 +467,288 @@ class PlayerController extends Controller
 
     public function approve(Request $request, $id)
     {
-        $player = Player::withTrashed()->find($id);
+        $player = Player::with('user')->withTrashed()->find($id);
 
         if (!$player) {
-            return response()->json(['message' => 'Player tidak ditemukan'], 404);
+            return response()->json(['message' => 'Pemain tidak ditemukan'], 404);
         }
 
         $player->status = 1;
         $player->save();
 
+        // Kirim email notifikasi registrasi berhasil
+        try {
+            Mail::to($player->user->email)->send(new ApprovePlayerMail($player, $player->user));
+        } catch (\Exception $mailException) {
+            // Log error email tapi tetap lanjutkan proses
+            \Log::error('Failed to send approve email: ' . $mailException->getMessage());
+        }
+
         return response()->json([
-            'message' => 'Player berhasil disetujui.',
+            'message' => 'Pemain berhasil disetujui.',
             'data' => new PlayerResource($player),
         ]);
     }
 
     public function reject(Request $request, $id)
     {
-        $player = Player::withTrashed()->find($id);
+        $player = Player::with('user')->withTrashed()->find($id);
 
         if (!$player) {
-            return response()->json(['message' => 'Player tidak ditemukan'], 404);
+            return response()->json(['message' => 'Pemain tidak ditemukan'], 404);
         }
 
         $player->status = 2;
         $player->save();
 
+        // Kirim email notifikasi registrasi berhasil
+        try {
+            Mail::to($player->user->email)->send(new RejectPlayerMail($player, $player->user));
+        } catch (\Exception $mailException) {
+            // Log error email tapi tetap lanjutkan proses
+            \Log::error('Failed to send reject email: ' . $mailException->getMessage());
+        }
+
         return response()->json([
-            'message' => 'Player berhasil ditolak.',
+            'message' => 'Pemain berhasil ditolak.',
             'data' => new PlayerResource($player),
         ]);
+    }
+
+    public function export(Request $request)
+    {
+        $orderByColumn = 'created_at';
+        $orderByDirection = $request->input('sort', 'desc') === 'asc' ? 'asc' : 'desc';
+
+        $playersQuery = Player::query()
+            ->select('id', 'user_id', 'code', 'name', 'nisn', 'height', 'weight', 'position', 'category', 'status', 'deleted_at')
+            ->with([
+                'user:id,email'
+            ])
+            ->withTrashed();
+
+        // 🔎 Filter search
+        $playersQuery->when(!empty($request->search), function ($q) use ($request) {
+            $q->where(function ($q) use ($request) {
+                $q->where('code', 'like', '%' . $request->search . '%')
+                    ->orWhere('name', 'like', '%' . $request->search . '%')
+                    ->orWhere('nisn', 'like', '%' . $request->search . '%')
+                    ->orWhere('height', 'like', '%' . $request->search . '%')
+                    ->orWhere('weight', 'like', '%' . $request->search . '%')
+                    ->orWhereHas('user', function ($user) use ($request) {
+                        $user->where('email', 'like', '%' . $request->search . '%');
+                    });
+            });
+        });
+
+        // 🔎 Filter status
+        $playersQuery->when($request->status, function ($query, $status) {
+            switch ($status) {
+                case 'in_confirm':
+                    $query->where('status', 0);
+                    break;
+                case 'active':
+                    $query->where('status', 1);
+                    break;
+                case 'in_active':
+                    $query->where('status', 2);
+                    break;
+                case 'all':
+                default:
+                    break;
+            }
+        });
+
+        // 🔎 Filter tanggal
+        if ($request->filled('from_date')) {
+            $playersQuery->where('created_at', '>=', Helper::formatDate($request->from_date, 'Y-m-d') . ' 00:00:00');
+        }
+
+        if ($request->filled('to_date')) {
+            $playersQuery->where('created_at', '<=', Helper::formatDate($request->to_date, 'Y-m-d') . ' 23:59:59');
+        }
+
+        $playersQuery->orderBy($orderByColumn, $orderByDirection);
+
+        // 🔎 Buat folder kalau belum ada
+        $exportDir = 'PlayersExport';
+        if (!is_dir(Storage::disk('public')->path($exportDir))) {
+            mkdir(Storage::disk('public')->path($exportDir), 0775, true);
+            chmod(Storage::disk('public')->path($exportDir), 0775);
+        }
+
+        // 🔎 Setup Excel
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $headers = [
+            'A1' => 'Kode Pemain',
+            'B1' => 'Nama',
+            'C1' => 'NISN',
+            'D1' => 'Email',
+            'E1' => 'Tinggi (cm)',
+            'F1' => 'Berat (kg)',
+            'G1' => 'Posisi',
+            'H1' => 'Kategori',
+            'I1' => 'Status',
+        ];
+
+        foreach ($headers as $cell => $header) {
+            $sheet->setCellValue($cell, $header);
+        }
+
+        $columnWidths = [
+            'A' => 12,
+            'B' => 25,
+            'C' => 20,
+            'D' => 30,
+            'E' => 12,
+            'F' => 12,
+            'G' => 15,
+            'H' => 15,
+            'I' => 25,
+        ];
+
+        foreach ($columnWidths as $column => $width) {
+            $sheet->getColumnDimension($column)->setWidth($width);
+        }
+
+        // 🔎 Isi data
+        $row = 2;
+        $playersQuery->chunk(1000, function ($players) use ($sheet, &$row) {
+            foreach ($players as $player) {
+                if ($player->deleted_at) {
+                    $statusText = 'Non Aktif'; // soft delete
+                } else {
+                    $statusText = match ($player->status) {
+                        0 => 'Menunggu Konfirmasi',
+                        1 => 'Pemain Aktif Pada Halaman',
+                        2 => 'Pemain Aktif',
+                        3 => 'Perlu Perbaikan',
+                        default => 'Unknown',
+                    };
+                }
+
+                $ageText = match ($player->category) {
+                    'u9' => 'U-9',
+                    'u10' => 'U-10',
+                    'u11' => 'U-11',
+                    'u12' => 'U-12',
+                    'u13' => 'U-13',
+                    'u14' => 'U-14',
+                    'u15' => 'U-15',
+                    default => 'Unknown',
+                };
+
+                $sheet->setCellValue("A{$row}", $player->code ?? '-');
+                $sheet->setCellValue("B{$row}", $player->name ?? '-');
+                $sheet->setCellValue("C{$row}", $player->nisn ?? '-');
+                $sheet->setCellValue("D{$row}", $player->user->email ?? '-');
+                $sheet->setCellValue("E{$row}", $player->height ?? '-');
+                $sheet->setCellValue("F{$row}", $player->weight ?? '-');
+                $sheet->setCellValue("G{$row}", $player->position ?? '-');
+                $sheet->setCellValue("H{$row}", $ageText);
+                $sheet->setCellValue("I{$row}", $statusText);
+                $row++;
+            }
+        });
+
+        // 🔎 Simpan file
+        $timestamp = now()->format('Y-m-d_H-i-s');
+        $fileName = "Players_Export_{$timestamp}.xlsx";
+        $filePath = Storage::disk('public')->path($exportDir . '/' . $fileName);
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($filePath);
+
+        $fileHeaders = [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ];
+
+        return response()->download($filePath, $fileName, $fileHeaders)->deleteFileAfterSend();
+    }
+
+    public function downloadBiodata($id)
+    {
+        try {
+            $player = Player::query()
+                ->with([
+                    'user',
+                    'avatar',
+                    'birth_certificate',
+                    'family_card',
+                    'report_grades',
+                ])
+                ->find($id);
+
+            if (!$player) {
+                return response()->json(['error' => 'Pemain tidak ditemukan'], 404);
+            }
+
+            // Load logo dari backend dan ubah jadi base64
+            $path = public_path('storage/logo/LOGOSSB.png');
+            $type = pathinfo($path, PATHINFO_EXTENSION);
+            $data = file_get_contents($path);
+            $base64Logo = 'data:image/' . $type . ';base64,' . base64_encode($data);
+
+            // Avatar base64
+            $avatarBase64 = null;
+            if ($player->avatar && $player->avatar->path) {
+                $avatarPath = public_path('storage/' . $player->avatar->path);
+                if (file_exists($avatarPath)) {
+                    $avatarType = pathinfo($avatarPath, PATHINFO_EXTENSION);
+                    $avatarData = file_get_contents($avatarPath);
+                    $avatarBase64 = 'data:image/' . $avatarType . ';base64,' . base64_encode($avatarData);
+                }
+            }
+
+            $ageText = match ($player->category) {
+                'u9' => 'U-9',
+                'u10' => 'U-10',
+                'u11' => 'U-11',
+                'u12' => 'U-12',
+                'u13' => 'U-13',
+                'u14' => 'U-14',
+                'u15' => 'U-15',
+                default => 'Unknown',
+            };
+
+            $positionText = match ($player->category) {
+                'front' => 'Depan',
+                'center' => 'Tengah',
+                'back' => 'Belakang',
+                'gk' => 'GK',
+                default => 'Unknown',
+            };
+
+            // Data untuk PDF
+            $data = [
+                'player' => $player,
+                'title' => 'Biodata Pemain - ' . $player->name,
+                'generated_at' => now()->format('d/m/Y H:i:s'),
+                'logo' => $base64Logo,
+                'avatar' => $avatarBase64,
+                'positionText' => $positionText,
+                'ageText' => $ageText
+            ];
+
+            $pdf = Pdf::loadView('pdf.biodata', $data)
+                ->setPaper('A4', 'portrait')
+                ->setOptions([
+                    'isRemoteEnabled' => true,
+                    'isHtml5ParserEnabled' => true,
+                    'dpi' => 96,
+                    'defaultFont' => 'Arial',
+                ]);
+
+            $filename = 'biodata_' . $player->code . '_' . date('YmdHis') . '.pdf';
+
+            return $pdf->download($filename);
+        } catch (\Exception $e) {
+            \Log::error('Error downloading biodata: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Gagal mengunduh biodata: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

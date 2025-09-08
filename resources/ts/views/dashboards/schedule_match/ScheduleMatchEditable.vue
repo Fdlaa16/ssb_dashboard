@@ -83,7 +83,7 @@ const filteredClubsForSecond = computed(() => {
 <template>
   <form @submit.prevent="$emit('submit')">
     <div class="d-flex flex-column gap-6 mb-6">
-      <VCard :title="props.data.id ? 'Edit Schedule Match' : 'Create Schedule Match'">
+      <VCard :title="props.data.id ? 'Ubah Jadwal Pertandingan' : 'Tambah Jadwal Pertandingan'">
         <VCardText>
           <VWindow>
             <VWindowItem>

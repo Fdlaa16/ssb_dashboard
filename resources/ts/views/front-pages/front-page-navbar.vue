@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NavbarThemeSwitcher from '@/layouts/components/NavbarThemeSwitcher.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useWindowScroll } from '@vueuse/core'
 import type { RouteLocationRaw } from 'vue-router/auto'
@@ -55,7 +56,7 @@ const menuItems: MenuItem[] = [
     listIcon: 'tabler-layout-dashboard',
     navItems: [
       { name: 'Sejarah', to: { name: 'history' }},
-      { name: 'Struktural', to: { name: 'structure' }},
+      { name: 'Pengurus', to: { name: 'structure' }},
       { name: 'Pemain', to: { name: 'player' } },
     ],
   },
@@ -700,27 +701,31 @@ onMounted(() => {
           <!-- Authentication Buttons - Desktop -->
           <template v-if="!isAuthenticated">
             <!-- Login Button -->
-            <VBtn
-              v-if="$vuetify.display.lgAndUp"
-              variant="outlined"
-              color="white"
-              class="text-white btn-navbar"
-              size="default"
-              @click="$router.push({ name: 'authentication-login' })"
-            >
-              Masuk
-            </VBtn>
+            <template v-if="$vuetify.display.lgAndUp">
+              <NavbarThemeSwitcher />
+              <VBtn
+                variant="outlined"
+                color="white"
+                class="text-white btn-navbar"
+                size="default"
+                @click="$router.push({ name: 'authentication-login' })"
+              >
+                Masuk
+              </VBtn>
+            </template>
 
-            <VBtn
-              v-else
-              variant="outlined"
-              color="white"
-              class="text-white btn-navbar"
-              size="default"
-              @click="$router.push({ name: 'authentication-login' })"
-            >
-              Masuk
-            </VBtn>
+            <template v-else>
+              <NavbarThemeSwitcher />
+              <VBtn
+                variant="outlined"
+                color="white"
+                class="text-white btn-navbar"
+                size="default"
+                @click="$router.push({ name: 'authentication-login' })"
+              >
+                Masuk
+              </VBtn>
+            </template>
 
             <!-- Register Button -->
             <VBtn

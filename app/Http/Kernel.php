@@ -15,4 +15,9 @@ class Kernel extends HttpKernel
         // ... middleware lainnya
         'role' => \App\Http\Middleware\RoleMiddleware::class,
     ];
+
+    protected $commands = [
+        \App\Console\Commands\SendScheduleTrainingNotifications::class,
+        \App\Console\Commands\SendScheduleMatchNotifications::class,
+    ];
 }

@@ -9,7 +9,7 @@ export const setupGuards = (router: _RouterTyped<RouteNamedMap & { [key: string]
     const role = authStore.role
 
     await authStore.checkSessionTimeout()
-    const authPages = ['authentication-login', 'authentication-login-v1-admin', 'authentication-register']
+    const authPages = ['authentication-login', 'authentication-register']
     
     if (authPages.includes(to.name as string)) {      
       if (isLoggedIn.value) {

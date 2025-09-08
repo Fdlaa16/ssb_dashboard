@@ -25,6 +25,7 @@ const itemsPerPage = 5
 const isSnackbarVisible = ref(false)
 const snackbarMessage = ref('')
 const snackbarColor = ref<'success' | 'error'>('success')
+const exportLoading = ref(false)
 
 onMounted(() => {
   if (route.query.success) {
@@ -48,12 +49,12 @@ const widgetData = ref([
 
 const headers = [
   { title: 'ID', key: 'id' },
-  { title: 'Club 1', key: 'first_club.name' },
-  { title: 'Club 2', key: 'secound_club.name' },
+  { title: 'Klub 1', key: 'first_club.name' },
+  { title: 'Klub 2', key: 'secound_club.name' },
   { title: 'Stadium', key: 'stadium.name' },
-  { title: 'Schedule Date', key: 'schedule_date' },
-  { title: 'Schedule Start At', key: 'schedule_start_at' },
-  { title: 'Action', key: 'action', sortable: false },
+  { title: 'Tanggal', key: 'schedule_date' },
+  { title: 'Pukul', key: 'schedule_start_at' },
+  { title: 'Aksi', key: 'action', sortable: false },
 ]
 
 const statusColorMap = {
@@ -86,9 +87,9 @@ async function fetchScheduleMatch() {
     const totals = response.totals
 
     widgetData.value = [
-      { title: 'All', value: totals.all, icon: 'tabler-calendar-check', iconColor: 'primary', change: 0, desc: 'Total semua scheduleMatch' },
-      { title: 'Active', value: totals.active, icon: 'tabler-calendar-check', iconColor: 'success', change: 0, desc: 'Schedule Match aktif' },
-      { title: 'Non Active', value: totals.in_active, icon: 'tabler-calendar-check', iconColor: 'error', change: 0, desc: 'Schedule Match tidak aktif' },
+      { title: 'All', value: totals.all, icon: 'tabler-calendar-check', iconColor: 'primary', change: 0, desc: 'Total semua jadwal pertandingan' },
+      { title: 'Active', value: totals.active, icon: 'tabler-calendar-check', iconColor: 'success', change: 0, desc: 'Jadwal Pertandingan aktif' },
+      { title: 'Non Active', value: totals.in_active, icon: 'tabler-calendar-check', iconColor: 'error', change: 0, desc: 'Jadwal Pertandingan tidak aktif' },
     ]
 
   } catch (err: any) {
@@ -139,7 +140,7 @@ function editScheduleMatch(scheduleMatch: any) {
 async function deleteScheduleMatch(scheduleMatch: any) {
   const confirm = await Swal.fire({
     title: 'Apakah kamu yakin?',
-    text: `Data Schedule Match ${scheduleMatch.first_club.name} melawan ${scheduleMatch.secound_club.name} pada tanggal ${scheduleMatch.schedule_date} pukul ${scheduleMatch.schedule_start_at} akan dihapus.`,
+    text: `Data Jadwal Pertandingan ${scheduleMatch.first_club.name} melawan ${scheduleMatch.secound_club.name} pada tanggal ${scheduleMatch.schedule_date} pukul ${scheduleMatch.schedule_start_at} akan dihapus.`,
     icon: 'warning',
     showCancelButton: true,
     confirmButtonText: 'Ya, hapus!',
@@ -160,7 +161,7 @@ async function deleteScheduleMatch(scheduleMatch: any) {
 
       await fetchScheduleMatch()
 
-      snackbarMessage.value = 'Schedule Match berhasil dihapus'
+      snackbarMessage.value = 'Jadwal Pertandingan berhasil dihapus'
       snackbarColor.value = 'success'
       isSnackbarVisible.value = true
     } catch (err: any) {
@@ -175,8 +176,8 @@ async function deleteScheduleMatch(scheduleMatch: any) {
 
 async function activateScheduleMatch(scheduleMatch: any) {
   const confirm = await Swal.fire({
-    title: 'Aktifkan Schedule Match?',
-    text: `Schedule Match ${scheduleMatch.first_club.name} melawan ${scheduleMatch.secound_club.name} pada tanggal ${scheduleMatch.schedule_date} pukul ${scheduleMatch.schedule_start_at} akan diaktifkan kembali.`,
+    title: 'Aktifkan Jadwal Pertandingan?',
+    text: `Jadwal Pertandingan ${scheduleMatch.first_club.name} melawan ${scheduleMatch.secound_club.name} pada tanggal ${scheduleMatch.schedule_date} pukul ${scheduleMatch.schedule_start_at} akan diaktifkan kembali.`,
     icon: 'question',
     showCancelButton: true,
     confirmButtonText: 'Ya, aktifkan!',
@@ -197,16 +198,64 @@ async function activateScheduleMatch(scheduleMatch: any) {
 
       await fetchScheduleMatch()
 
-      snackbarMessage.value = 'Schedule Match berhasil diaktifkan kembali'
+      snackbarMessage.value = 'Jadwal Pertandingan berhasil diaktifkan kembali'
       snackbarColor.value = 'success'
       isSnackbarVisible.value = true
     } catch (err: any) {
-      snackbarMessage.value = err?.response?.data?.message || 'Gagal mengaktifkan Schedule Match'
+      snackbarMessage.value = err?.response?.data?.message || 'Gagal mengaktifkan Jadwal Pertandingan'
       snackbarColor.value = 'error'
       isSnackbarVisible.value = true
     } finally {
       loading.value = false
     }
+  }
+}
+
+async function exportScheduleMatch() {
+  exportLoading.value = true
+  
+  try {
+    const response = await $api(`schedule-match/export`, {
+      method: 'POST',
+      params: {
+        format: 'xlsx',
+        search: searchQuery.value,
+        club_id: selectedClub.value,
+        stadium_id: selectedStadium.value,
+        status: selectedStatus.value,
+        sort: selectedSort.value,
+      },
+      responseType: 'blob',
+    })
+
+    const blob = new Blob([response], { 
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    })
+    
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-')
+    link.download = `Schedule_match_Export_${timestamp}.xlsx`
+    
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    
+    window.URL.revokeObjectURL(url)
+
+    snackbarMessage.value = 'Data berhasil diekspor'
+    snackbarColor.value = 'success'
+    isSnackbarVisible.value = true
+
+  } catch (err: any) {
+    console.error('Export error:', err)
+    snackbarMessage.value = err?.response?.data?.message || 'Gagal mengekspor data'
+    snackbarColor.value = 'error'
+    isSnackbarVisible.value = true
+  } finally {
+    exportLoading.value = false
   }
 }
 
@@ -293,7 +342,7 @@ watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort]
 
       <VCard class="mb-6">
         <VCardItem class="pb-4">
-          <VCardTitle>Schedule Matchs</VCardTitle>
+          <VCardTitle>Jadwal Pertandingans</VCardTitle>
         </VCardItem>
 
         <VCardText>
@@ -356,7 +405,7 @@ watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort]
                 clear-icon="tabler-x"
                 single-line
                 :items="[
-                  { title: 'Pilih Sort', value: '' },
+                  { title: 'Pilih Sortir', value: '' },
                   { title: 'A-Z', value: 'asc' },
                   { title: 'Z-A', value: 'desc' },
                 ]"
@@ -371,25 +420,25 @@ watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort]
           <div style="inline-size: 15.625rem;">
             <AppTextField
                 v-model="searchQuery"
-                placeholder="Search Schedule Match"
+                placeholder="Cari Jadwal Pertandingan"
             />
           </div>
           <VSpacer />
 
           <div class="app-user-search-filter d-flex align-center flex-wrap gap-4">
             <VBtn
-              variant="tonal"
-              color="secondary"
+              color="warning"
               prepend-icon="tabler-upload"
+              @click="exportScheduleMatch()"
             >
-              Export
+              Ekspor
             </VBtn>
 
             <VBtn
               prepend-icon="tabler-plus"
               :to="{ name: 'dashboards-schedule-match-add' }"
             >
-              Add New Schedule Match
+              Tambah Baru Jadwal Pertandingan
             </VBtn>
           </div>
         </VCardText>
@@ -436,7 +485,7 @@ watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort]
                 size="small"
                 color="primary"
                 @click="editScheduleMatch(item)"
-                title="Edit"
+                title="Ubah"
               >
                 <VIcon icon="tabler-pencil" />
               </VBtn>
@@ -447,7 +496,7 @@ watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort]
                 size="small"
                 color="error"
                 @click="deleteScheduleMatch(item)"
-                title="Delete"
+                title="Hapus"
               >
                 <VIcon icon="tabler-trash" />
               </VBtn>
@@ -458,7 +507,7 @@ watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort]
                 size="small"
                 color="success"
                 @click="activateScheduleMatch(item)"
-                title="Activate"
+                title="Aktifkan"
               >
                 <VIcon icon="tabler-check" />
               </VBtn>

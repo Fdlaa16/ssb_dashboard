@@ -67,13 +67,13 @@ onBeforeUnmount(() => {
 <template>
   <form @submit.prevent="$emit('submit')">
     <div class="d-flex flex-column gap-6 mb-6">
-      <VCard :title="props.data.id ? 'Edit Slide Home' : 'Create Slide Home'">
+      <VCard :title="props.data.id ? 'Ubah Halaman Slide' : 'Tambah Halaman Slide'">
         <VCardText>
           <VWindow>
             <div>
               <VRow>
                 <VCol cols="12" class="text-no-wrap">
-                  <h6 class="text-h6 mb-2">Slide Home</h6>
+                  <h6 class="text-h6 mb-2">Halaman Slide</h6>
                   <img
                     v-if="slideHomePreview"
                     :src="slideHomePreview"

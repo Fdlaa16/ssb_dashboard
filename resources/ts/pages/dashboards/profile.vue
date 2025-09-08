@@ -80,7 +80,9 @@ const avatarPreview = ref<string | null>(
 const departments = [
   { title: 'Pilih Posisi', value: '' },
   { title: 'Ketua Umum', value: 'chief' },
-  { title: 'Official', value: 'official' },
+  { title: 'Official', value: 'official' }, 
+  { title: 'Admin', value: 'admin' }, 
+  { title: 'Pelatih', value: 'coach' }
 ]
 
 // Utility functions

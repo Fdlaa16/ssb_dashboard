@@ -11,7 +11,10 @@ use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class StructureController extends Controller
 {
@@ -351,5 +354,116 @@ class StructureController extends Controller
             'message' => 'Structure berhasil diaktifkan.',
             'data' => new StructureResource($structure),
         ]);
+    }
+
+    public function export(Request $request)
+    {
+        $orderByColumn = 'created_at';
+        $orderByDirection = $request->input('sort', 'desc') === 'asc' ? 'asc' : 'desc';
+
+        $structuresQuery = Structure::query()
+            ->select('user_id', 'code', 'name', 'department', 'deleted_at')
+            ->with([
+                'user:id,email',
+            ])
+            ->withTrashed();
+
+        $structuresQuery->when(!empty($request->search), function ($q) use ($request) {
+            $q->where(function ($q) use ($request) {
+                $q->where('code', 'like', '%' . $request->search . '%')
+                    ->orWhere('name', 'like', '%' . $request->search . '%')
+                    ->orWhere('department', 'like', '%' . $request->search . '%')
+                    ->orWhereHas('user', function ($user) use ($request) {
+                        $user->where('email', 'like', '%' . $request->search . '%');
+                    });
+            });
+        });
+
+
+        $structuresQuery->when($request->status, function ($query, $status) {
+            switch ($status) {
+                case 'in_active':
+                    $query->onlyTrashed();
+                    break;
+                case 'active':
+                    $query->whereNull('deleted_at');
+                    break;
+                case 'all':
+                default:
+                    break;
+            }
+        });
+
+
+        if ($request->filled('from_date')) {
+            $structuresQuery->where('created_at', '>=', Helper::formatDate($request->from_date, 'Y-m-d') . ' 00:00:00');
+        }
+
+        if ($request->filled('to_date')) {
+            $structuresQuery->where('created_at', '<=', Helper::formatDate($request->to_date, 'Y-m-d') . ' 23:59:59');
+        }
+
+        $structuresQuery->orderBy($orderByColumn, $orderByDirection);
+
+        $exportDir = 'StructureExport';
+        if (!is_dir(Storage::disk('public')->path($exportDir))) {
+            mkdir(Storage::disk('public')->path($exportDir), 0775, true);
+            chmod(Storage::disk('public')->path($exportDir), 0775);
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $headers = [
+            'A1' => 'Kode structure',
+            'B1' => 'Nama',
+            'C1' => 'Email',
+            'D1' => 'Departemen',
+            'E1' => 'Status'
+        ];
+
+        foreach ($headers as $cell => $header) {
+            $sheet->setCellValue($cell, $header);
+        }
+
+        $columnWidths = [
+            'A' => 12,
+            'B' => 25,
+            'C' => 20,
+            'D' => 30,
+            'E' => 20
+        ];
+
+        foreach ($columnWidths as $column => $width) {
+            $sheet->getColumnDimension($column)->setWidth($width);
+        }
+
+        $row = 2;
+        $structuresQuery->chunk(1000, function ($structures) use ($sheet, &$row) {
+            foreach ($structures as $structure) {
+                // status diambil dari deleted_at (sesuai index)
+                $statusText = isset($structure->deleted_at) ? 'Tidak Aktif' : 'Aktif';
+
+                $sheet->setCellValue("A{$row}", $structure->code ?? '-');
+                $sheet->setCellValue("B{$row}", $structure->name ?? '-');
+                $sheet->setCellValue("C{$row}", $structure->user->email ?? '-');
+                $sheet->setCellValue("D{$row}", $structure->department ?? '-');
+                $sheet->setCellValue("E{$row}", $statusText);
+                $row++;
+            }
+        });
+
+        $timestamp = now()->format('Y-m-d_H-i-s');
+        $fileName = "structures_Export_{$timestamp}.xlsx";
+        $filePath = Storage::disk('public')->path($exportDir . '/' . $fileName);
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($filePath);
+
+        $fileHeaders = [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ];
+
+        return response()->download($filePath, $fileName, $fileHeaders)->deleteFileAfterSend();
     }
 }

@@ -24,6 +24,7 @@ const itemsPerPage = 5
 const isSnackbarVisible = ref(false)
 const snackbarMessage = ref('')
 const snackbarColor = ref<'success' | 'error'>('success')
+const exportLoading = ref(false)
 
 onMounted(() => {
   if (route.query.success) {
@@ -48,20 +49,28 @@ const widgetData = ref([
 
 const headers = [
   { title: 'ID', key: 'id' },
-  { title: 'Name', key: 'name' },
+  { title: 'Nama', key: 'name' },
   { title: 'NISN', key: 'nisn' },
-  { title: 'Height (cm)', key: 'height' },
-  { title: 'Weight (kg)', key: 'weight' },
-  { title: 'Back Number', key: 'back_number' },
+  { title: 'Tinggi Badan (cm)', key: 'height' },
+  { title: 'Berat Badan (kg)', key: 'weight' },
+  { title: 'Nomor Punggung', key: 'back_number' },
   { title: 'Status', key: 'status' },
-  { title: 'Action', key: 'action', sortable: false },
+  { title: 'Aksi', key: 'action', sortable: false },
 ]
 
-const statusColorMap = {
-  1: { label: 'Active', color: 'success' },
-  0: { label: 'In Confirm', color: 'warning', textColor: 'black' },
-  2: { label: 'Non Active', color: 'error' },
+const statusColor = (item) => {
+  switch (item.status) {
+    case 0:
+      return { label: 'Menunggu Konfirmasi', color: 'warning', textColor: 'black' }
+    case 1:
+      return { label: 'Permain Aktif', color: 'success' }
+    case 2:
+      return { label: 'Perlu Perbaikan', color: 'error' }
+    default:
+      return { label: 'Unknown', color: 'grey' }
+  }
 }
+
 
 const paginatedPlayers = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage
@@ -87,8 +96,8 @@ async function fetchPlayer() {
     const totals = response.totals
 
     widgetData.value = [
-      { title: 'All', value: totals.all, icon: 'tabler-user', iconColor: 'primary', change: 0, desc: 'Total semua player' },
-      { title: 'Active', value: totals.active, icon: 'tabler-user-check', iconColor: 'success', change: 0, desc: 'Player aktif' },
+      { title: 'All', value: totals.all, icon: 'tabler-user', iconColor: 'primary', change: 0, desc: 'Total semua pemain' },
+      { title: 'Active', value: totals.active, icon: 'tabler-user-check', iconColor: 'success', change: 0, desc: 'Pemain aktif' },
       { title: 'In Confirm', value: totals.in_confirm, icon: 'tabler-user-question', iconColor: 'warning', change: 0, desc: 'Menunggu konfirmasi' },
       { title: 'Non Active', value: totals.in_active, icon: 'tabler-user-x', iconColor: 'error', change: 0, desc: 'Player tidak aktif' },
     ]
@@ -140,10 +149,10 @@ function editPlayer(player: any) {
 async function deletePlayer(player: any) {
   const confirm = await Swal.fire({
     title: 'Apakah kamu yakin?',
-    text: `Data player dengan nama ${player.name} akan dihapus.`,
+    text: `Pemain dengan nama ${player.name} apakah akan dinonaktifkan?`,
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonText: 'Ya, hapus!',
+    confirmButtonText: 'Ya, Non Aktifkan!',
     cancelButtonText: 'Batal',
     customClass: {
       confirmButton: 'swal2-confirm-btn',
@@ -161,11 +170,11 @@ async function deletePlayer(player: any) {
 
       await fetchPlayer()
 
-      snackbarMessage.value = 'Player berhasil dihapus'
+      snackbarMessage.value = 'Pemain berhasil dihapus'
       snackbarColor.value = 'success'
       isSnackbarVisible.value = true
     } catch (err: any) {
-      snackbarMessage.value = err?.response?.data?.message || 'Gagal menghapus player'
+      snackbarMessage.value = err?.response?.data?.message || 'Gagal menghapus pemain'
       snackbarColor.value = 'error'
       isSnackbarVisible.value = true
     } finally {
@@ -192,7 +201,7 @@ async function activatePlayer(player: any) {
     try {
       loading.value = true
 
-      await $api(`player/${player.id}/active`, {
+      await $api(`player/${player.id}/activate`, {
         method: 'PUT',
       })
 
@@ -213,11 +222,11 @@ async function activatePlayer(player: any) {
 
 async function approvePlayer(player: any) {
   const result = await Swal.fire({
-    title: 'Terima Player?',
-    text: `Player ${player.name} akan diterima?.`,
+    title: 'Terima Pemain?',
+    text: `Pemain ${player.name} apakah akan diterima?`,
     icon: 'question',
     showCancelButton: true,
-    confirmButtonText: 'Ya, terima!',
+    confirmButtonText: 'Ya, Terima!',
     cancelButtonText: 'Batal',
     customClass: {
       confirmButton: 'swal2-confirm-btn',
@@ -231,12 +240,12 @@ async function approvePlayer(player: any) {
     })
       .then(() => {
         fetchPlayer()
-        snackbarMessage.value = 'Player diterima'
+        snackbarMessage.value = 'Pemain diterima'
         snackbarColor.value = 'success'
         isSnackbarVisible.value = true
       })
       .catch((err: any) => {
-        snackbarMessage.value = err?.response?.data?.message || 'Gagal menerima player'
+        snackbarMessage.value = err?.response?.data?.message || 'Gagal menerima Pemain'
         snackbarColor.value = 'error'
         isSnackbarVisible.value = true
       })
@@ -245,11 +254,11 @@ async function approvePlayer(player: any) {
 
 async function rejectPlayer(player: any) {
   const result = await Swal.fire({
-    title: 'Tolak Player?',
-    text: `Player ${player.name} akan ditolak?.`,
+    title: 'Perlu Perbaikan Data?',
+    text: `Pemain ${player.name} apakah perlu melakukan perbaikan?`,
     icon: 'question',
     showCancelButton: true,
-    confirmButtonText: 'Ya, tolak!',
+    confirmButtonText: 'Ya, Perbaiki!',
     cancelButtonText: 'Batal',
     customClass: {
       confirmButton: 'swal2-confirm-btn',
@@ -263,18 +272,63 @@ async function rejectPlayer(player: any) {
     })
       .then(() => {
         fetchPlayer()
-        snackbarMessage.value = 'Player ditolak'
+        snackbarMessage.value = 'Pemain ditolak'
         snackbarColor.value = 'success'
         isSnackbarVisible.value = true
       })
       .catch((err: any) => {
-        snackbarMessage.value = err?.response?.data?.message || 'Gagal menolak player'
+        snackbarMessage.value = err?.response?.data?.message || 'Gagal menolak pemain'
         snackbarColor.value = 'error'
         isSnackbarVisible.value = true
       })
   }
 }
 
+async function exportPlayers() {
+  exportLoading.value = true
+  
+  try {
+    const response = await $api(`player/export`, {
+      method: 'POST',
+      params: {
+        format: 'xlsx',
+        search: searchQuery.value,
+        status: selectedStatus.value,
+        sort: selectedSort.value,
+      },
+      responseType: 'blob',
+    })
+
+    const blob = new Blob([response], { 
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    })
+    
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-')
+    link.download = `Players_Export_${timestamp}.xlsx`
+    
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    
+    window.URL.revokeObjectURL(url)
+
+    snackbarMessage.value = 'Data berhasil diekspor'
+    snackbarColor.value = 'success'
+    isSnackbarVisible.value = true
+
+  } catch (err: any) {
+    console.error('Export error:', err)
+    snackbarMessage.value = err?.response?.data?.message || 'Gagal mengekspor data'
+    snackbarColor.value = 'error'
+    isSnackbarVisible.value = true
+  } finally {
+    exportLoading.value = false
+  }
+}
 
 function getQueryParam(param: LocationQueryValue | LocationQueryValue[] | undefined): string {
   return Array.isArray(param) ? param[0] || '' : param || ''
@@ -310,17 +364,14 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
   <VRow>
     <VCol cols="12">
       <div class="d-flex mb-6">
-        <VRow>
-          <template
-            v-for="(data, id) in widgetData"
-            :key="id"
-          >
+        <VRow class="w-100">
+          <template v-for="(data, id) in widgetData" :key="id">
             <VCol
               cols="12"
               md="3"
               sm="6"
             >
-              <VCard>
+              <VCard class="h-100">
                 <VCardText>
                   <div class="d-flex justify-space-between">
                     <div class="d-flex flex-column gap-y-1">
@@ -342,10 +393,7 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
                       rounded
                       size="42"
                     >
-                      <VIcon
-                        :icon="data.icon"
-                        size="26"
-                      />
+                      <VIcon :icon="data.icon" size="26" />
                     </VAvatar>
                   </div>
                 </VCardText>
@@ -357,7 +405,7 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
 
       <VCard class="mb-6">
         <VCardItem class="pb-4">
-          <VCardTitle>Players</VCardTitle>
+          <VCardTitle>Master Pemain</VCardTitle>
         </VCardItem>
 
         <VCardText>
@@ -393,7 +441,7 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
                 clear-icon="tabler-x"
                 single-line
                 :items="[
-                  { title: 'Pilih Sort', value: '' },
+                  { title: 'Pilih Sortir', value: '' },
                   { title: 'A-Z', value: 'asc' },
                   { title: 'Z-A', value: 'desc' },
                 ]"
@@ -408,25 +456,25 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
           <div style="inline-size: 15.625rem;">
             <AppTextField
                 v-model="searchQuery"
-                placeholder="Search Player"
+                placeholder="Cari Pemain"
             />
           </div>
           <VSpacer />
 
           <div class="app-user-search-filter d-flex align-center flex-wrap gap-4">
             <VBtn
-              variant="tonal"
-              color="secondary"
+              color="warning"
               prepend-icon="tabler-upload"
+              @click="exportPlayers()"
             >
-              Export
+              Ekspor
             </VBtn>
 
             <VBtn
               prepend-icon="tabler-plus"
               :to="{ name: 'dashboards-player-add' }"
             >
-              Add New User
+              Tambah Pemain Baru
             </VBtn>
           </div>
         </VCardText>
@@ -475,12 +523,12 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
             <VChip
               label
               class="text-body-1 font-weight-medium"
-              :color="statusColorMap[item.status]?.color"
-              :text-color="statusColorMap[item.status]?.textColor || 'white'"
+              :color="statusColor(item).color"
+              :text-color="statusColor(item).textColor || 'white'"
               variant="tonal"
               size="small"
             >
-              {{ statusColorMap[item.status]?.label || 'Unknown' }}
+              {{ statusColor(item).label }}
             </VChip>
           </template>
 
@@ -492,20 +540,9 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
                 size="small"
                 color="primary"
                 @click="editPlayer(item)"
-                title="Edit"
+                title="Ubah"
               >
                 <VIcon icon="tabler-pencil" />
-              </VBtn>
-
-              <VBtn  
-                v-if="!item.deleted_at && item.status !== 0"
-                icon
-                size="small"
-                color="error"
-                @click="deletePlayer(item)"
-                title="Delete"
-              >
-                <VIcon icon="tabler-trash" />
               </VBtn>
               
               <VBtn
@@ -514,31 +551,42 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
                 size="small"
                 color="success"
                 @click="activatePlayer(item)"
-                title="Activate"
+                title="Aktikan"
               >
                 <VIcon icon="tabler-check" />
               </VBtn>
 
               <VBtn
-                v-if="item.status === 0"
+                v-if="!item.deleted_at &&  item.status !== 1"
                 icon
                 size="small"
                 color="warning"
                 @click="approvePlayer(item)"
-                title="Approve"
+                title="Terima"
               >
                 <VIcon icon="tabler-file-check" />
               </VBtn>
 
               <VBtn
-                v-if="item.status === 0"
+                v-if="!item.deleted_at && item.status !== 1"
                 icon
                 size="small"
                 color="error"
                 @click="rejectPlayer(item)"
-                title="Reject"
+                title="Tolak"
               >
                 <VIcon icon="tabler-x" />
+              </VBtn>
+
+              <VBtn  
+                v-if="!item.deleted_at && item.status !== 0"
+                icon
+                size="small"
+                color="error"
+                @click="deletePlayer(item)"
+                title="Hapus"
+              >
+                <VIcon icon="tabler-trash" />
               </VBtn>
             </div>
           </template>
@@ -584,5 +632,10 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
   border: none;
   padding: 0.625rem 1.25rem;
   border-radius: 0.375rem;
+}
+
+.widget-col {
+  flex: 1 1 20%;   /* setiap col ambil 20% */
+  max-width: 20%;
 }
 </style>

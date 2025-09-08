@@ -111,6 +111,7 @@ const departments = [
   { title: 'Ketua Umum', value: 'chief' },
   { title: 'Official', value: 'official' }, 
   { title: 'Admin', value: 'admin' }, 
+  { title: 'Pelatih', value: 'coach' }
 ];
 const selectedDepartment = ref(departments[0])
 
@@ -158,15 +159,15 @@ watch(currentPage, () => {
           <h4 class="text-h4 mt-2 mb-1">
             {{
               selectedDepartment?.value
-                ? `Struktur organisasi di departemen ${selectedDepartment.title}`
-                  : 'Semua departemen struktur organisasi'
+                ? `Pengurus organisasi di departemen ${selectedDepartment.title}`
+                  : 'Semua departemen pengurus organisasi'
             }}
           </h4>
 
           <p class="text-body-1 mb-0">
             {{
               selectedDepartment?.value
-                  ? `Lihat daftar struktur organisasi dalam departemen ${selectedDepartment.title}.`
+                  ? `Lihat daftar pengurus organisasi dalam departemen ${selectedDepartment.title}.`
                   : 'Jelajahi pemain dari semua departemen umur.'
             }}
           </p>

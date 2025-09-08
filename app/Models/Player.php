@@ -14,6 +14,7 @@ class Player extends Model
         'code',
         'name',
         'nisn',
+        'phone',
         'height',
         'weight',
         'back_number',

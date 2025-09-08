@@ -11,7 +11,10 @@ use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ScheduleMatchController extends Controller
 {
@@ -382,5 +385,126 @@ class ScheduleMatchController extends Controller
             'message' => 'Schedule Match berhasil diaktifkan.',
             'data' => new ScheduleMatchResource($scheduleMatch),
         ]);
+    }
+
+    public function export(Request $request)
+    {
+        $orderByColumn = 'created_at';
+        $orderByDirection = $request->input('sort', 'desc') === 'asc' ? 'asc' : 'desc';
+
+        $scheduleMatchQuery = ScheduleMatch::query()
+            ->with(['firstClub', 'secoundClub', 'stadium'])
+            ->withTrashed();
+
+        // filter sama persis dengan index
+        $scheduleMatchQuery->when(!empty($request->search), function ($q) use ($request) {
+            $q->where('created_at', 'like', '%' . $request->search . '%')
+                ->orWhere('schedule_date', 'like', '%' . $request->search . '%')
+                ->orWhere('schedule_start_at', 'like', '%' . $request->search . '%')
+                ->orWhere('schedule_end_at', 'like', '%' . $request->search . '%')
+                ->orWhereHas('firstClub', function ($club) use ($request) {
+                    $club->where('name', 'like', '%' . $request->search . '%');
+                })
+                ->orWhereHas('secoundClub', function ($club) use ($request) {
+                    $club->where('name', 'like', '%' . $request->search . '%');
+                })
+                ->orWhereHas('stadium', function ($stadium) use ($request) {
+                    $stadium->where('name', 'like', '%' . $request->search . '%');
+                });
+        });
+
+        $scheduleMatchQuery->when($request->status, function ($query, $status) {
+            switch ($status) {
+                case 'in_active':
+                    $query->onlyTrashed();
+                    break;
+                case 'active':
+                    $query->whereNull('deleted_at');
+                    break;
+            }
+        });
+
+        $scheduleMatchQuery->when($request->club_id, function ($query) use ($request) {
+            $query->where(function ($q) use ($request) {
+                $q->whereHas('firstClub', function ($q1) use ($request) {
+                    $q1->where('id', $request->club_id);
+                })->orWhereHas('secoundClub', function ($q2) use ($request) {
+                    $q2->where('id', $request->club_id);
+                });
+            });
+        });
+
+        $scheduleMatchQuery->when($request->stadium_id, function ($query) use ($request) {
+            $query->whereHas('stadium', function ($q) use ($request) {
+                $q->where('id', $request->stadium_id);
+            });
+        });
+
+        if ($request->filled('from_date')) {
+            $scheduleMatchQuery->where('created_at', '>=', Helper::formatDate($request->from_date, 'Y-m-d') . ' 00:00:00');
+        }
+        if ($request->filled('to_date')) {
+            $scheduleMatchQuery->where('created_at', '<=', Helper::formatDate($request->to_date, 'Y-m-d') . ' 23:59:59');
+        }
+
+        $scheduleMatchQuery->orderBy($orderByColumn, $orderByDirection);
+
+        // --- Excel Export ---
+        $exportDir = 'ScheduleMatchExport';
+        if (!is_dir(Storage::disk('public')->path($exportDir))) {
+            mkdir(Storage::disk('public')->path($exportDir), 0775, true);
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Header kolom
+        $headers = [
+            'A1' => 'Tanggal',
+            'B1' => 'Jam Mulai',
+            'C1' => 'Jam Selesai',
+            'D1' => 'Club Pertama',
+            'E1' => 'Club Kedua',
+            'F1' => 'Stadium',
+            'G1' => 'Skor',
+            'H1' => 'Status',
+        ];
+        foreach ($headers as $cell => $header) {
+            $sheet->setCellValue($cell, $header);
+        }
+
+        $statusMap = [
+            'not_started'  => 'Belum Dimulai',
+            'in_progress'  => 'Sedang Berlangsung',
+            'finished'     => 'Selesai',
+        ];
+
+        // Isi data
+        $row = 2;
+        $scheduleMatchQuery->chunk(1000, function ($matches) use ($sheet, &$row, $statusMap) {
+            foreach ($matches as $match) {
+                $statusTitle = $statusMap[$match->status] ?? $match->status; // fallback kalau tidak ada di mapping
+
+                $sheet->setCellValue("A{$row}", $match->schedule_date);
+                $sheet->setCellValue("B{$row}", $match->schedule_start_at);
+                $sheet->setCellValue("C{$row}", $match->schedule_end_at);
+                $sheet->setCellValue("D{$row}", $match->firstClub->name ?? '-');
+                $sheet->setCellValue("E{$row}", $match->secoundClub->name ?? '-');
+                $sheet->setCellValue("F{$row}", $match->stadium->name ?? '-');
+                $sheet->setCellValue("G{$row}", ($match->first_club_score ?? 0) . " - " . ($match->secound_club_score ?? 0));
+                $sheet->setCellValue("H{$row}", $statusTitle); // tampilkan judul status
+
+                $row++;
+            }
+        });
+
+        $timestamp = now()->format('Y-m-d_H-i-s');
+        $fileName = "schedule_match_export_{$timestamp}.xlsx";
+        $filePath = Storage::disk('public')->path($exportDir . '/' . $fileName);
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($filePath);
+
+        return response()->download($filePath, $fileName)->deleteFileAfterSend();
     }
 }

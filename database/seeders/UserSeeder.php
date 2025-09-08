@@ -27,6 +27,11 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'role' => 'admin',
             ],
+            [
+                'email' => 'coach@gmail.com',
+                'password' => Hash::make('password'),
+                'role' => 'admin'
+            ]
         ];
 
         $structures = [
@@ -45,6 +50,11 @@ class UserSeeder extends Seeder
                 'department' => 'official',
                 'date_of_birth' => now()->format('Y-m-d'),
             ],
+            [
+                'name' => 'Pelatih',
+                'department' => 'coach',
+                'date_of_birth' => now()->format('Y-m-d')
+            ]
         ];
 
         foreach ($users as $index => $userData) {

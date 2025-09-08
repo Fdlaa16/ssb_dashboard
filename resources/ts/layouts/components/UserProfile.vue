@@ -99,6 +99,7 @@ const departments = [
   { title: 'Ketua Umum', value: 'chief' },
   { title: 'Official', value: 'official' }, 
   { title: 'Admin', value: 'admin' }, 
+  { title: 'Pelatih', value: 'coach' }
 ]
 
 // Computed properties untuk kemudahan akses data

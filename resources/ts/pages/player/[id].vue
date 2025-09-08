@@ -137,7 +137,7 @@ const getCategoryLabel = (category: string) => {
                 </VCol>
 
                 <VCol cols="8" class="text-no-wrap">
-                  <VRow>
+                  <!-- <VRow>
                     <VCol cols="4" class="text-subtitle-2 font-weight-bold">Email:</VCol>
                     <VCol cols="8">{{ detail?.user?.email || '-' }}</VCol>
                   </VRow>
@@ -145,7 +145,7 @@ const getCategoryLabel = (category: string) => {
                   <VRow>
                     <VCol cols="4" class="text-subtitle-2 font-weight-bold">NISN:</VCol>
                     <VCol cols="8">{{ detail?.nisn || '-' }}</VCol>
-                  </VRow>
+                  </VRow> -->
 
                   <VRow>
                     <VCol cols="4" class="text-subtitle-2 font-weight-bold">Nama Lengkap:</VCol>

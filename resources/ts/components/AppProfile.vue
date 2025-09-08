@@ -37,6 +37,7 @@ interface PlayerData {
     confirm_password: string
   }
   nisn: string
+  phone: string
   height: string
   weight: string
   back_number: string
@@ -87,6 +88,7 @@ const playerData = ref<PlayerData>({
     confirm_password: ''
   },
   nisn: '',
+  phone: '',
   height: '',
   weight: '',
   back_number: '',
@@ -115,11 +117,11 @@ const birthCertificatePreview = ref<string | null>(null)
 // Options
 const positions = [
   { title: 'Pilih Posisi', value: '' },
-  { title: 'Penjaga Gawang', value: 'goalkeeper' },
-  { title: 'Bek', value: 'defender' },
-  { title: 'Gelandang', value: 'midfielder' },
-  { title: 'Penyerang', value: 'forward' },
-]
+  { title: 'Depan', value: 'front' },
+  { title: 'Tengah', value: 'center' },
+  { title: 'Belakang', value: 'back' },
+  { title: 'GK', value: 'gk' },
+];
 
 const categories = [
   { title: 'Pilih Kategori', value: '' },
@@ -136,7 +138,8 @@ const categories = [
 // Validation Rules
 const rulesNisn = {
   required: (value: string) => !!value || 'Harus diisi.',
-  exactLength: (value: string) => value.length === 10 || 'Harus tepat 10 karakter',
+  maxLength: (value: string) =>
+    (value?.length <= 13) || 'Maksimal 13 karakter',
 };
 
 const rulesPassword = {
@@ -212,6 +215,7 @@ const updatePlayer = async () => {
     formData.append('email', playerData.value.user.email ?? '')
     formData.append('new_password', playerData.value.user.new_password ?? '')
     formData.append('nisn', playerData.value.nisn ?? '')
+    formData.append('phone', playerData.value.phone ?? '')
     formData.append('name', playerData.value.name ?? '')
     formData.append('height', playerData.value.height ?? '')
     formData.append('weight', playerData.value.weight ?? '')
@@ -439,17 +443,26 @@ onBeforeUnmount(() => {
                               :rules="[rulesConfirmPassword.required, rulesConfirmPassword.sameAsPassword]"
                             />
                           </VCol>
-                          
-                          <VCol cols="12">
+
+                          <VCol cols="12" sm="6">
                             <AppTextField
                               v-model="playerData.nisn"
                               label="NISN"
                               placeholder="Contoh: 1234567890"
-                              maxlength="10"
-                              :rules="[rulesNisn.required, rulesNisn.exactLength]"
-                              hint="Harus tepat 10 karakter"
+                              class="mb-4"
+                              maxlength="13"
+                              :rules="[rulesNisn.required, rulesNisn.maxLength]"
+                              hint="Maksimal 13 karakter"
                               counter
-                              required
+                            />
+                          </VCol>
+
+                          <VCol cols="12" sm="6">
+                            <AppTextField
+                              v-model="playerData.phone"
+                              type="number"
+                              label="Nomor Telepon"
+                              placeholder="081234567890"
                             />
                           </VCol>
 

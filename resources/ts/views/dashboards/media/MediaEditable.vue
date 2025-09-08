@@ -179,7 +179,7 @@ const typeMedia = ref([
 <template>
   <form @submit.prevent="$emit('submit')">
     <div class="d-flex flex-column gap-6 mb-6">
-      <VCard :title="props.data.id ? 'Edit Media' : 'Create Media'">
+      <VCard :title="props.data.id ? 'Ubah Media' : 'Tambah Media'">
         <VCardText>
           <VWindow>
             <!-- Tab Biodata -->
@@ -219,28 +219,28 @@ const typeMedia = ref([
                     </VRow>       
                   </template> -->
 
+                  <h6 class="text-h6 mb-1 mt-5">Judul</h6>
                   <AppTextField
                     v-model="localData.title"
-                    label="Title"
                     placeholder="Title"
                     class="mb-4"
                   />
 
-                  <h6 class="text-h6 mb-1 mt-5">Description</h6>
+                  <h6 class="text-h6 mb-1 mt-5">Deskripsi</h6>
                   <TiptapEditor
                     v-model="localData.description"
                     class="border rounded basic-editor"
                     placeholder="Masukkan deskripsi media"
                   />
 
+                  <h6 class="text-h6 mb-1 mt-5">Link</h6>
                   <AppTextField
                     v-model="localData.link"
-                    label="Link"
                     placeholder="Link"
-                    class="mb-4 mt-4"
+                    class="mb-4"
                   />
 
-                  <h6 class="text-h6 mb-2">Document Media (Maksimal 5 gambar)</h6>                  
+                  <h6 class="text-h6 mb-2">Documen Media (Maksimal 5 gambar)</h6>                  
                   <div v-if="documentMediaPreviews.length > 0" class="mb-4">
                     <VRow>
                       <VCol 

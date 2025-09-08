@@ -10,7 +10,10 @@ use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ScheduleTrainingController extends Controller
 {
@@ -299,5 +302,93 @@ class ScheduleTrainingController extends Controller
             'message' => 'Schedule Training berhasil diaktifkan.',
             'data' => new ScheduleTrainingResource($scheduleTraining),
         ]);
+    }
+
+    public function export(Request $request)
+    {
+        $orderByColumn = 'created_at';
+        $orderByDirection = $request->input('sort', 'desc') === 'asc' ? 'asc' : 'desc';
+
+        $scheduleTrainingQuery = ScheduleTraining::query()
+            ->with(['firstClub', 'secoundClub', 'stadium'])
+            ->withTrashed();
+
+        // Filter search
+        $scheduleTrainingQuery->when(!empty($request->search), function ($q) use ($request) {
+            $q->where('created_at', 'like', '%' . $request->search . '%')
+                ->orWhere('schedule_date', 'like', '%' . $request->search . '%')
+                ->orWhere('schedule_start_at', 'like', '%' . $request->search . '%')
+                ->orWhereHas('stadium', function ($stadium) use ($request) {
+                    $stadium->where('name', 'like', '%' . $request->search . '%');
+                });
+        });
+
+        // Filter status (sama dengan index)
+        $scheduleTrainingQuery->when($request->status, function ($query, $status) {
+            switch ($status) {
+                case 'in_active':
+                    $query->onlyTrashed();
+                    break;
+                case 'active':
+                    $query->whereNull('deleted_at');
+                    break;
+                case 'all':
+                default:
+                    break;
+            }
+        });
+
+        // Filter stadium
+        $scheduleTrainingQuery->when($request->stadium_id, function ($query) use ($request) {
+            $query->whereHas('stadium', function ($q) use ($request) {
+                $q->where('id', $request->stadium_id);
+            });
+        });
+
+        $scheduleTrainingQuery->orderBy($orderByColumn, $orderByDirection);
+
+        // --- Excel Export ---
+        $exportDir = 'ScheduleTrainingExport';
+        if (!is_dir(Storage::disk('public')->path($exportDir))) {
+            mkdir(Storage::disk('public')->path($exportDir), 0775, true);
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Header kolom
+        $headers = [
+            'A1' => 'Tanggal',
+            'B1' => 'Jam Mulai',
+            'C1' => 'Stadium',
+            'D1' => 'Status',
+        ];
+        foreach ($headers as $cell => $header) {
+            $sheet->setCellValue($cell, $header);
+        }
+
+        // Isi data
+        $row = 2;
+        $scheduleTrainingQuery->chunk(1000, function ($matches) use ($sheet, &$row) {
+            foreach ($matches as $match) {
+                $statusTitle = $match->deleted_at ? 'Tidak Aktif' : 'Aktif';
+
+                $sheet->setCellValue("A{$row}", $match->schedule_date);
+                $sheet->setCellValue("B{$row}", $match->schedule_start_at);
+                $sheet->setCellValue("C{$row}", $match->stadium->name ?? '-');
+                $sheet->setCellValue("D{$row}", $statusTitle);
+
+                $row++;
+            }
+        });
+
+        $timestamp = now()->format('Y-m-d_H-i-s');
+        $fileName = "schedule_training_export_{$timestamp}.xlsx";
+        $filePath = Storage::disk('public')->path($exportDir . '/' . $fileName);
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($filePath);
+
+        return response()->download($filePath, $fileName)->deleteFileAfterSend();
     }
 }

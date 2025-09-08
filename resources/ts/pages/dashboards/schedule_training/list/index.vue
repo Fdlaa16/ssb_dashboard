@@ -25,6 +25,7 @@ const itemsPerPage = 5
 const isSnackbarVisible = ref(false)
 const snackbarMessage = ref('')
 const snackbarColor = ref<'success' | 'error'>('success')
+const exportLoading = ref(false)
 
 onMounted(() => {
   if (route.query.success) {
@@ -51,9 +52,9 @@ const headers = [
   // { title: 'Club 1', key: 'first_club.name' },
   // { title: 'Club 2', key: 'secound_club.name' },
   { title: 'Stadium', key: 'stadium.name' },
-  { title: 'Schedule Date', key: 'schedule_date' },
-  { title: 'Schedule Start At', key: 'schedule_start_at' },
-  { title: 'Action', key: 'action', sortable: false },
+  { title: 'Tanggal', key: 'schedule_date' },
+  { title: 'Pukul', key: 'schedule_start_at' },
+  { title: 'Aksi', key: 'action', sortable: false },
 ]
 
 const statusColorMap = {
@@ -86,9 +87,9 @@ async function fetchScheduleTraining() {
     const totals = response.totals
 
     widgetData.value = [
-      { title: 'All', value: totals.all, icon: 'tabler-calendar-check', iconColor: 'primary', change: 0, desc: 'Total semua scheduletraining' },
-      { title: 'Active', value: totals.active, icon: 'tabler-calendar-check', iconColor: 'success', change: 0, desc: 'Schedule Training aktif' },
-      { title: 'Non Active', value: totals.in_active, icon: 'tabler-calendar-check', iconColor: 'error', change: 0, desc: 'Schedule Training tidak aktif' },
+      { title: 'All', value: totals.all, icon: 'tabler-calendar-check', iconColor: 'primary', change: 0, desc: 'Total semua jadwal latihan' },
+      { title: 'Active', value: totals.active, icon: 'tabler-calendar-check', iconColor: 'success', change: 0, desc: 'Jadwal Latihan aktif' },
+      { title: 'Non Active', value: totals.in_active, icon: 'tabler-calendar-check', iconColor: 'error', change: 0, desc: 'Jadwal Latihan tidak aktif' },
     ]
 
   } catch (err: any) {
@@ -139,7 +140,7 @@ function editScheduleTraining(scheduleTraining: any) {
 async function deleteScheduleTraining(scheduleTraining: any) {
   const confirm = await Swal.fire({
     title: 'Apakah kamu yakin?',
-    text: `Data Schedule Training pada tanggal ${scheduleTraining.schedule_date} pukul ${scheduleTraining.schedule_start_at} akan dihapus.`,
+    text: `Data Jadwal Latihan pada tanggal ${scheduleTraining.schedule_date} pukul ${scheduleTraining.schedule_start_at} akan dihapus.`,
     icon: 'warning',
     showCancelButton: true,
     confirmButtonText: 'Ya, hapus!',
@@ -160,7 +161,7 @@ async function deleteScheduleTraining(scheduleTraining: any) {
 
       await fetchScheduleTraining()
 
-      snackbarMessage.value = 'Schedule Training berhasil dihapus'
+      snackbarMessage.value = 'Jadwal Latihan berhasil dihapus'
       snackbarColor.value = 'success'
       isSnackbarVisible.value = true
     } catch (err: any) {
@@ -175,8 +176,8 @@ async function deleteScheduleTraining(scheduleTraining: any) {
 
 async function activateScheduletraining(scheduleTraining: any) {
   const confirm = await Swal.fire({
-    title: 'Aktifkan Schedule Training?',
-    text: `Schedule Training ${scheduleTraining.first_club.name} melawan ${scheduleTraining.secound_club.name} pada tanggal ${scheduleTraining.schedule_date} pukul ${scheduleTraining.schedule_start_at} akan diaktifkan kembali.`,
+    title: 'Aktifkan Jadwal Latihan?',
+    text: `Jadwal Latihan ${scheduleTraining.first_club.name} melawan ${scheduleTraining.secound_club.name} pada tanggal ${scheduleTraining.schedule_date} pukul ${scheduleTraining.schedule_start_at} akan diaktifkan kembali.`,
     icon: 'question',
     showCancelButton: true,
     confirmButtonText: 'Ya, aktifkan!',
@@ -197,16 +198,64 @@ async function activateScheduletraining(scheduleTraining: any) {
 
       await fetchScheduleTraining()
 
-      snackbarMessage.value = 'Schedule Training berhasil diaktifkan kembali'
+      snackbarMessage.value = 'Jadwal Latihan berhasil diaktifkan kembali'
       snackbarColor.value = 'success'
       isSnackbarVisible.value = true
     } catch (err: any) {
-      snackbarMessage.value = err?.response?.data?.message || 'Gagal mengaktifkan Schedule Training'
+      snackbarMessage.value = err?.response?.data?.message || 'Gagal mengaktifkan Jadwal Latihan'
       snackbarColor.value = 'error'
       isSnackbarVisible.value = true
     } finally {
       loading.value = false
     }
+  }
+}
+
+async function exportScheduleTraining() {
+  exportLoading.value = true
+  
+  try {
+    const response = await $api(`schedule-training/export`, {
+      method: 'POST',
+      params: {
+        format: 'xlsx',
+        search: searchQuery.value,
+        // club_id: selectedClub.value,
+        stadium_id: selectedStadium.value,
+        status: selectedStatus.value,
+        sort: selectedSort.value,
+      },
+      responseType: 'blob',
+    })
+
+    const blob = new Blob([response], { 
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    })
+    
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-')
+    link.download = `Schedule_training_Export_${timestamp}.xlsx`
+    
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    
+    window.URL.revokeObjectURL(url)
+
+    snackbarMessage.value = 'Data berhasil diekspor'
+    snackbarColor.value = 'success'
+    isSnackbarVisible.value = true
+
+  } catch (err: any) {
+    console.error('Export error:', err)
+    snackbarMessage.value = err?.response?.data?.message || 'Gagal mengekspor data'
+    snackbarColor.value = 'error'
+    isSnackbarVisible.value = true
+  } finally {
+    exportLoading.value = false
   }
 }
 
@@ -303,7 +352,7 @@ function formatIndoDate(dateStr: string): string {
 
       <VCard class="mb-6">
         <VCardItem class="pb-4">
-          <VCardTitle>Schedule Trainings</VCardTitle>
+          <VCardTitle>Jadwal Latihan</VCardTitle>
         </VCardItem>
 
         <VCardText>
@@ -352,7 +401,7 @@ function formatIndoDate(dateStr: string): string {
                 clear-icon="tabler-x"
                 single-line
                 :items="[
-                  { title: 'Pilih Sort', value: '' },
+                  { title: 'Pilih Sortir', value: '' },
                   { title: 'A-Z', value: 'asc' },
                   { title: 'Z-A', value: 'desc' },
                 ]"
@@ -367,25 +416,25 @@ function formatIndoDate(dateStr: string): string {
           <div style="inline-size: 15.625rem;">
             <AppTextField
                 v-model="searchQuery"
-                placeholder="Search Schedule Training"
+                placeholder="Cari Jadwal Latihan"
             />
           </div>
           <VSpacer />
 
           <div class="app-user-search-filter d-flex align-center flex-wrap gap-4">
             <VBtn
-              variant="tonal"
-              color="secondary"
+              color="warning"
               prepend-icon="tabler-upload"
+              @click="exportScheduleTraining()"
             >
-              Export
+              Ekspor
             </VBtn>
 
             <VBtn
               prepend-icon="tabler-plus"
               :to="{ name: 'dashboards-schedule-training-add' }"
             >
-              Add New Schedule Training
+              Tambah Baru Jadwal Latihan
             </VBtn>
           </div>
         </VCardText>
@@ -424,7 +473,7 @@ function formatIndoDate(dateStr: string): string {
                 size="small"
                 color="primary"
                 @click="editScheduleTraining(item)"
-                title="Edit"
+                title="Ubah"
               >
                 <VIcon icon="tabler-pencil" />
               </VBtn>
@@ -435,7 +484,7 @@ function formatIndoDate(dateStr: string): string {
                 size="small"
                 color="error"
                 @click="deleteScheduleTraining(item)"
-                title="Delete"
+                title="Hapus"
               >
                 <VIcon icon="tabler-trash" />
               </VBtn>
@@ -446,7 +495,7 @@ function formatIndoDate(dateStr: string): string {
                 size="small"
                 color="success"
                 @click="activateScheduletraining(item)"
-                title="Activate"
+                title="Aktifkan"
               >
                 <VIcon icon="tabler-check" />
               </VBtn>

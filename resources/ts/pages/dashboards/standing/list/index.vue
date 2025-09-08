@@ -25,6 +25,7 @@ const itemsPerPage = 5
 const isSnackbarVisible = ref(false)
 const snackbarMessage = ref('')
 const snackbarColor = ref<'success' | 'error'>('success')
+const exportLoading = ref(false)
 
 onMounted(() => {
   if (route.query.success) {
@@ -48,16 +49,16 @@ const widgetData = ref([
 
 const headers = [
   { title: 'ID', key: 'id' },
-  { title: 'Club', key: 'club.name' },
+  { title: 'Klub', key: 'club.name' },
   { title: 'Total', key: 'total' },
-  { title: 'Win', key: 'win' },
-  { title: 'Draw', key: 'draw' },
-  { title: 'Lose', key: 'lose' },
-  { title: 'Goal In', key: 'goal_in' },
-  { title: 'Goal Conceded', key: 'goal_conceded' },
-  { title: 'Goal Difference', key: 'goal_difference' },
-  { title: 'Point', key: 'points' },
-  { title: 'Action', key: 'action', sortable: false },
+  { title: 'Menang', key: 'win' },
+  { title: 'Seri', key: 'draw' },
+  { title: 'Kalah', key: 'lose' },
+  { title: 'Goal Masuk', key: 'goal_in' },
+  { title: 'Goal Kebobolam', key: 'goal_conceded' },
+  { title: 'Goal Selisih', key: 'goal_difference' },
+  { title: 'Poin', key: 'points' },
+  { title: 'Aksi', key: 'action', sortable: false },
 ]
 
 const statusColorMap = {
@@ -112,7 +113,7 @@ async function fetchClubs() {
       value: club.id,
     }))
 
-    clubs.value = [{ title: 'Pilih Club', value: '' }, ...clubData]
+    clubs.value = [{ title: 'Pilih Klub', value: '' }, ...clubData]
   } catch (error) {
     console.error('Gagal memuat clubs', error)
   }
@@ -193,6 +194,53 @@ async function activateStanding(standing: any) {
     } finally {
       loading.value = false
     }
+  }
+}
+
+async function exportStanding() {
+  exportLoading.value = true
+  
+  try {
+    const response = await $api(`standing/export`, {
+      method: 'POST',
+      params: {
+        format: 'xlsx',
+        search: searchQuery.value,
+        club_id: selectedClub.value,
+        status: selectedStatus.value,
+        sort: selectedSort.value,
+      },
+      responseType: 'blob',
+    })
+
+    const blob = new Blob([response], { 
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    })
+    
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-')
+    link.download = `Standing_Export_${timestamp}.xlsx`
+    
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    
+    window.URL.revokeObjectURL(url)
+
+    snackbarMessage.value = 'Data berhasil diekspor'
+    snackbarColor.value = 'success'
+    isSnackbarVisible.value = true
+
+  } catch (err: any) {
+    console.error('Export error:', err)
+    snackbarMessage.value = err?.response?.data?.message || 'Gagal mengekspor data'
+    snackbarColor.value = 'error'
+    isSnackbarVisible.value = true
+  } finally {
+    exportLoading.value = false
   }
 }
 
@@ -277,7 +325,7 @@ watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort]
 
       <VCard class="mb-6">
         <VCardItem class="pb-4">
-          <VCardTitle>Standings</VCardTitle>
+          <VCardTitle>Klasemen</VCardTitle>
         </VCardItem>
 
         <VCardText>
@@ -323,18 +371,18 @@ watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort]
           <div style="inline-size: 15.625rem;">
             <AppTextField
                 v-model="searchQuery"
-                placeholder="Search Standing"
+                placeholder="Cari Klasemen"
             />
           </div>
           <VSpacer />
 
           <div class="app-user-search-filter d-flex align-center flex-wrap gap-4">
             <VBtn
-              variant="tonal"
-              color="secondary"
+              color="warning"
               prepend-icon="tabler-upload"
+              @click="exportStanding()"
             >
-              Export
+              Ekspor
             </VBtn>
           </div>
         </VCardText>
@@ -385,7 +433,7 @@ watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort]
                 size="small"
                 color="error"
                 @click="deleteStanding(item)"
-                title="Delete"
+                title="Hapus"
               >
                 <VIcon icon="tabler-trash" />
               </VBtn>
@@ -396,7 +444,7 @@ watch([searchQuery, selectedClub, selectedStadium, selectedStatus, selectedSort]
                 size="small"
                 color="success"
                 @click="activateStanding(item)"
-                title="Activate"
+                title="Aktifkan"
               >
                 <VIcon icon="tabler-check" />
               </VBtn>

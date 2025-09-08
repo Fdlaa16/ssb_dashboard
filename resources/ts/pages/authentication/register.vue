@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
+import Swal from 'sweetalert2'
 import type { Club } from '../../views/dashboards/player/types'
 
 import registerMultiStepIllustrationDark from '@images/illustrations/register-multi-step-illustration-dark.png'
@@ -26,6 +27,8 @@ const clubs = ref<Club[]>([])
 const isFlatSnackbarVisible = ref(false)
 const snackbarMessage = ref('')
 const snackbarColor = ref<'success' | 'error'>('success')
+const isSnackbarVisible = ref(false)
+const loading = ref(false)
 
 const rules = [
   (file: File | null) => {
@@ -36,7 +39,8 @@ const rules = [
 
 const rulesNisn = {
   required: (value: string) => !!value || 'Harus diisi.',
-  exactLength: (value: string) => value.length === 10 || 'Harus tepat 10 karakter',
+  maxLength: (value: string) =>
+    (value?.length <= 13) || 'Maksimal 13 karakter',
 };
 
 const rulesPassword = {
@@ -128,60 +132,79 @@ const form = ref({
 })
 
 const onSubmit = async () => {
-  const formData = new FormData()
+  const confirm = await Swal.fire({
+    title: 'Registrasi Pemain',
+    text: 'Apakah Anda yakin ingin melanjutkan?',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Ya!',
+    cancelButtonText: 'Batal',
+    customClass: {
+      confirmButton: 'swal2-confirm-btn',
+      cancelButton: 'swal2-cancel-btn',
+    },
+  })
 
-  formData.append('email', localData.value.email)
-  formData.append('password', localData.value.password)
-  formData.append('confirmPassword', localData.value.confirmPassword)
-  formData.append('name', localData.value.name)
-  formData.append('phone', localData.value.phone)
-  formData.append('nisn', localData.value.nisn)
-  formData.append('height', localData.value.height)
-  formData.append('weight', localData.value.weight)
-  formData.append('club_id', localData.value.club_player.club_id)
-  formData.append('category', localData.value.club_player.category)
-  formData.append('position', localData.value.club_player.position)
-  formData.append('back_number', localData.value.club_player.back_number)
+  if (confirm.isConfirmed) {
+    try {
+      loading.value = true
 
-  // file upload
-  if (localData.value.family_card instanceof File) {
-    formData.append('family_card', localData.value.family_card)
-  }
-  if (localData.value.report_grades instanceof File) {
-    formData.append('report_grades', localData.value.report_grades)
-  }
-  if (localData.value.birth_certificate instanceof File) {
-    formData.append('birth_certificate', localData.value.birth_certificate)
-  }
+      const formData = new FormData()
+      formData.append('email', localData.value.email)
+      formData.append('password', localData.value.password)
+      formData.append('confirmPassword', localData.value.confirmPassword)
+      formData.append('name', localData.value.name)
+      formData.append('phone', localData.value.phone)
+      formData.append('nisn', localData.value.nisn)
+      formData.append('height', localData.value.height)
+      formData.append('weight', localData.value.weight)
+      formData.append('club_id', localData.value.club_player.club_id)
+      formData.append('category', localData.value.club_player.category)
+      formData.append('position', localData.value.club_player.position)
+      formData.append('back_number', localData.value.club_player.back_number)
 
-  try {
-    await $api('company/register', {
-      method: 'POST',
-      body: formData,
-    });
+      // file upload
+      if (localData.value.family_card instanceof File) {
+        formData.append('family_card', localData.value.family_card)
+      }
+      if (localData.value.report_grades instanceof File) {
+        formData.append('report_grades', localData.value.report_grades)
+      }
+      if (localData.value.birth_certificate instanceof File) {
+        formData.append('birth_certificate', localData.value.birth_certificate)
+      }
 
-    snackbarMessage.value = 'Registrasi Berhasil!!';
-    snackbarColor.value = 'success';
-    isFlatSnackbarVisible.value = true;
+      await $api('company/register', {
+        method: 'POST',
+        body: formData,
+      })
 
-    router.push({
-      name: 'authentication-login',
-      query: {
-        success: 'Registrasi Berhasil!!',
-      },
-    });
-  } catch (err: any) {
-    const errors = err?.data?.errors
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      router.push({
+        name: 'authentication-login',
+        query: {
+          success: 'Registrasi Berhasil!',
+        },
+      });
+      
+    } catch (err: any) {
+      loading.value = false 
+      
+      const errors = err?.data?.errors
+      if (err?.status === 422 && errors) {
+        const messages = Object.values(errors).flat()
+        snackbarMessage.value = 'Validasi gagal: ' + messages.join(', ')
+      } else {
+        snackbarMessage.value =
+          'Gagal mengirim data: ' + (err?.data?.message || err?.message || 'Unknown error')
+      }
 
-    if (err?.status === 422 && errors) {
-      const messages = Object.values(errors).flat()
-      snackbarMessage.value = 'Validasi gagal: ' + messages.join(', ')
-    } else {
-      snackbarMessage.value = 'Gagal mengirim data: ' + (err?.message || 'Unknown error')
+      snackbarColor.value = 'error'
+      isFlatSnackbarVisible.value = true
+    } finally {
+      loading.value = false 
     }
-
-    snackbarColor.value = 'error'
-    isFlatSnackbarVisible.value = true
   }
 }
 
@@ -198,10 +221,10 @@ const categories = [
 
 const positions = [
   { title: 'Pilih Posisi', value: '' },
-  { title: 'Penjaga Gawang', value: 'goalkeeper' },
-  { title: 'Bek', value: 'defender' },
-  { title: 'Gelandang', value: 'midfielder' },
-  { title: 'Penyerang', value: 'forward' },
+  { title: 'Depan', value: 'front' },
+  { title: 'Tengah', value: 'center' },
+  { title: 'Belakang', value: 'back' },
+  { title: 'GK', value: 'gk' },
 ];
 
 const familyCardPreview = ref<string | null>(null)
@@ -450,10 +473,11 @@ onBeforeUnmount(() => {
                     v-model="localData.nisn"
                     label="NISN"
                     placeholder="Contoh: 1234567890"
-                    maxlength="10"
-                    hint="Harus tepat 10 karakter"
-                    countertype="number"
-                    :rules="[rulesNisn.required, rulesNisn.exactLength]"
+                    class="mb-4"
+                    maxlength="13"
+                    :rules="[rulesNisn.required, rulesNisn.maxLength]"
+                    hint="Maksimal 13 karakter"
+                    counter
                   />
                 </VCol>
 
@@ -665,4 +689,13 @@ onBeforeUnmount(() => {
 .bg-image {
   inset-block-end: 0;
 }
+
+.swal2-confirm-btn {
+  color: #fff !important;   /* teks putih */
+}
+
+.swal2-cancel-btn {
+  color: #fff !important;   /* teks putih */
+}
+
 </style>

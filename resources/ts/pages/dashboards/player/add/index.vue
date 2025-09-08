@@ -12,18 +12,20 @@ const snackbarColor = ref<'success' | 'error'>('success')
 
 const playerData = ref<PlayerData>({
   id: 0,
+  code: '',
   name: '',
   user: {
     email: '',
     password: '',
   },
   nisn: '',
+  phone: '',
   height: '',
   weight: '',
   back_number: '',   
   position: '',
   is_captain: false,   
-  status: false,
+  status: 0,
   category: '',
   club: {
     id: 0,
@@ -36,6 +38,7 @@ const handleSubmit = async () => {
   const formData = new FormData();
   formData.append('email', playerData.value.user.email ?? '');
   formData.append('nisn', playerData.value.nisn ?? '');
+  formData.append('phone', playerData.value.phone ?? '');
   formData.append('name', playerData.value.name ?? '');
   formData.append('height', playerData.value.height ?? '');
   formData.append('weight', playerData.value.weight ?? '');

@@ -73,7 +73,7 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered)
     <!-- 👉 Header -->
     <div class="nav-header">
       <slot name="nav-header">
-        <RouterLink to="/" class="app-logo app-title-wrapper">
+        <RouterLink to="/dashboards/player/list" class="app-logo app-title-wrapper">
           <img
             src="/storage/logo/LOGOSSB.png"
             alt="Logo SSB"

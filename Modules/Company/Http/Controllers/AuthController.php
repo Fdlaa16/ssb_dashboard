@@ -2,6 +2,7 @@
 
 namespace Modules\Company\Http\Controllers;
 
+use App\Mail\RegisterMail;
 use App\Models\File;
 use App\Models\Player;
 use App\Models\User;
@@ -10,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
@@ -83,6 +85,7 @@ class AuthController extends Controller
                 'email'     => 'required|email|unique:users,email',
                 'password'  => 'required',
                 'nisn'      => 'required|unique:players,nisn',
+                'phone'     => 'required|unique:players,phone',
                 'name'      => 'required',
                 'height'    => 'required',
                 'weight'    => 'required',
@@ -101,6 +104,8 @@ class AuthController extends Controller
                 'password.required'  => 'Password harus diisi',
                 'nisn.required'      => 'NISN harus diisi',
                 'nisn.unique'        => 'NISN sudah digunakan',
+                'phone.required'     => 'Nomor Telepon harus diisi',
+                'phone.unique'       => 'Nomor Telepon sudah digunakan',
                 'name.required'      => 'Nama harus diisi',
                 'height.required'    => 'Tinggi badan harus diisi',
                 'weight.required'    => 'Berat badan harus diisi',
@@ -135,6 +140,7 @@ class AuthController extends Controller
                 $player = Player::create([
                     'user_id' => $user->id ?? '',
                     'nisn' => $request->nisn ?? '',
+                    'phone' => $request->phone ?? '',
                     'name' => $request->name ?? '',
                     'height' => $request->height ?? '',
                     'weight' => $request->weight ?? '',
@@ -164,6 +170,14 @@ class AuthController extends Controller
                             'path' => "$fileDir$fileName",
                         ]);
                     }
+                }
+
+                // Kirim email notifikasi registrasi berhasil
+                try {
+                    Mail::to($user->email)->send(new RegisterMail($player, $user));
+                } catch (\Exception $mailException) {
+                    // Log error email tapi tetap lanjutkan proses
+                    \Log::error('Failed to send registration email: ' . $mailException->getMessage());
                 }
 
                 DB::commit();
@@ -212,6 +226,7 @@ class AuthController extends Controller
             $rules = [
                 'email'     => 'required|email|unique:users,email,' . $player->user_id,
                 'nisn'      => 'required|unique:players,nisn,' . $player->id,
+                'phone'     => 'required|unique:players,phone,' . $player->id,
                 'name'      => 'required',
                 'height'    => 'required',
                 'weight'    => 'required',
@@ -230,6 +245,8 @@ class AuthController extends Controller
                 'email.unique'       => 'Email sudah digunakan',
                 'nisn.required'      => 'NISN harus diisi',
                 'nisn.unique'        => 'NISN sudah digunakan',
+                'phone.required'     => 'Nomor Telepon harus diisi',
+                'phone.unique'       => 'Nomor Telepon sudah digunakan',
                 'name.required'      => 'Nama harus diisi',
                 'height.required'    => 'Tinggi badan harus diisi',
                 'weight.required'    => 'Berat badan harus diisi',
@@ -269,6 +286,7 @@ class AuthController extends Controller
 
                 $player->update([
                     'nisn'   => $request->nisn ?? '',
+                    'phone'   => $request->phone ?? '',
                     'name'   => $request->name ?? '',
                     'height' => $request->height ?? '',
                     'weight' => $request->weight ?? '',

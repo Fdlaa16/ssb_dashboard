@@ -62,11 +62,6 @@ export const db: DB = {
           title: 'Payment Front',
         },
         {
-          url: { name: 'checkout' },
-          icon: 'tabler-file-description',
-          title: 'Checkout Front',
-        },
-        {
           url: { name: 'help-center' },
           icon: 'tabler-file-description',
           title: 'Help Center Front',
@@ -115,32 +110,32 @@ export const db: DB = {
         {
           url: { name: 'dashboards-player-list' },
           icon: 'tabler-user',
-          title: 'Player',
+          title: 'Pemain',
         },
         {
           url: { name: 'dashboards-player-edit-id' },
           icon: 'tabler-user',
-          title: 'Player',
+          title: 'Pemain',
         },
         {
           url: { name: 'dashboards-structure-list' },
           icon: 'tabler-user',
-          title: 'Structure',
+          title: 'Pengurus',
         },
         {
           url: { name: 'dashboards-structure-edit-id' },
           icon: 'tabler-user',
-          title: 'Structure',
+          title: 'Pengurus',
         },
         {
           url: { name: 'dashboards-club-list' },
           icon: 'tabler-shirt',
-          title: 'Club',
+          title: 'KLub',
         },
         {
           url: { name: 'dashboards-club-edit-id' },
           icon: 'tabler-shirt',
-          title: 'Club',
+          title: 'KLub',
         },
         {
           url: { name: 'dashboards-media-list' },
@@ -165,12 +160,12 @@ export const db: DB = {
         {
           url: { name: 'dashboards-slide-home-list' },
           icon: 'tabler-shirt',
-          title: 'Slide Home',
+          title: 'Halaman Slide',
         },
         {
           url: { name: 'dashboards-slide-home-edit-id' },
           icon: 'tabler-shirt',
-          title: 'Slide Home',
+          title: 'Halaman Slide',
         },
       ]
     },
@@ -409,71 +404,71 @@ export const db: DB = {
           icon: 'tabler-login',
           title: 'Login V1',
         },
-        {
-          url: { name: 'authentication-login-v1-admin' },
-          icon: 'tabler-login',
-          title: 'Login V1 Admin',
-        },
+        // {
+        //   url: { name: 'authentication-login-v1-admin' },
+        //   icon: 'tabler-login',
+        //   title: 'Login V1 Admin',
+        // },
         {
           url: { name: 'authentication-login' },
           icon: 'tabler-login',
           title: 'Login V1 Company',
         },
+        // {
+        //   url: { name: 'authentication-login-v2' },
+        //   icon: 'tabler-login',
+        //   title: 'Login V2',
+        // },
         {
-          url: { name: 'authentication-login-v2' },
-          icon: 'tabler-login',
-          title: 'Login V2',
-        },
-        {
-          url: { name: 'authentication-register-v1' },
+          url: { name: 'authentication-register' },
           icon: 'tabler-user-plus',
           title: 'Register V1',
         },
-        {
-          url: { name: 'pages-authentication-register-v2' },
-          icon: 'tabler-user-plus',
-          title: 'Register V2',
-        },
-        {
-          icon: 'tabler-mail',
-          title: 'Verify Email V1',
-          url: { name: 'pages-authentication-verify-email-v1' },
-        },
-        {
-          icon: 'tabler-mail',
-          title: 'Verify Email V2',
-          url: { name: 'pages-authentication-verify-email-v2' },
-        },
-        {
-          url: { name: 'authentication-forgot-password-v1' },
-          icon: 'tabler-lock-exclamation',
-          title: 'Forgot Password V1',
-        },
-        {
-          url: { name: 'pages-authentication-forgot-password-v2' },
-          icon: 'tabler-lock-exclamation',
-          title: 'Forgot Password V2',
-        },
-        {
-          url: { name: 'pages-authentication-reset-password-v1' },
-          icon: 'tabler-help-circle',
-          title: 'Reset Password V1',
-        },
-        {
-          url: { name: 'pages-authentication-reset-password-v2' },
-          icon: 'tabler-help-circle',
-          title: 'Reset Password V2',
-        },
-        {
-          icon: 'tabler-devices',
-          title: 'Two Steps V1',
-          url: { name: 'pages-authentication-two-steps-v1' },
-        },
-        {
-          icon: 'tabler-devices',
-          title: 'Two Steps V2',
-          url: { name: 'pages-authentication-two-steps-v2' },
-        },
+        // {
+        //   url: { name: 'pages-authentication-register-v2' },
+        //   icon: 'tabler-user-plus',
+        //   title: 'Register V2',
+        // },
+        // {
+        //   icon: 'tabler-mail',
+        //   title: 'Verify Email V1',
+        //   url: { name: 'pages-authentication-verify-email-v1' },
+        // },
+        // {
+        //   icon: 'tabler-mail',
+        //   title: 'Verify Email V2',
+        //   url: { name: 'pages-authentication-verify-email-v2' },
+        // },
+        // {
+        //   url: { name: 'authentication-forgot-password-v1' },
+        //   icon: 'tabler-lock-exclamation',
+        //   title: 'Forgot Password V1',
+        // },
+        // {
+        //   url: { name: 'pages-authentication-forgot-password-v2' },
+        //   icon: 'tabler-lock-exclamation',
+        //   title: 'Forgot Password V2',
+        // },
+        // {
+        //   url: { name: 'pages-authentication-reset-password-v1' },
+        //   icon: 'tabler-help-circle',
+        //   title: 'Reset Password V1',
+        // },
+        // {
+        //   url: { name: 'pages-authentication-reset-password-v2' },
+        //   icon: 'tabler-help-circle',
+        //   title: 'Reset Password V2',
+        // },
+        // {
+        //   icon: 'tabler-devices',
+        //   title: 'Two Steps V1',
+        //   url: { name: 'pages-authentication-two-steps-v1' },
+        // },
+        // {
+        //   icon: 'tabler-devices',
+        //   title: 'Two Steps V2',
+        //   url: { name: 'pages-authentication-two-steps-v2' },
+        // },
         {
           url: { name: 'pages-dialog-examples' },
           icon: 'tabler-square',

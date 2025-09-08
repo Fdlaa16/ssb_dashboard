@@ -67,13 +67,13 @@ onBeforeUnmount(() => {
 <template>
   <form @submit.prevent="$emit('submit')">
     <div class="d-flex flex-column gap-6 mb-6">
-      <VCard :title="props.data.id ? 'Edit Club' : 'Create Club'">
+      <VCard :title="props.data.id ? 'Ubah Club' : 'Tambah Club'">
         <VCardText>
           <VWindow>
             <div>
               <VRow>
                 <VCol cols="12" class="text-no-wrap">
-                  <h6 class="text-h6 mb-2">Profile Club</h6>
+                  <h6 class="text-h6 mb-2">Profil Klub</h6>
                   <img
                     v-if="profileClubPreview"
                     :src="profileClubPreview"
@@ -90,7 +90,7 @@ onBeforeUnmount(() => {
                   
                   <AppTextField
                     v-model="localData.name"
-                    label="Name"
+                    label="Nama"
                     placeholder="Contoh: Nama Club"
                   />
                 </VCol>

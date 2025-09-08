@@ -33,9 +33,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('player/{id}/edit', [PlayerController::class, 'edit'])->name('player.edit');
     Route::put('player/{id}', [PlayerController::class, 'update'])->name('player.update');
     Route::delete('player/{id}', [PlayerController::class, 'destroy'])->name('player.destroy');
-    Route::put('player/{id}/active', [PlayerController::class, 'active'])->name('player.active');
+    Route::put('player/{id}/activate', [PlayerController::class, 'activate'])->name('player.activate');
     Route::put('player/{id}/approve', [PlayerController::class, 'approve'])->name('player.approve');
     Route::put('player/{id}/reject', [PlayerController::class, 'reject'])->name('player.reject');
+    Route::post('player/export', [PlayerController::class, 'export'])->name('player.export');
+    Route::get('player/{id}/download-biodata', [PlayerController::class, 'downloadBiodata'])->name('player.export');
 
     Route::get('structure', [StructureController::class, 'index'])->name('structure.index');
     Route::get('structure/create', [StructureController::class, 'create'])->name('structure.create');
@@ -47,6 +49,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('structure/{id}/active', [StructureController::class, 'active'])->name('structure.active');
     Route::put('structure/{id}/approve', [StructureController::class, 'approve'])->name('structure.approve');
     Route::put('structure/{id}/reject', [StructureController::class, 'reject'])->name('structure.reject');
+    Route::post('structure/export', [StructureController::class, 'export'])->name('structure.export');
 
     Route::get('club', [ClubController::class, 'index'])->name('club.index');
     Route::get('club/create', [ClubController::class, 'create'])->name('club.create');
@@ -100,6 +103,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('schedule-match/{id}', [ScheduleMatchController::class, 'update'])->name('schedule-match.update');
     Route::delete('schedule-match/{id}', [ScheduleMatchController::class, 'destroy'])->name('schedule-match.destroy');
     Route::put('schedule-match/{id}/active', [ScheduleMatchController::class, 'active'])->name('schedule-match.active');
+    Route::post('schedule-match/export', [ScheduleMatchController::class, 'export'])->name('schedule-match.export');
 
     Route::get('schedule-training', [ScheduleTrainingController::class, 'index'])->name('schedule-training.index');
     Route::get('schedule-training/create', [ScheduleTrainingController::class, 'create'])->name('schedule-training.create');
@@ -109,6 +113,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('schedule-training/{id}', [ScheduleTrainingController::class, 'update'])->name('schedule-training.update');
     Route::delete('schedule-training/{id}', [ScheduleTrainingController::class, 'destroy'])->name('schedule-training.destroy');
     Route::put('schedule-training/{id}/active', [ScheduleTrainingController::class, 'active'])->name('schedule-training.active');
+    Route::post('schedule-training/export', [ScheduleTrainingController::class, 'export'])->name('schedule-training.export');
 
     Route::get('standing', [StandingController::class, 'index'])->name('standing.index');
     Route::get('standing/create', [StandingController::class, 'create'])->name('standing.create');
@@ -118,4 +123,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('standing/{id}', [StandingController::class, 'update'])->name('standing.update');
     Route::delete('standing/{id}', [StandingController::class, 'destroy'])->name('standing.destroy');
     Route::put('standing/{id}/active', [StandingController::class, 'active'])->name('standing.active');
+    Route::post('standing/export', [StandingController::class, 'export'])->name('standing.export');
 });

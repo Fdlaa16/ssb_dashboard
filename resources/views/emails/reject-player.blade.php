@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Aktivasi Gagal - SSB PUTRA MUDA BALARAJA</title>
+</head>
+
+<body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: Arial, sans-serif; color: #333;">
+    <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%"
+        style="max-width: 600px; margin: auto;">
+        <tr>
+            <td align="center" style="padding: 30px;">
+                <!-- CARD -->
+                <table width="100%" cellpadding="0" cellspacing="0"
+                    style="
+          background-color: #ffffff;
+          border-radius: 12px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          overflow: hidden;
+        ">
+                    <tr>
+                        <td align="center" style="padding: 30px 20px 10px;">
+                            <!-- Logo Text -->
+                            <img src="{{ $message->embed(public_path('images/logo/LOGOSSB.png')) }}" alt="Logo SSB"
+                                style="width: 100px;">
+
+                            <!-- Garis -->
+                            <hr
+                                style="border: none; height: 1px; background-color: #ddd; width: 80%; margin: 15px auto;">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding: 0 20px 20px 20px; color: #333;">
+                            <h2 style="color:rgb(255, 0, 0); text-align: center; margin: 0 0 20px 0;">Maaf, Aktivasi
+                                Anda
+                                Gagal</h2>
+
+                            <p>Yth <strong>{{ $player->name }}</strong>,</p>
+
+                            <p>Kami telah melakukan pemeriksaan terhadap data dan dokumen yang Anda kirimkan.
+                                Namun, dengan berat hati kami informasikan bahwa <strong>aktivasi akun pemain Anda tidak
+                                    dapat diproses</strong> karena data atau dokumen yang Anda lampirkan
+                                tidak sesuai atau tidak valid.</p>
+
+
+                            <!-- Detail Registrasi -->
+                            <div style="background-color: #f8f9fa; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                                <h3 style="color: #333; margin-top: 0;">Detail Anda:</h3>
+                                <table style="width: 100%; border-collapse: collapse;">
+                                    <tr>
+                                        <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Nama
+                                                Lengkap:</strong></td>
+                                        <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ $player->name }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px 0; border-bottom: 1px solid #eee;">
+                                            <strong>Email:</strong>
+                                        </td>
+                                        <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ $user->email }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Tinggi
+                                                Badan:</strong></td>
+                                        <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ $player->height }}
+                                            cm</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Berat
+                                                Badan:</strong></td>
+                                        <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{ $player->weight }}
+                                            kg</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <p style="color: #555; font-size: 14px;">
+                                Silakan melakukan <strong>perbaikan data atau unggah ulang dokumen</strong> sesuai
+                                ketentuan agar proses aktivasi bisa dilanjutkan.
+                            </p>
+
+                            <p style="color: #555; font-size: 14px;">Jika Anda memiliki pertanyaan, jangan ragu untuk
+                                menghubungi kami melalui email ini atau nomor telepon yang tersedia di website kami.</p>
+
+                            <p style="margin-top: 30px;">
+                                Salam Olahraga,<br>
+                                <strong>SSB PUTRA MUDA BALARAJA</strong>
+                            </p>
+
+                            <hr style="border: none; height: 1px; background-color: #eee; margin: 30px 0;">
+
+                            <p style="font-size: 12px; color: #999; text-align: center;">
+                                Email ini dikirim secara otomatis, mohon tidak membalas email ini.<br>
+                                ©{{ date('Y') }} SSB PUTRA MUDA BALARAJA Management System. All Rights Reserved
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+                <!-- END CARD -->
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>

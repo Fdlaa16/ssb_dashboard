@@ -46,8 +46,8 @@ const widgetData = ref([
 
 const headers = [
   { title: 'ID', key: 'id' },
-  { title: 'Code', key: 'code' },
-  { title: 'Action', key: 'action', sortable: false },
+  { title: 'Kode', key: 'code' },
+  { title: 'Aksi', key: 'action', sortable: false },
 ]
 
 const statusColorMap = {
@@ -246,7 +246,7 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
 
       <VCard class="mb-6">
         <VCardItem class="pb-4">
-          <VCardTitle>Slide Homes</VCardTitle>
+          <VCardTitle>Master Halaman Slide</VCardTitle>
         </VCardItem>
 
         <VCardText>
@@ -257,7 +257,7 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
             >
              <AppTextField
                 v-model="searchQuery"
-                placeholder="Search slide home"
+                placeholder="Cari Slide Halaman"
               />
             </VCol>
 
@@ -291,7 +291,7 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
                 clear-icon="tabler-x"
                 single-line
                 :items="[
-                  { title: 'Pilih Sort', value: '' },
+                  { title: 'Pilih Sortir', value: '' },
                   { title: 'A-Z', value: 'asc' },
                   { title: 'Z-A', value: 'desc' },
                 ]"
@@ -305,7 +305,7 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
               prepend-icon="tabler-plus"
               :to="{ name: 'dashboards-slide-home-add' }"
             >
-              Add New slide home
+              Buat Slide Halaman Baru
             </VBtn>
           </div>
           </VRow>
@@ -333,7 +333,7 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
                 size="small"
                 color="primary"
                 @click="editSlideHome(item)"
-                title="Edit"
+                title="Ubah"
               >
                 <VIcon icon="tabler-pencil" />
               </VBtn>
@@ -344,7 +344,7 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
                 size="small"
                 color="error"
                 @click="deleteSlideHome(item)"
-                title="Delete"
+                title="Hapus"
               >
                 <VIcon icon="tabler-trash" />
               </VBtn>
@@ -355,7 +355,7 @@ watch([searchQuery, selectedStatus, selectedSort], () => {
                 size="small"
                 color="success"
                 @click="activateSlideHome(item)"
-                title="Activate"
+                title="Aktifkan"
               >
                 <VIcon icon="tabler-check" />
               </VBtn>

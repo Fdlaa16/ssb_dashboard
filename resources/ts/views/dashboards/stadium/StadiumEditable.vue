@@ -43,7 +43,7 @@ const submitForm = () => {
 <template>
   <form @submit.prevent="$emit('submit')">
     <div class="d-flex flex-column gap-6 mb-6">
-      <VCard :title="props.data.id ? 'Edit Stadium' : 'Create Stadium'">
+      <VCard :title="props.data.id ? 'Ubah Stadium' : 'Tambah Stadium'">
         <VCardText>
           <VWindow>
             <div>
@@ -53,7 +53,7 @@ const submitForm = () => {
                     <VCol cols="6">
                       <AppTextField
                         v-model="localData.name"
-                        label="Name"
+                        label="Nama"
                         placeholder="Contoh: Nama Stadium"
                       />
                     </VCol>
@@ -61,7 +61,7 @@ const submitForm = () => {
                     <VCol cols="6">
                       <AppTextField
                         v-model="localData.area"
-                        label="Area"
+                        label="Daerah"
                         placeholder="Contoh: Nama Area"
                       />
                     </VCol>

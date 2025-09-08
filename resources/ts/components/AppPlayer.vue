@@ -101,10 +101,10 @@ const category = ref(categories[0])
 
 const positions = [
   { title: 'Semua Posisi', value: '' },
-  { title: 'Penjaga Gawang', value: 'goalkeeper' },
-  { title: 'Bek', value: 'defender' },
-  { title: 'Gelandang', value: 'midfielder' },
-  { title: 'Penyerang', value: 'forward' },
+  { title: 'Depan', value: 'front' },
+  { title: 'Tengah', value: 'center' },
+  { title: 'Belakang', value: 'back' },
+  { title: 'GK', value: 'gk' },
 ];
 const selectedPosition = ref(positions[0])
 

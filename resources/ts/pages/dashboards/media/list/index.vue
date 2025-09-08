@@ -48,9 +48,9 @@ const widgetData = ref([
 
 const headers = [
   { title: 'ID', key: 'id' },
-  { title: 'Title', key: 'title' },
-  { title: 'Type Media', key: 'type_media' },
-  { title: 'Action', key: 'action', sortable: false },
+  { title: 'Judul', key: 'title' },
+  { title: 'Tipe Media', key: 'type_media' },
+  { title: 'Aksi', key: 'action', sortable: false },
 ]
 
 const paginatedMedias = computed(() => {
@@ -311,7 +311,7 @@ watch([searchQuery, selectedTypeMedia, selectedStatus, selectedSort], () => {
 
       <VCard class="mb-6">
         <VCardItem class="pb-4">
-          <VCardTitle>Medias</VCardTitle>
+          <VCardTitle>Master Media</VCardTitle>
         </VCardItem>
 
          <VCardText>
@@ -364,7 +364,7 @@ watch([searchQuery, selectedTypeMedia, selectedStatus, selectedSort], () => {
                 clear-icon="tabler-x"
                 single-line
                 :items="[
-                  { title: 'Pilih Sort', value: '' },
+                  { title: 'Pilih Sortir', value: '' },
                   { title: 'A-Z', value: 'asc' },
                   { title: 'Z-A', value: 'desc' },
                 ]"
@@ -379,7 +379,7 @@ watch([searchQuery, selectedTypeMedia, selectedStatus, selectedSort], () => {
           <div style="inline-size: 15.625rem;">
             <AppTextField
                 v-model="searchQuery"
-                placeholder="Search Media"
+                placeholder="Cari Media"
             />
           </div>
           <VSpacer />
@@ -389,7 +389,7 @@ watch([searchQuery, selectedTypeMedia, selectedStatus, selectedSort], () => {
               prepend-icon="tabler-plus"
               :to="{ name: 'dashboards-media-add' }"
             >
-              Add New Media
+              Tambah Media Baru
             </VBtn>
           </div>
         </VCardText>
@@ -460,7 +460,7 @@ watch([searchQuery, selectedTypeMedia, selectedStatus, selectedSort], () => {
                 size="small"
                 color="primary"
                 @click="editMedia(item)"
-                title="Edit"
+                title="Ubah"
               >
                 <VIcon icon="tabler-pencil" />
               </VBtn>
@@ -471,7 +471,7 @@ watch([searchQuery, selectedTypeMedia, selectedStatus, selectedSort], () => {
                 size="small"
                 color="error"
                 @click="deleteMedia(item)"
-                title="Delete"
+                title="Hapus"
               >
                 <VIcon icon="tabler-trash" />
               </VBtn>
@@ -482,7 +482,7 @@ watch([searchQuery, selectedTypeMedia, selectedStatus, selectedSort], () => {
                 size="small"
                 color="success"
                 @click="activateMedia(item)"
-                title="Activate"
+                title="Aktifkan"
               >
                 <VIcon icon="tabler-check" />
               </VBtn>

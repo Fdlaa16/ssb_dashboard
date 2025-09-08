@@ -12,11 +12,26 @@ definePage({
   },
 })
 
+onMounted(() => {
+  if (route.query.success) {
+    snackbarMessage.value = String(route.query.success)
+    snackbarColor.value = 'success'
+    isFlatSnackbarVisible.value = true
+
+    setTimeout(() => {
+      router.replace({ query: {} })
+    }, 100)
+  }
+})
+
 const authStore = useAuthStore()
+const route = useRoute()
 const router = useRouter()
 const isFlatSnackbarVisible = ref(false)
 const snackbarMessage = ref('')
 const snackbarColor = ref<'success' | 'error'>('success')
+const isSnackbarVisible = ref(false)
+
 
 const rulesPassword = {
   required: (value: string) => !!value || 'Password harus diisi',

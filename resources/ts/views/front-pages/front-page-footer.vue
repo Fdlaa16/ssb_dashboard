@@ -23,9 +23,8 @@ const pagesList: Menu[] = [
   { name: 'Media', to: { name: 'media' } },
   { name: 'Pricing', to: { name: 'pricing' } },
   { name: 'Payment', to: { name: 'payment' }, isNew: true },
-  { name: 'Checkout', to: { name: 'checkout' } },
   { name: 'Help Center', to: { name: 'help-center' } },
-  { name: 'Login/Register', to: { name: 'authentication-login-v2' } },
+  // { name: 'Login/Register', to: { name: 'authentication-login-v2' } },
 ]
 
 const demoList = [

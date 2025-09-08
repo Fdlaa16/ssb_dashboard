@@ -40,4 +40,60 @@ class ScheduleTraining extends Model
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
+
+    public function scheduleTrainingNotifications()
+    {
+        return $this->hasMany(ScheduleTrainingNotification::class);
+    }
+
+    // Event listener untuk auto-create notifikasi saat jadwal dibuat
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($scheduleTraining) {
+            $scheduleTraining->createNotifications();
+        });
+
+        static::updated(function ($scheduleTraining) {
+            if ($scheduleTraining->wasChanged(['schedule_date', 'schedule_start_at'])) {
+                $scheduleTraining->updateNotifications();
+            }
+        });
+    }
+
+    public function createNotifications()
+    {
+        $scheduleDateTime = \Carbon\Carbon::parse($this->schedule_date . ' ' . $this->schedule_start_at);
+
+        $notifications = [
+            [
+                'type' => 'h_minus_7',
+                'scheduled_at' => $scheduleDateTime->copy()->subDays(7)->startOfDay(),
+            ],
+            [
+                'type' => 'h_minus_1',
+                'scheduled_at' => $scheduleDateTime->copy()->subDay()->startOfDay(),
+            ],
+            [
+                'type' => 'day_h',
+                'scheduled_at' => $scheduleDateTime->copy()->startOfDay(),
+            ],
+        ];
+
+        foreach ($notifications as $notification) {
+            ScheduleTrainingNotification::create(array_merge($notification, [
+                'schedule_training_id' => $this->id,
+            ]));
+        }
+    }
+
+    public function updateNotifications()
+    {
+        // Hapus notifikasi yang belum terkirim
+        $this->scheduleTrainingNotifications()->where('is_sent', false)->delete();
+
+        // Buat ulang notifikasi
+        $this->createNotifications();
+    }
 }
