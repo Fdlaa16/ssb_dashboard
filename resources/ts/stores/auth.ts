@@ -23,7 +23,7 @@ export const useAuthStore = defineStore('auth', () => {
   const role = ref<string | null>(null)
   const loginType = ref<string | null>(null)
   const lastActivity = ref<number | null>(null)
-  const sessionTimeout = 10 * 60 * 1000 // 10 minutes in milliseconds
+  const sessionTimeout = 30 * 60 * 1000 // 10 minutes in milliseconds
 
   function storeUserData(userData: UserData) {
     user.value = userData.user

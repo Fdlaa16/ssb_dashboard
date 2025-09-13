@@ -743,6 +743,7 @@ onMounted(() => {
           <!-- Profile Menu - Desktop (when authenticated) -->
           <template v-else>
             <!-- Profile Dropdown Menu - Desktop -->
+            <NavbarThemeSwitcher />
             <VMenu
               v-model="isProfileMenuOpen"
               offset="10"
@@ -765,7 +766,7 @@ onMounted(() => {
                     <VIcon icon="tabler-user" color="white" />
                   </VAvatar>
                 </VBtn>
-            </template>
+              </template>
 
               <VCard min-width="200">
                 <VList>
