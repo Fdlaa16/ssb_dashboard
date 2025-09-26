@@ -59,6 +59,9 @@ const handleSubmit = async () => {
   if (playerData.value.birth_certificate instanceof File)
     formData.append('birth_certificate', playerData.value.birth_certificate);
 
+  if (playerData.value.proof_payment instanceof File)
+    formData.append('proof_payment', playerData.value.proof_payment);
+
   try {
     const response = await $api('player/store', {
       method: 'POST',

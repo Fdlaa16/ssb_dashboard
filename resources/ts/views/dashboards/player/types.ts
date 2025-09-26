@@ -57,5 +57,6 @@ export interface PlayerData {
   family_card?: File | { url: string; name: string };
   report_grades?: File | { url: string; name: string };
   birth_certificate?: File | { url: string; name: string };
+  proof_payment?: File | { url: string; name: string };
   avatar?: File | { url: string; name: string }; 
 }

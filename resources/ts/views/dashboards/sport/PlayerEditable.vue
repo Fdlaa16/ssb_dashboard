@@ -224,6 +224,21 @@ const getImageUrl = (path: string) => {
                       accept="image/png, image/jpeg, image/bmp"
                     />
                   </div>
+
+                  <div class="text-h6 mt-4">
+                    <h6 class="text-h6 mb-2">Bukti Pendaftaran</h6>
+                    <img
+                      v-if="localData.proof_payment"
+                      :src="getImageUrl(localData.proof_payment.url)"
+                      class="card-website-analytics-img"
+                      style="width: 12%; filter: drop-shadow(0 4px 60px rgba(0, 0, 0, 50%));"
+                    />
+                    <VFileInput
+                      v-model="localData.proof_payment"
+                      :rules="rules"
+                      accept="image/png, image/jpeg, image/bmp"
+                    />
+                  </div>
                 </VCol>
               </VRow>
             </VWindowItem>

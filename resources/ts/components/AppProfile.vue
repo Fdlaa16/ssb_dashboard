@@ -55,6 +55,7 @@ interface PlayerData {
   family_card: File | { url: string } | null
   report_grades: File | { url: string } | null
   birth_certificate: File | { url: string } | null
+  proof_payment: File | { url: string } | null
 }
 
 interface Props {
@@ -106,6 +107,7 @@ const playerData = ref<PlayerData>({
   family_card: null,
   report_grades: null,
   birth_certificate: null,
+  proof_payment: null
 })
 
 // Image Previews
@@ -113,6 +115,7 @@ const avatarPreview = ref<string | null>(null)
 const familyCardPreview = ref<string | null>(null)
 const reportGradesPreview = ref<string | null>(null)
 const birthCertificatePreview = ref<string | null>(null)
+const proofPaymentPreview = ref<string | null>(null)
 
 // Options
 const positions = [
@@ -196,6 +199,9 @@ const fetchPlayer = async () => {
     if (playerData.value.birth_certificate?.url) {
       birthCertificatePreview.value = getImageUrl(playerData.value.birth_certificate.url)
     }
+    if (playerData.value.proof_payment?.url) {
+      proofPaymentPreview.value = getImageUrl(playerData.value.proof_payment.url)
+    }
   } catch (err: any) {
     error.value = err.message || 'Gagal mengambil data player'
     showNotification(error.value, 'error')
@@ -236,6 +242,9 @@ const updatePlayer = async () => {
     if (playerData.value.birth_certificate instanceof File) {
       formData.append('birth_certificate', playerData.value.birth_certificate)
     }
+    if (playerData.value.proof_payment instanceof File) {
+      formData.append('proof_payment', playerData.value.proof_payment)
+    }
 
     const res = await $api(`company/profile-update`, {
       method: 'POST',
@@ -269,7 +278,7 @@ const updatePlayer = async () => {
 //   await updatePlayer()
 // }
 
-const handleFileChange = (file: File | null, type: 'avatar' | 'family_card' | 'report_grades' | 'birth_certificate') => {
+const handleFileChange = (file: File | null, type: 'avatar' | 'family_card' | 'report_grades' | 'birth_certificate' | 'proof_payment') => {
   if (file) {
     playerData.value[type] = file
   }
@@ -316,6 +325,16 @@ watch(() => playerData.value.birth_certificate, (newBirthCertificate: any) => {
   }
 })
 
+watch(() => playerData.value.proof_payment, (newProofPayment: any) => {
+  if (newProofPayment instanceof File) {
+    proofPaymentPreview.value = URL.createObjectURL(newProofPayment)
+  } else if (newProofPayment?.url) {
+    proofPaymentPreview.value = getImageUrl(newProofPayment.url)
+  } else {
+    proofPaymentPreview.value = null
+  }
+})
+
 // Lifecycle
 onMounted(() => {
   fetchPlayer()
@@ -323,7 +342,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   // Clean up blob URLs
-  const previews = [avatarPreview, familyCardPreview, reportGradesPreview, birthCertificatePreview]
+  const previews = [avatarPreview, familyCardPreview, reportGradesPreview, birthCertificatePreview, proofPaymentPreview]
   previews.forEach(preview => {
     if (preview.value?.startsWith('blob:')) {
       URL.revokeObjectURL(preview.value)
@@ -580,6 +599,23 @@ onBeforeUnmount(() => {
 
                           <VFileInput
                             v-model="playerData.birth_certificate"
+                            label="Upload Akte Kelahiran"
+                            accept="image/png, image/jpeg, image/bmp"
+                            density="comfortable"
+                          />
+                        </div>
+
+                        <div class="text-h6 mt-4">
+                          <h6 class="text-h6 mb-2">Bukti Pendaftaran</h6>
+                          <img
+                            v-if="proofPaymentPreview"
+                            :src="proofPaymentPreview"
+                            alt="Preview Birth Certificate"
+                            style="width: 30%; border-radius: 8px; margin-bottom: 1rem;"
+                          />
+
+                          <VFileInput
+                            v-model="playerData.proof_payment"
                             label="Upload Akte Kelahiran"
                             accept="image/png, image/jpeg, image/bmp"
                             density="comfortable"

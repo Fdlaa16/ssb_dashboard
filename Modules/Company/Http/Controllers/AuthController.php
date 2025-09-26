@@ -95,6 +95,7 @@ class AuthController extends Controller
                 'family_card' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
                 'report_grades' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
                 'birth_certificate' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
+                'proof_payment' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
             ];
 
             $messages = [
@@ -124,6 +125,9 @@ class AuthController extends Controller
                 'birth_certificate.image' => 'Akte Kelahiran harus berupa gambar',
                 'birth_certificate.mimes' => 'Format Akte Kelahiran harus jpeg, png, jpg, atau bmp',
                 'birth_certificate.max' => 'Ukuran Akte Kelahiran maksimal 2MB',
+                'proof_payment.image' => 'Bukti Pendaftaran harus berupa gambar',
+                'proof_payment.mimes' => 'Format Bukti Pendaftaran harus jpeg, png, jpg, atau bmp',
+                'proof_payment.max' => 'Ukuran Bukti Pendaftaran maksimal 2MB',
             ];
 
             $validator = Validator::make($postData, $rules, $messages);
@@ -149,7 +153,7 @@ class AuthController extends Controller
                     'category' => $request->category ?? '',
                 ]);
 
-                $types = ['family_card', 'report_grades', 'birth_certificate'];
+                $types = ['family_card', 'report_grades', 'birth_certificate', 'proof_payment'];
                 $fileObj = new File();
 
                 foreach ($types as $type) {
@@ -200,7 +204,7 @@ class AuthController extends Controller
     {
         $user = Auth::user();
         $players = Player::where('user_id', $user->id)
-            ->with(['family_card', 'report_grades', 'birth_certificate', 'avatar', 'user'])
+            ->with(['family_card', 'report_grades', 'birth_certificate', 'proof_payment', 'avatar', 'user'])
             ->get();
 
         return response()->json([
@@ -214,7 +218,7 @@ class AuthController extends Controller
 
         $user = Auth::user();
         $player = Player::where('user_id', $user->id)
-            ->with(['family_card', 'report_grades', 'birth_certificate', 'avatar', 'user'])
+            ->with(['family_card', 'report_grades', 'birth_certificate', 'proof_payment', 'avatar', 'user'])
             ->first();
 
         if (!$player) {
@@ -237,6 +241,7 @@ class AuthController extends Controller
                 'family_card.*' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
                 'report_grades.*' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
                 'birth_certificate.*' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
+                'proof_payment.*' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
             ];
 
             $messages = [
@@ -266,6 +271,9 @@ class AuthController extends Controller
                 'birth_certificate.*.image' => 'Akte Kelahiran harus berupa gambar',
                 'birth_certificate.*.mimes' => 'Format Akte Kelahiran harus jpeg, png, jpg, atau bmp',
                 'birth_certificate.*.max' => 'Ukuran Akte Kelahiran maksimal 2MB',
+                'proof_payment.*.image' => 'Bukti Pendaftaran harus berupa gambar',
+                'proof_payment.*.mimes' => 'Format Bukti Pendaftaran harus jpeg, png, jpg, atau bmp',
+                'proof_payment.*.max' => 'Ukuran Bukti Pendaftaran maksimal 2MB',
             ];
 
             $validator = Validator::make($request->all(), $rules, $messages);
@@ -295,7 +303,7 @@ class AuthController extends Controller
                     'category' => $request->category ?? '',
                 ]);
 
-                $types = ['avatar', 'family_card', 'report_grades', 'birth_certificate'];
+                $types = ['avatar', 'family_card', 'report_grades', 'birth_certificate', 'proof_payment'];
                 $fileObj = new File();
 
                 foreach ($types as $type) {

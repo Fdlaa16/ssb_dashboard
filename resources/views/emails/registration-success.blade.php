@@ -99,6 +99,29 @@
                             <p style="color: #555; font-size: 14px;">Jika Anda memiliki pertanyaan, jangan ragu untuk
                                 menghubungi kami melalui email ini atau nomor telepon yang tersedia di website kami.</p>
 
+                            <p style="color: #555; font-size: 14px;">
+                                Berikut adalah detail biaya masuk yang perlu Anda selesaikan:
+                            </p>
+
+                            <div style="background-color:#f8f9fa; border-radius:8px; padding:15px; margin:15px 0;">
+                                <p style="margin:0 0 12px; color:#333; font-weight:bold;">Rincian Biaya Pendaftaran</p>
+                                <table style="width:100%; border-collapse:collapse; font-size:14px; color:#555;">
+                                    <tr>
+                                        <td style="padding:6px 0; width:40%;"><strong>Jumlah Biaya Masuk</strong></td>
+                                        <td style="padding:6px 0;">Rp 250.000,-</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:6px 0;"><strong>Nomor Rekening</strong></td>
+                                        <td style="padding:6px 0;">408601032591532<br>(Bank BRI a.n. M FIRMAN F)</td>
+                                    </tr>
+                                </table>
+                                <p style="margin-top:14px; color:#d9534f; font-size:13px; line-height:1.5;">
+                                    ⚠️ Silakan lakukan transfer sesuai dengan jumlah di atas, lalu unggah bukti
+                                    pendaftaran melalui
+                                    <strong>halaman profil</strong> di website SSB PUTRA MUDA BALARAJA.
+                                </p>
+                            </div>
+
                             <p>Terima kasih telah memilih bergabung dengan SSB PUTRA MUDA BALARAJA kami. Semoga
                                 perjalanan sepak bola Anda
                                 bersama kami menjadi pengalaman yang berharga!</p>

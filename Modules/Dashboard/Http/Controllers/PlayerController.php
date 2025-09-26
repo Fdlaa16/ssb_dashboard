@@ -171,6 +171,7 @@ class PlayerController extends Controller
                 'family_card' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
                 'report_grades' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
                 'birth_certificate' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
+                'proof_payment' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
             ];
 
             $messages = [
@@ -200,6 +201,9 @@ class PlayerController extends Controller
                 'birth_certificate.image' => 'Akte Kelahiran harus berupa gambar',
                 'birth_certificate.mimes' => 'Format Akte Kelahiran harus jpeg, png, jpg, atau bmp',
                 'birth_certificate.max' => 'Ukuran Akte Kelahiran maksimal 2MB',
+                'proof_payment.image' => 'Bukti Pendaftaran harus berupa gambar',
+                'proof_payment.mimes' => 'Format Bukti Pendaftaran harus jpeg, png, jpg, atau bmp',
+                'proof_payment.max' => 'Ukuran Bukti Pendaftaran maksimal 2MB',
             ];
 
             $validator = Validator::make($postData, $rules, $messages);
@@ -221,7 +225,7 @@ class PlayerController extends Controller
                     'category' => $request->category ?? '',
                 ]);
 
-                $types = ['avatar', 'family_card', 'report_grades', 'birth_certificate'];
+                $types = ['avatar', 'family_card', 'report_grades', 'birth_certificate', 'proof_payment'];
                 $fileObj = new File();
 
                 foreach ($types as $type) {
@@ -291,6 +295,7 @@ class PlayerController extends Controller
                 // 'clubPlayers.club.profile_club',
                 'avatar',
                 'birth_certificate',
+                'proof_payment',
                 'family_card',
                 'report_grades',
             ])
@@ -335,6 +340,7 @@ class PlayerController extends Controller
                 'family_card.*' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
                 'report_grades.*' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
                 'birth_certificate.*' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
+                'proof_payment.*' => 'image|mimes:jpeg,png,jpg,bmp|max:2048',
             ];
 
             $messages = [
@@ -364,6 +370,9 @@ class PlayerController extends Controller
                 'birth_certificate.*.image' => 'Akte Kelahiran harus berupa gambar',
                 'birth_certificate.*.mimes' => 'Format Akte Kelahiran harus jpeg, png, jpg, atau bmp',
                 'birth_certificate.*.max' => 'Ukuran Akte Kelahiran maksimal 2MB',
+                'proof_payment.*.image' => 'Bukti Pendaftaran harus berupa gambar',
+                'proof_payment.*.mimes' => 'Format Bukti Pendaftaran harus jpeg, png, jpg, atau bmp',
+                'proof_payment.*.max' => 'Ukuran Bukti Pendaftaran maksimal 2MB',
             ];
 
             $validator = Validator::make($request->all(), $rules, $messages);
@@ -387,7 +396,7 @@ class PlayerController extends Controller
                     'category' => $request->category ?? '',
                 ]);
 
-                $types = ['avatar', 'family_card', 'report_grades', 'birth_certificate'];
+                $types = ['avatar', 'family_card', 'report_grades', 'birth_certificate', 'proof_payment'];
                 $fileObj = new File();
 
                 foreach ($types as $type) {
@@ -676,6 +685,7 @@ class PlayerController extends Controller
                     'user',
                     'avatar',
                     'birth_certificate',
+                    'proof_payment',
                     'family_card',
                     'report_grades',
                 ])
@@ -736,6 +746,18 @@ class PlayerController extends Controller
                     $attachments['birth_certificate'] = [
                         'title' => 'Akte Kelahiran',
                         'data' => 'data:image/' . $birthCertificateType . ';base64,' . base64_encode($birthCertificateData)
+                    ];
+                }
+            }
+
+            if ($player->proof_payment() && $player->proof_payment()->path) {
+                $proofPaymentPath = public_path('storage/' . $player->proof_payment()->path);
+                if (file_exists($proofPaymentPath)) {
+                    $proofPaymentType = pathinfo($proofPaymentPath, PATHINFO_EXTENSION);
+                    $proofPaymentData = file_get_contents($proofPaymentPath);
+                    $attachments['proof_payment'] = [
+                        'title' => 'Bukti Pendaftaran',
+                        'data' => 'data:image/' . $proofPaymentType . ';base64,' . base64_encode($proofPaymentData)
                     ];
                 }
             }

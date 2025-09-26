@@ -97,6 +97,11 @@ class Player extends Model
         return $this->morphMany(File::class, 'fileable')->where('type', 'birth_certificate')->latest()->one();
     }
 
+    public function proof_payment()
+    {
+        return $this->morphMany(File::class, 'fileable')->where('type', 'proof_payment')->latest()->one();
+    }
+
     public function avatar()
     {
         return $this->morphMany(File::class, 'fileable')->where('type', 'avatar')->latest()->one();

@@ -40,6 +40,10 @@ const birthCertificatePreview = ref<string | null>(
   props.data.birth_certificate?.url ? getImageUrl(props.data.birth_certificate.url) : null
 )
 
+const proofPaymentPreview = ref<string | null>(
+  props.data.proof_payment?.url ? getImageUrl(props.data.proof_payment.url) : null
+)
+
 watch(
   () => props.data.id,
   (newId, oldId) => {
@@ -147,6 +151,16 @@ watch(() => localData.value.birth_certificate, (newBirthCertificatePreview: any)
   }
 })
 
+watch(() => localData.value.proof_payment, (newProofPaymentPreview: any) => {
+  if (newProofPaymentPreview instanceof File) {
+    proofPaymentPreview.value = URL.createObjectURL(newProofPaymentPreview)
+  } else if (newProofPaymentPreview?.url) {
+    proofPaymentPreview.value = getImageUrl(newProofPaymentPreview.url)
+  } else {
+    proofPaymentPreview.value = null
+  }
+})
+
 onBeforeUnmount(() => {
   if (avatarPreview.value?.startsWith('blob:')) {
     URL.revokeObjectURL(avatarPreview.value)
@@ -168,6 +182,12 @@ onBeforeUnmount(() => {
 onBeforeUnmount(() => {
   if (birthCertificatePreview.value?.startsWith('blob:')) {
     URL.revokeObjectURL(birthCertificatePreview.value)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (proofPaymentPreview.value?.startsWith('blob:')) {
+    URL.revokeObjectURL(proofPaymentPreview.value)
   }
 })
 
@@ -427,6 +447,23 @@ const downloadBiodata = async () => {
                     <VFileInput
                       v-model="localData.birth_certificate"
                       label="Ganti Foto"
+                      accept="image/png, image/jpeg, image/bmp"
+                      density="comfortable"
+                    />
+                  </div>
+
+                  <div class="text-h6 mt-4">
+                    <h6 class="text-h6 mb-2">Bukti Pendaftaran</h6>
+                    <img
+                      v-if="proofPaymentPreview"
+                      :src="proofPaymentPreview"
+                      alt="Preview Bukti Pendaftaran"
+                      style="width: 30%; border-radius: 8px; margin-bottom: 1rem;"
+                    />
+
+                    <VFileInput
+                      v-model="localData.proof_payment"
+                      label="Ganti Bukti Pendaftaran"
                       accept="image/png, image/jpeg, image/bmp"
                       density="comfortable"
                     />
